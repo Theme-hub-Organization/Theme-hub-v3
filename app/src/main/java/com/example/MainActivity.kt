@@ -443,36 +443,16 @@ class MainActivity : ComponentActivity() {
         val rawEmail = user.email?.trim() ?: ""
         val userEmail = rawEmail.lowercase()
         val isOwner = userEmail == "zaim9002@gmail.com"
-        val defaultAdmins = setOf(
-            "zaim9002@gmail.com",
-            "konami123mw@gmail.com",
-            "gojosaturo123m@gmail.com",
-            "sanoussi92720@gmail.com"
-        )
         val fallbackName = if (isOwner) "المالك (zaim9002)" else (userEmail.ifBlank { "مستخدم Theme Hub" })
         val name = user.displayName?.takeIf { it.isNotBlank() } ?: fallbackName
         val photo = user.photoUrl?.toString() ?: ""
 
         val firestore = Firebase.firestore
 
-        // Auto-bootstrap default admins into admins collection if verified
-        if (defaultAdmins.contains(userEmail) && user.isEmailVerified) {
-            try {
-                val adminDocRef = firestore.collection("admins").document(userEmail)
-                if (!adminDocRef.get().await().exists()) {
-                    adminDocRef.set(hashMapOf(
-                        "email" to userEmail,
-                        "addedAt" to System.currentTimeMillis(),
-                        "addedBy" to "system-bootstrap"
-                    )).await()
-                }
-            } catch (_: Throwable) {}
-        }
-
         // 1. Check whether user is in admins/{email} allowlist (strictly email-based, NO role field)
-        var isAllowlistedAdmin = isOwner || defaultAdmins.contains(userEmail)
+        var isAllowlistedAdmin = isOwner
         var adminCheckError: Throwable? = null
-        if (!isAllowlistedAdmin && userEmail.isNotEmpty() && user.isEmailVerified) {
+        if (!isOwner && userEmail.isNotEmpty() && user.isEmailVerified) {
             try {
                 val lowerDoc = firestore.collection("admins").document(userEmail).get().await()
                 isAllowlistedAdmin = when {
@@ -534,13 +514,8 @@ class MainActivity : ComponentActivity() {
         }
 
         try {
-            // Load personal admin token from adminTokens/{uid} first, fallback to config/github
-            val adminTokenDoc = firestore.collection("adminTokens").document(user.uid).get().await()
-            var githubToken = if (adminTokenDoc.exists()) (adminTokenDoc.getString("token")?.trim() ?: "") else ""
-            if (githubToken.isEmpty()) {
-                val configDoc = firestore.collection("config").document("github").get().await()
-                githubToken = if (configDoc.exists()) (configDoc.getString("token")?.trim() ?: "") else ""
-            }
+            val configDoc = firestore.collection("config").document("github").get().await()
+            val githubToken = if (configDoc.exists()) (configDoc.getString("token")?.trim() ?: "") else ""
             inMemoryGithubToken = githubToken
             sendAuthSuccessToJs(
                 token = githubToken,
@@ -567,8 +542,8 @@ class MainActivity : ComponentActivity() {
     fun saveGithubTokenToFirestore(token: String) {
         val user = Firebase.auth.currentUser
         val userEmail = user?.email?.trim()?.lowercase() ?: ""
-        if (user == null || !currentUserIsAdmin) {
-            sendToastToJs("غير مصرح: حفظ التوكن متاح للمشرفين المعتمدين فقط")
+        if (userEmail != "zaim9002@gmail.com") {
+            sendToastToJs("غير مصرح: حفظ التوكن متاح للمالك فقط (zaim9002@gmail.com)")
             return
         }
 
@@ -584,23 +559,11 @@ class MainActivity : ComponentActivity() {
             "updatedBy" to userEmail
         )
 
-        val firestore = Firebase.firestore
-        val batch = firestore.batch()
-        
-        // Save to personal adminTokens/{uid}
-        val adminTokenRef = firestore.collection("adminTokens").document(user.uid)
-        batch.set(adminTokenRef, data)
-
-        // If owner, also update shared config/github fallback
-        if (userEmail == "zaim9002@gmail.com") {
-            val configRef = firestore.collection("config").document("github")
-            batch.set(configRef, data)
-        }
-
-        batch.commit()
+        Firebase.firestore.collection("config").document("github")
+            .set(data)
             .addOnSuccessListener {
                 inMemoryGithubToken = cleanToken
-                sendToastToJs("تم حفظ توكن GitHub الخاص بك بنجاح في Firebase")
+                sendToastToJs("تم حفظ توكن GitHub بنجاح في Firebase")
                 val jsToken = JSONObject.quote(cleanToken)
                 evaluateJs("window.onGithubTokenSaved?.(true, $jsToken);")
             }

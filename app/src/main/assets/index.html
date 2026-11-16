@@ -4614,14 +4614,14 @@ a[href] {
       </button>
     </div>
 
-    <!-- ADMIN GITHUB TOKEN MANAGEMENT -->
+    <!-- OWNER ONLY GITHUB TOKEN MANAGEMENT (VISIBLE ONLY TO zaim9002@gmail.com) -->
     <div id="admin-owner-token-box" style="display:none; background:rgba(124, 92, 255, 0.08); border:1px solid rgba(124, 92, 255, 0.28); border-radius:var(--radius-sm); padding:12px; margin-bottom:var(--space-sm);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:var(--fs-xs); font-weight:800; color:#B9A8FF;">توكن GitHub الشخصي للمشرف</span>
+        <span style="font-size:var(--fs-xs); font-weight:800; color:#B9A8FF;">توكن GitHub المشترك (خاص بالمالك zaim9002@gmail.com)</span>
         <span class="token-status saved" id="owner-token-status-badge">مربوط</span>
       </div>
       <div style="font-size:11px; color:var(--muted); line-height:1.4; margin-bottom:8px;">
-        يُحفظ التوكن في Firestore (<code style="color:#B9A8FF">adminTokens/{uid}</code>). يتيح لكل مشرف معتمد (zaim9002, konami123mw, gojosaturo123m, sanoussi92720) نشر الثيمات عبر توكنه الخاص.
+        يُحفظ التوكن في Firestore (<code style="color:#B9A8FF">config/github</code>). يستفيد منه جميع المشرفين المعتمدين لنشر الثيمات تلقائياً دون إظهاره لهم.
       </div>
       <div class="form-group" style="margin-bottom:8px;">
         <input type="password" id="input-owner-github-token" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
@@ -8295,11 +8295,6 @@ service cloud.firestore {
       );
       allow list: if isAdmin();
       allow write: if isOwnerBootstrap();
-    }
-
-    // Per-admin GitHub tokens (each admin manages their own personal token)
-    match /adminTokens/{uid} {
-      allow read, write: if isAuthenticated() && request.auth.uid == uid && isAdmin();
     }
 
     // Shared GitHub token (admins read-only, owner read/write)

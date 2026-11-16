@@ -83,11 +83,6 @@ service cloud.firestore {
       allow write: if isOwnerBootstrap();
     }
 
-    // Per-admin GitHub tokens (each admin manages their own personal token)
-    match /adminTokens/{uid} {
-      allow read, write: if isAuthenticated() && request.auth.uid == uid && isAdmin();
-    }
-
     // Shared GitHub token (admins read-only, owner read/write)
     match /config/github {
       allow read: if isAdmin();
