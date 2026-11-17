@@ -4614,10 +4614,10 @@ a[href] {
       </button>
     </div>
 
-    <!-- OWNER ONLY GITHUB TOKEN MANAGEMENT (VISIBLE ONLY TO zaim9002@gmail.com) -->
+    <!-- OWNER ONLY GITHUB TOKEN MANAGEMENT (VISIBLE ONLY TO konami123mw@gmail.com) -->
     <div id="admin-owner-token-box" style="display:none; background:rgba(124, 92, 255, 0.08); border:1px solid rgba(124, 92, 255, 0.28); border-radius:var(--radius-sm); padding:12px; margin-bottom:var(--space-sm);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:var(--fs-xs); font-weight:800; color:#B9A8FF;">توكن GitHub المشترك (خاص بالمالك zaim9002@gmail.com)</span>
+        <span style="font-size:var(--fs-xs); font-weight:800; color:#B9A8FF;">توكن GitHub المشترك (خاص بالمالك)</span>
         <span class="token-status saved" id="owner-token-status-badge">مربوط</span>
       </div>
       <div style="font-size:11px; color:var(--muted); line-height:1.4; margin-bottom:8px;">
@@ -4643,7 +4643,7 @@ a[href] {
     <!-- NOTICE FOR APPROVED ADMINS WHEN TOKEN IS NOT SET -->
     <div id="admin-no-token-warning" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:var(--radius-sm); padding:12px; margin-bottom:var(--space-sm); color:var(--text); font-size:var(--fs-xs); line-height:1.4;">
       <b style="color:var(--danger); display:block; margin-bottom:2px;">⚠️ لم يضف المالك توكن GitHub بعد</b>
-      لا يمكن نشر الثيمات حتى يقوم مالك التطبيق (<bdi dir="ltr">zaim9002@gmail.com</bdi>) بإضافة وحفظ توكن GitHub في قاعدة البيانات.
+      لا يمكن نشر الثيمات حتى يقوم مالك التطبيق بإضافة وحفظ توكن GitHub في قاعدة البيانات.
     </div>
 
     <div class="admin-tabs">
@@ -5548,6 +5548,8 @@ a[href] {
    ========================================================================== */
 const THEMES_JSON_URL = "https://raw.githubusercontent.com/zaim9002/theme-hub-data/main/themes.json";
 const GH_OWNER = "zaim9002";
+// Core owner accounts (protected from removal). Every approved admin also gets owner tools. Keep in sync with firestore.rules and MainActivity.kt
+const OWNER_EMAILS = ["konami123mw@gmail.com", "zaim9002@gmail.com"];
 const GH_REPO = "theme-hub-data";
 const GH_BRANCH = "main";
 const GH_RAW_BASE = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/`;
@@ -8240,7 +8242,7 @@ service cloud.firestore {
 
     function isOwnerBootstrap() {
       return isEmailVerified() &&
-             request.auth.token.email.lower() == 'zaim9002@gmail.com';
+             request.auth.token.email.lower() in ['konami123mw@gmail.com', 'zaim9002@gmail.com'];
     }
 
     // Admin privilege verified strictly from admins/{lowercase_email} allowlist (no role field on users)
@@ -9207,7 +9209,7 @@ function submitAddAdminMember() {
 function deleteAdminMember(email) {
   const cleanEmail = String(email || "").replace(/\s+/g, "").toLowerCase();
   if (!cleanEmail) return;
-  if (cleanEmail === "zaim9002@gmail.com") {
+  if (OWNER_EMAILS.includes(cleanEmail)) {
     setAdminMemberStatus("⚠️ لا يمكن حذف حساب المالك الأساسي.", "error");
     return;
   }
@@ -9234,14 +9236,14 @@ window.onAdminsListLoaded = function(payload) {
 
   const admins = Array.isArray(data.admins) ? data.admins : [];
   if (admins.length === 0) {
-    listEl.innerHTML = `<div style="text-align:center; padding:18px; color:var(--muted); font-size:12px; background:var(--surface2); border-radius:var(--radius-sm);">لا يوجد مشرفون مضافون بعد في admins. المالك (zaim9002@gmail.com) مشرف دائم.</div>`;
+    listEl.innerHTML = `<div style="text-align:center; padding:18px; color:var(--muted); font-size:12px; background:var(--surface2); border-radius:var(--radius-sm);">لا يوجد مشرفون مضافون بعد في admins. المالك مشرف دائم.</div>`;
     return;
   }
 
   listEl.innerHTML = "";
   admins.forEach(item => {
     const email = String(item.email || item.docId || "").toLowerCase();
-    const isOwnerAccount = email === "zaim9002@gmail.com";
+    const isOwnerAccount = OWNER_EMAILS.includes(email);
     const row = document.createElement("div");
     row.className = "adm-theme-item";
     row.innerHTML = `
