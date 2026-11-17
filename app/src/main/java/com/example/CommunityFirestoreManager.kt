@@ -33,9 +33,21 @@ data class ProfileInitResult(
     val hideCommentsCount: Boolean,
     val badges: List<String>,
     val frame: String,
+    val frameId: String = "",
+    val frameAssigned: List<String> = emptyList(),
     val customTitle: String,
+    val title: String = "",
+    val verified: Boolean = false,
+    val badgeType: String = "",
+    val nameColor: String = "",
+    val nameGradient: String = "",
+    val nameFont: String = "",
     val createdAt: Long,
     val blocked: Boolean,
+    val blockedUntil: Long = 0L,
+    val muted: Boolean = false,
+    val mutedUntil: Long = 0L,
+    val clubRulesAccepted: Boolean = false,
     val publisher: Boolean,
     val isAdmin: Boolean,
     val isOwner: Boolean,
@@ -66,7 +78,26 @@ class CommunityFirestoreManager(
         private val USERNAME_REGEX = Regex("^[a-z0-9_]{3,20}$")
         private val HEX_COLOR_REGEX = Regex("^#[0-9A-Fa-f]{6}$")
         private val ALLOWED_FRAMES = setOf("", "gold-admin", "neon", "aurora")
+        private val SAFE_FRAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{2,48}$")
         private val ALLOWED_BADGES = setOf("موثّق", "ناشر موثوق", "داعم", "مبدع")
+        private val ALLOWED_BADGE_TYPES = setOf("", "verified", "trusted_publisher")
+        private val ALLOWED_NAME_FONTS = setOf("", "Cairo", "Tajawal", "Amiri", "Readex Pro", "Space Grotesk", "Changa")
+        private val SAFE_LINEAR_GRADIENT_REGEX = Regex("^linear-gradient\\([0-9a-zA-Zdeg,\\s#%()-]+\\)$")
+    }
+
+    private fun sanitizeNameColor(raw: String): String {
+        val v = raw.trim()
+        return if (v.isEmpty() || HEX_COLOR_REGEX.matches(v)) v else ""
+    }
+
+    private fun sanitizeNameGradient(raw: String): String {
+        val v = raw.trim().take(160)
+        return if (v.isEmpty() || SAFE_LINEAR_GRADIENT_REGEX.matches(v)) v else ""
+    }
+
+    private fun sanitizeNameFont(raw: String): String {
+        val v = raw.trim()
+        return if (v in ALLOWED_NAME_FONTS) v else ""
     }
 
     fun detachAllListeners() {
@@ -128,20 +159,27 @@ class CommunityFirestoreManager(
         }
     }
 
-    private suspend fun sendUserNotification(
+    internal suspend fun sendUserNotification(
         targetUid: String,
         type: String,
         title: String,
         body: String,
         submissionId: String = "",
-        themeId: String = ""
+        themeId: String = "",
+        postId: String = "",
+        actorUid: String = "",
+        actorName: String = ""
     ) {
         if (targetUid.isBlank()) return
+        if (!activity.currentUserIsAdmin && actorUid.isNotBlank() && actorUid == targetUid) return
         runCatching {
             val notifData = hashMapOf<String, Any>(
                 "type" to type,
                 "title" to title.take(100),
                 "body" to body.take(350),
+                "actorUid" to actorUid,
+                "actorName" to actorName.take(60),
+                "postId" to postId,
                 "submissionId" to submissionId,
                 "themeId" to themeId,
                 "read" to false,
@@ -220,7 +258,12 @@ class CommunityFirestoreManager(
         }
 
         val userRef = db.collection("users").document(user.uid)
+        val nowMs = System.currentTimeMillis()
         var profileBlocked = false
+        var profileBlockedUntil = 0L
+        var profileMuted = false
+        var profileMutedUntil = 0L
+        var profileClubRulesAccepted = false
         var profilePublisher = false
         var profileBio = ""
         var profileName = name
@@ -234,14 +277,28 @@ class CommunityFirestoreManager(
         var profileHideCommentsCount = false
         var profileBadges = emptyList<String>()
         var profileFrame = ""
+        var profileFrameId = ""
+        var profileFrameAssigned = emptyList<String>()
         var profileCustomTitle = ""
-        var profileCreatedAt = System.currentTimeMillis()
+        var profileTitle = ""
+        var profileVerified = false
+        var profileBadgeType = ""
+        var profileNameColor = ""
+        var profileNameGradient = ""
+        var profileNameFont = ""
+        var profileCreatedAt = nowMs
         var initError = ""
 
         try {
             val userSnap = userRef.get().await()
             if (userSnap.exists()) {
-                profileBlocked = userSnap.getBoolean("blocked") ?: false
+                val rawBlocked = userSnap.getBoolean("blocked") ?: false
+                profileBlockedUntil = userSnap.getLong("blockedUntil") ?: 0L
+                profileBlocked = rawBlocked && (profileBlockedUntil == 0L || profileBlockedUntil > nowMs)
+                val rawMuted = userSnap.getBoolean("muted") ?: false
+                profileMutedUntil = userSnap.getLong("mutedUntil") ?: 0L
+                profileMuted = rawMuted && (profileMutedUntil == 0L || profileMutedUntil > nowMs)
+                profileClubRulesAccepted = userSnap.getBoolean("clubRulesAccepted") ?: false
                 profilePublisher = userSnap.getBoolean("publisher") ?: false
                 profileBio = userSnap.getString("bio") ?: ""
                 profileName = userSnap.getString("displayName")?.takeIf { it.isNotBlank() } ?: name
@@ -261,7 +318,15 @@ class CommunityFirestoreManager(
                 profileHideCommentsCount = userSnap.getBoolean("hideCommentsCount") ?: false
                 profileBadges = extractStringList(userSnap, "badges")
                 profileFrame = userSnap.getString("frame") ?: ""
+                profileFrameId = (userSnap.getString("frameId") ?: "").ifBlank { profileFrame }
+                profileFrameAssigned = extractStringList(userSnap, "frameAssigned")
                 profileCustomTitle = userSnap.getString("customTitle") ?: ""
+                profileTitle = (userSnap.getString("title") ?: "").ifBlank { profileCustomTitle }
+                profileVerified = userSnap.getBoolean("verified") ?: false
+                profileBadgeType = userSnap.getString("badgeType") ?: ""
+                profileNameColor = userSnap.getString("nameColor") ?: ""
+                profileNameGradient = userSnap.getString("nameGradient") ?: ""
+                profileNameFont = userSnap.getString("nameFont") ?: ""
                 profileCreatedAt = userSnap.getLong("createdAt") ?: profileCreatedAt
 
                 if (hasValidUname && storedLower != profileUsername) {
@@ -288,10 +353,22 @@ class CommunityFirestoreManager(
                     "hideCommentsCount" to false,
                     "badges" to emptyList<String>(),
                     "frame" to "",
+                    "frameId" to "",
+                    "frameAssigned" to emptyList<String>(),
                     "customTitle" to "",
+                    "title" to "",
+                    "verified" to false,
+                    "badgeType" to "",
+                    "nameColor" to "",
+                    "nameGradient" to "",
+                    "nameFont" to "",
                     "createdAt" to profileCreatedAt,
                     "updatedAt" to profileCreatedAt,
                     "blocked" to false,
+                    "blockedUntil" to 0L,
+                    "muted" to false,
+                    "mutedUntil" to 0L,
+                    "clubRulesAccepted" to false,
                     "publisher" to false
                 )
                 userRef.set(initialProfile).await()
@@ -317,9 +394,21 @@ class CommunityFirestoreManager(
             hideCommentsCount = profileHideCommentsCount,
             badges = profileBadges,
             frame = profileFrame,
+            frameId = profileFrameId,
+            frameAssigned = profileFrameAssigned,
             customTitle = profileCustomTitle,
+            title = profileTitle,
+            verified = profileVerified,
+            badgeType = profileBadgeType,
+            nameColor = profileNameColor,
+            nameGradient = profileNameGradient,
+            nameFont = profileNameFont,
             createdAt = profileCreatedAt,
             blocked = profileBlocked,
+            blockedUntil = profileBlockedUntil,
+            muted = profileMuted,
+            mutedUntil = profileMutedUntil,
+            clubRulesAccepted = profileClubRulesAccepted,
             publisher = profilePublisher,
             isAdmin = isAdminEffective,
             isOwner = isOwner,
@@ -384,7 +473,15 @@ class CommunityFirestoreManager(
                         updates["hideCommentsCount"] = false
                         updates["badges"] = emptyList<String>()
                         updates["frame"] = ""
+                        updates["frameId"] = ""
+                        updates["frameAssigned"] = emptyList<String>()
                         updates["customTitle"] = ""
+                        updates["title"] = ""
+                        updates["verified"] = false
+                        updates["badgeType"] = ""
+                        updates["nameColor"] = ""
+                        updates["nameGradient"] = ""
+                        updates["nameFont"] = ""
                         updates["createdAt"] = now
                         updates["blocked"] = false
                         updates["publisher"] = false
@@ -471,8 +568,12 @@ class CommunityFirestoreManager(
         val hideCommentsCount = extra.optBoolean("hideCommentsCount", false)
 
         val adminFrameRaw = extra.optString("frame", "").trim()
-        val adminCustomTitle = extra.optString("customTitle", "").trim().take(30)
+        val adminFrameIdRaw = extra.optString("frameId", "").trim()
+        val adminCustomTitle = extra.optString("title", extra.optString("customTitle", "")).trim().take(30)
         val adminGradientRaw = extra.optString("profileGradient", "").trim().take(160)
+        val adminNameColor = sanitizeNameColor(extra.optString("nameColor", ""))
+        val adminNameGradient = sanitizeNameGradient(extra.optString("nameGradient", ""))
+        val adminNameFont = sanitizeNameFont(extra.optString("nameFont", ""))
 
         scope.launch {
             try {
@@ -517,20 +618,42 @@ class CommunityFirestoreManager(
                         updates["profileGradient"] = ""
                         updates["badges"] = emptyList<String>()
                         updates["frame"] = ""
+                        updates["frameId"] = ""
+                        updates["frameAssigned"] = emptyList<String>()
                         updates["customTitle"] = ""
+                        updates["title"] = ""
+                        updates["verified"] = false
+                        updates["badgeType"] = ""
+                        updates["nameColor"] = ""
+                        updates["nameGradient"] = ""
+                        updates["nameFont"] = ""
                         updates["createdAt"] = now
                         updates["blocked"] = false
                         updates["publisher"] = false
                     }
                     if (activity.currentUserIsAdmin) {
+                        if (extra.has("frameId") && (adminFrameIdRaw.isEmpty() || SAFE_FRAME_ID_REGEX.matches(adminFrameIdRaw))) {
+                            updates["frameId"] = adminFrameIdRaw
+                        }
                         if (extra.has("frame") && adminFrameRaw in ALLOWED_FRAMES) {
                             updates["frame"] = adminFrameRaw
+                            if (!extra.has("frameId")) updates["frameId"] = adminFrameRaw
                         }
-                        if (extra.has("customTitle")) {
+                        if (extra.has("title") || extra.has("customTitle")) {
+                            updates["title"] = adminCustomTitle
                             updates["customTitle"] = adminCustomTitle
                         }
                         if (extra.has("profileGradient")) {
                             updates["profileGradient"] = adminGradientRaw
+                        }
+                        if (extra.has("nameColor")) {
+                            updates["nameColor"] = adminNameColor
+                        }
+                        if (extra.has("nameGradient")) {
+                            updates["nameGradient"] = adminNameGradient
+                        }
+                        if (extra.has("nameFont")) {
+                            updates["nameFont"] = adminNameFont
                         }
                     }
                     tx.set(userRef, updates, SetOptions.merge())
@@ -538,6 +661,10 @@ class CommunityFirestoreManager(
                 }.await()
 
                 val updatedSnap = runCatching { userRef.get().await() }.getOrNull()
+                val resFrame = updatedSnap?.getString("frame") ?: ""
+                val resFrameId = (updatedSnap?.getString("frameId") ?: "").ifBlank { resFrame }
+                val resCustomTitle = updatedSnap?.getString("customTitle") ?: ""
+                val resTitle = (updatedSnap?.getString("title") ?: "").ifBlank { resCustomTitle }
                 val payload = JSONObject().apply {
                     put("ok", true)
                     put("uid", uid)
@@ -549,8 +676,16 @@ class CommunityFirestoreManager(
                     put("links", JSONArray(cleanLinks))
                     put("profileAccent", cleanAccent)
                     put("hideCommentsCount", hideCommentsCount)
-                    put("frame", updatedSnap?.getString("frame") ?: "")
-                    put("customTitle", updatedSnap?.getString("customTitle") ?: "")
+                    put("frame", resFrame)
+                    put("frameId", resFrameId)
+                    put("frameAssigned", JSONArray(if (updatedSnap != null) extractStringList(updatedSnap, "frameAssigned") else emptyList<String>()))
+                    put("customTitle", resCustomTitle)
+                    put("title", resTitle)
+                    put("verified", updatedSnap?.getBoolean("verified") ?: false)
+                    put("badgeType", updatedSnap?.getString("badgeType") ?: "")
+                    put("nameColor", updatedSnap?.getString("nameColor") ?: "")
+                    put("nameGradient", updatedSnap?.getString("nameGradient") ?: "")
+                    put("nameFont", updatedSnap?.getString("nameFont") ?: "")
                     put("profileGradient", updatedSnap?.getString("profileGradient") ?: "")
                     put("badges", JSONArray(if (updatedSnap != null) extractStringList(updatedSnap, "badges") else emptyList<String>()))
                 }.toString()
@@ -564,6 +699,64 @@ class CommunityFirestoreManager(
                 )
             }
         }
+    }
+
+    fun selectMyFrame(rawFrameId: String) {
+        val user = auth.currentUser
+        if (user == null) {
+            emitFrameSelected(false, "", "يجب تسجيل الدخول أولاً")
+            return
+        }
+        if (activity.currentUserBlocked) {
+            emitFrameSelected(false, "", "حسابك محظور")
+            return
+        }
+        val fid = rawFrameId.trim()
+        if (fid.isNotEmpty() && !SAFE_FRAME_ID_REGEX.matches(fid)) {
+            emitFrameSelected(false, "", "معرّف الإطار غير صالح")
+            return
+        }
+        scope.launch {
+            try {
+                val userRef = db.collection("users").document(user.uid)
+                if (fid.isNotEmpty() && !activity.currentUserIsAdmin) {
+                    val frameSnap = db.collection("frames").document(fid).get().await()
+                    if (!frameSnap.exists()) {
+                        emitFrameSelected(false, "", "هذا الإطار غير محفوظ على الخادم بعد")
+                        return@launch
+                    }
+                    val access = frameSnap.getString("access") ?: "everyone"
+                    val userSnap = userRef.get().await()
+                    val assigned = extractStringList(userSnap, "frameAssigned")
+                    val allowed = access == "everyone" || (access == "assigned" && fid in assigned)
+                    if (!allowed) {
+                        emitFrameSelected(false, "", "هذا الإطار مخصص أو يتطلب منحه من الإدارة")
+                        return@launch
+                    }
+                }
+                userRef.update(
+                    mapOf(
+                        "frameId" to fid,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                ).await()
+                emitFrameSelected(true, fid, "")
+                activity.sendToastToJs(if (fid.isEmpty()) "تمت إزالة الإطار" else "✓ تم تفعيل الإطار بنجاح")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                emitFrameSelected(false, "", AuthErrorFormatter.format(e))
+            }
+        }
+    }
+
+    private fun emitFrameSelected(ok: Boolean, frameId: String, error: String) {
+        val payload = JSONObject().apply {
+            put("ok", ok)
+            put("frameId", frameId)
+            if (error.isNotEmpty()) put("error", error)
+        }.toString()
+        activity.evaluateJs("window.onMyFrameSelected?.($payload);")
     }
 
     fun updateMyProfile(
@@ -652,17 +845,52 @@ class CommunityFirestoreManager(
 
                 val myUid = auth.currentUser?.uid
                 var personalBlockedByMe = false
+                var isFollowingByMe = false
                 if (!myUid.isNullOrBlank() && myUid != targetUid) {
                     personalBlockedByMe = runCatching {
                         db.collection("users").document(myUid)
                             .collection("blockedUsers").document(targetUid)
                             .get().await().exists()
                     }.getOrDefault(false)
+                    isFollowingByMe = runCatching {
+                        db.collection("follows").document(myUid)
+                            .collection("following").document(targetUid)
+                            .get().await().exists()
+                    }.getOrDefault(false)
                 }
+
+                val followersCount = runCatching {
+                    db.collection("follows").document(targetUid)
+                        .collection("followers")
+                        .count().get(AggregateSource.SERVER).await().count
+                }.getOrDefault(0L)
+                val followingCount = runCatching {
+                    db.collection("follows").document(targetUid)
+                        .collection("following")
+                        .count().get(AggregateSource.SERVER).await().count
+                }.getOrDefault(0L)
+                val postsCount = runCatching {
+                    db.collection("posts")
+                        .whereEqualTo("authorUid", targetUid)
+                        .whereEqualTo("status", "visible")
+                        .count().get(AggregateSource.SERVER).await().count
+                }.getOrDefault(0L)
+
+                val nowMs = System.currentTimeMillis()
+                val rawBlocked = snap.getBoolean("blocked") ?: false
+                val blockedUntil = snap.getLong("blockedUntil") ?: 0L
+                val effectiveBlocked = rawBlocked && (blockedUntil == 0L || blockedUntil > nowMs)
+                val rawMuted = snap.getBoolean("muted") ?: false
+                val mutedUntil = snap.getLong("mutedUntil") ?: 0L
+                val effectiveMuted = rawMuted && (mutedUntil == 0L || mutedUntil > nowMs)
 
                 val targetIsAdmin = cachedAdminUids.contains(targetUid) ||
                     (myUid == targetUid && activity.currentUserIsAdmin)
 
+                val legacyFrame = snap.getString("frame") ?: ""
+                val effectiveFrameId = (snap.getString("frameId") ?: "").ifBlank { legacyFrame }
+                val legacyTitle = snap.getString("customTitle") ?: ""
+                val effectiveTitle = (snap.getString("title") ?: "").ifBlank { legacyTitle }
                 val payload = JSONObject().apply {
                     put("ok", true)
                     put("uid", snap.getString("uid") ?: targetUid)
@@ -676,15 +904,31 @@ class CommunityFirestoreManager(
                     put("profileGradient", snap.getString("profileGradient") ?: "")
                     put("hideCommentsCount", snap.getBoolean("hideCommentsCount") ?: false)
                     put("badges", JSONArray(extractStringList(snap, "badges")))
-                    put("frame", snap.getString("frame") ?: "")
-                    put("customTitle", snap.getString("customTitle") ?: "")
+                    put("frame", legacyFrame)
+                    put("frameId", effectiveFrameId)
+                    put("frameAssigned", JSONArray(extractStringList(snap, "frameAssigned")))
+                    put("customTitle", legacyTitle)
+                    put("title", effectiveTitle)
+                    put("verified", snap.getBoolean("verified") ?: false)
+                    put("badgeType", snap.getString("badgeType") ?: "")
+                    put("nameColor", snap.getString("nameColor") ?: "")
+                    put("nameGradient", snap.getString("nameGradient") ?: "")
+                    put("nameFont", snap.getString("nameFont") ?: "")
                     put("createdAt", snap.getLong("createdAt") ?: 0L)
-                    put("blocked", snap.getBoolean("blocked") ?: false)
+                    put("blocked", effectiveBlocked)
+                    put("blockedUntil", blockedUntil)
+                    put("muted", effectiveMuted)
+                    put("mutedUntil", mutedUntil)
                     put("publisher", snap.getBoolean("publisher") ?: false)
                     put("isAdmin", targetIsAdmin)
+                    put("isOwner", cachedOwnerUid == targetUid || (myUid == targetUid && activity.currentUserIsAdmin && activity.isOwnerSession()))
                     put("commentsCount", commentsCount)
                     put("commentsCountError", commentsCountError)
                     put("personalBlockedByMe", personalBlockedByMe)
+                    put("followersCount", followersCount)
+                    put("followingCount", followingCount)
+                    put("postsCount", postsCount)
+                    put("isFollowingByMe", isFollowingByMe)
                 }.toString()
                 activity.evaluateJs("window.onUserProfileLoaded?.($payload);")
             } catch (e: CancellationException) {
@@ -763,15 +1007,26 @@ class CommunityFirestoreManager(
                 for (d in foundDocs) {
                     val uid = d.getString("uid") ?: d.id
                     if (uid == myUid || !seen.add(uid)) continue
+                    val legacyFrame = d.getString("frame") ?: ""
+                    val legacyTitle = d.getString("customTitle") ?: ""
                     arr.put(JSONObject().apply {
                         put("uid", uid)
                         put("displayName", d.getString("displayName") ?: "عضو Theme Hub")
                         put("username", d.getString("username") ?: "")
                         put("photoURL", d.getString("photoURL") ?: "")
                         put("badges", JSONArray(extractStringList(d, "badges")))
-                        put("frame", d.getString("frame") ?: "")
-                        put("customTitle", d.getString("customTitle") ?: "")
+                        put("frame", legacyFrame)
+                        put("frameId", (d.getString("frameId") ?: "").ifBlank { legacyFrame })
+                        put("customTitle", legacyTitle)
+                        put("title", (d.getString("title") ?: "").ifBlank { legacyTitle })
+                        put("verified", d.getBoolean("verified") ?: false)
+                        put("badgeType", d.getString("badgeType") ?: "")
+                        put("nameColor", d.getString("nameColor") ?: "")
+                        put("nameGradient", d.getString("nameGradient") ?: "")
+                        put("nameFont", d.getString("nameFont") ?: "")
                         put("isAdmin", cachedAdminUids.contains(uid))
+                        put("isOwner", cachedOwnerUid == uid)
+                        put("publisher", d.getBoolean("publisher") ?: false)
                         put("blocked", d.getBoolean("blocked") ?: false)
                     })
                 }
@@ -838,7 +1093,13 @@ class CommunityFirestoreManager(
         scope.launch {
             try {
                 db.collection("users").document(targetUid)
-                    .update("blocked", blocked, "updatedAt", System.currentTimeMillis())
+                    .update(
+                        mapOf(
+                            "blocked" to blocked,
+                            "blockedUntil" to 0L,
+                            "updatedAt" to System.currentTimeMillis()
+                        )
+                    )
                     .await()
                 writeAuditLog(if (blocked) "block_user" else "unblock_user", "user", targetUid, "blocked=$blocked")
                 val payload = JSONObject().apply {
@@ -941,6 +1202,9 @@ class CommunityFirestoreManager(
                         put("body", d.getString("body") ?: "")
                         put("submissionId", d.getString("submissionId") ?: "")
                         put("themeId", d.getString("themeId") ?: "")
+                        put("postId", d.getString("postId") ?: "")
+                        put("actorUid", d.getString("actorUid") ?: "")
+                        put("actorName", d.getString("actorName") ?: "")
                         put("read", isRead)
                         put("createdAt", d.getLong("createdAt") ?: 0L)
                     })
@@ -1050,7 +1314,16 @@ class CommunityFirestoreManager(
                             put("peerUsername", peerInfo?.optString("username") ?: "")
                             put("peerPhoto", peerInfo?.optString("photoURL") ?: "")
                             put("peerFrame", peerInfo?.optString("frame") ?: "")
+                            put("peerFrameId", peerInfo?.optString("frameId") ?: (peerInfo?.optString("frame") ?: ""))
+                            put("peerTitle", peerInfo?.optString("title") ?: "")
+                            put("peerVerified", peerInfo?.optBoolean("verified") ?: false)
+                            put("peerBadgeType", peerInfo?.optString("badgeType") ?: "")
+                            put("peerNameColor", peerInfo?.optString("nameColor") ?: "")
+                            put("peerNameGradient", peerInfo?.optString("nameGradient") ?: "")
+                            put("peerNameFont", peerInfo?.optString("nameFont") ?: "")
                             put("peerIsAdmin", peerInfo?.optBoolean("isAdmin") ?: false)
+                            put("peerIsOwner", peerInfo?.optBoolean("isOwner") ?: false)
+                            put("peerIsPublisher", peerInfo?.optBoolean("publisher") ?: false)
                             put("lastMessage", doc.getString("lastMessage") ?: "")
                             put("lastAt", ts)
                             put("updatedAt", ts)
@@ -1126,7 +1399,16 @@ class CommunityFirestoreManager(
                         put("peerUsername", peerProfile?.optString("username") ?: "")
                         put("peerPhoto", peerProfile?.optString("photoURL") ?: "")
                         put("peerFrame", peerProfile?.optString("frame") ?: "")
+                        put("peerFrameId", peerProfile?.optString("frameId") ?: (peerProfile?.optString("frame") ?: ""))
+                        put("peerTitle", peerProfile?.optString("title") ?: "")
+                        put("peerVerified", peerProfile?.optBoolean("verified") ?: false)
+                        put("peerBadgeType", peerProfile?.optString("badgeType") ?: "")
+                        put("peerNameColor", peerProfile?.optString("nameColor") ?: "")
+                        put("peerNameGradient", peerProfile?.optString("nameGradient") ?: "")
+                        put("peerNameFont", peerProfile?.optString("nameFont") ?: "")
                         put("peerIsAdmin", peerProfile?.optBoolean("isAdmin") ?: false)
+                        put("peerIsOwner", peerProfile?.optBoolean("isOwner") ?: false)
+                        put("peerIsPublisher", peerProfile?.optBoolean("publisher") ?: false)
                         put("personalBlockedByMe", personalBlockedByMe)
                         put("messages", JSONArray())
                     }.toString()
@@ -1186,7 +1468,16 @@ class CommunityFirestoreManager(
                                 put("peerUsername", peerProfile?.optString("username") ?: "")
                                 put("peerPhoto", peerProfile?.optString("photoURL") ?: "")
                                 put("peerFrame", peerProfile?.optString("frame") ?: "")
+                                put("peerFrameId", peerProfile?.optString("frameId") ?: (peerProfile?.optString("frame") ?: ""))
+                                put("peerTitle", peerProfile?.optString("title") ?: "")
+                                put("peerVerified", peerProfile?.optBoolean("verified") ?: false)
+                                put("peerBadgeType", peerProfile?.optString("badgeType") ?: "")
+                                put("peerNameColor", peerProfile?.optString("nameColor") ?: "")
+                                put("peerNameGradient", peerProfile?.optString("nameGradient") ?: "")
+                                put("peerNameFont", peerProfile?.optString("nameFont") ?: "")
                                 put("peerIsAdmin", peerProfile?.optBoolean("isAdmin") ?: false)
+                                put("peerIsOwner", peerProfile?.optBoolean("isOwner") ?: false)
+                                put("peerIsPublisher", peerProfile?.optBoolean("publisher") ?: false)
                                 put("personalBlockedByMe", personalBlockedByMe)
                                 put("messages", arr)
                             }.toString()
@@ -1292,7 +1583,7 @@ class CommunityFirestoreManager(
     }
 
     // ---------------- COMMENTS, LIKES & 1-LEVEL REPLIES ----------------
-    private suspend fun fetchUserSummaries(uids: List<String>): Map<String, JSONObject> {
+    internal suspend fun fetchUserSummaries(uids: List<String>): Map<String, JSONObject> {
         val result = mutableMapOf<String, JSONObject>()
         val unique = uids.filter { it.isNotBlank() }.distinct()
         refreshSupportDirectory(force = false)
@@ -1300,6 +1591,8 @@ class CommunityFirestoreManager(
             runCatching {
                 val snap = db.collection("users").document(uid).get().await()
                 if (snap.exists()) {
+                    val legacyFrame = snap.getString("frame") ?: ""
+                    val legacyTitle = snap.getString("customTitle") ?: ""
                     result[uid] = JSONObject().apply {
                         put("displayName", snap.getString("displayName") ?: "مستخدم Theme Hub")
                         put("username", snap.getString("username") ?: "")
@@ -1307,9 +1600,18 @@ class CommunityFirestoreManager(
                         put("blocked", snap.getBoolean("blocked") ?: false)
                         put("publisher", snap.getBoolean("publisher") ?: false)
                         put("badges", JSONArray(extractStringList(snap, "badges")))
-                        put("frame", snap.getString("frame") ?: "")
-                        put("customTitle", snap.getString("customTitle") ?: "")
+                        put("frame", legacyFrame)
+                        put("frameId", (snap.getString("frameId") ?: "").ifBlank { legacyFrame })
+                        put("frameAssigned", JSONArray(extractStringList(snap, "frameAssigned")))
+                        put("customTitle", legacyTitle)
+                        put("title", (snap.getString("title") ?: "").ifBlank { legacyTitle })
+                        put("verified", snap.getBoolean("verified") ?: false)
+                        put("badgeType", snap.getString("badgeType") ?: "")
+                        put("nameColor", snap.getString("nameColor") ?: "")
+                        put("nameGradient", snap.getString("nameGradient") ?: "")
+                        put("nameFont", snap.getString("nameFont") ?: "")
                         put("isAdmin", cachedAdminUids.contains(uid))
+                        put("isOwner", cachedOwnerUid == uid)
                     }
                 }
             }
@@ -1352,9 +1654,17 @@ class CommunityFirestoreManager(
                         put("username", author?.optString("username") ?: "")
                         put("photo", author?.optString("photoURL") ?: (d.getString("photo") ?: ""))
                         put("frame", author?.optString("frame") ?: "")
+                        put("frameId", author?.optString("frameId") ?: (author?.optString("frame") ?: ""))
                         put("badges", author?.optJSONArray("badges") ?: JSONArray())
                         put("customTitle", author?.optString("customTitle") ?: "")
+                        put("title", author?.optString("title") ?: "")
+                        put("verified", author?.optBoolean("verified") ?: false)
+                        put("badgeType", author?.optString("badgeType") ?: "")
+                        put("nameColor", author?.optString("nameColor") ?: "")
+                        put("nameGradient", author?.optString("nameGradient") ?: "")
+                        put("nameFont", author?.optString("nameFont") ?: "")
                         put("isAdmin", author?.optBoolean("isAdmin") ?: false)
+                        put("isOwner", author?.optBoolean("isOwner") ?: false)
                         put("isPublisher", author?.optBoolean("publisher") ?: false)
                         put("pinned", d.getBoolean("pinned") ?: false)
                         put("text", d.getString("text") ?: "")
@@ -1430,9 +1740,17 @@ class CommunityFirestoreManager(
                     put("username", username)
                     put("photo", photo)
                     put("frame", userMap?.optString("frame") ?: "")
+                    put("frameId", userMap?.optString("frameId") ?: (userMap?.optString("frame") ?: ""))
                     put("badges", userMap?.optJSONArray("badges") ?: JSONArray())
                     put("customTitle", userMap?.optString("customTitle") ?: "")
+                    put("title", userMap?.optString("title") ?: "")
+                    put("verified", userMap?.optBoolean("verified") ?: false)
+                    put("badgeType", userMap?.optString("badgeType") ?: "")
+                    put("nameColor", userMap?.optString("nameColor") ?: "")
+                    put("nameGradient", userMap?.optString("nameGradient") ?: "")
+                    put("nameFont", userMap?.optString("nameFont") ?: "")
                     put("isAdmin", activity.currentUserIsAdmin)
+                    put("isOwner", userMap?.optBoolean("isOwner") ?: activity.isOwnerSession())
                     put("isPublisher", userMap?.optBoolean("publisher") ?: false)
                     put("pinned", false)
                     put("text", cleanText)
@@ -1557,8 +1875,17 @@ class CommunityFirestoreManager(
                         put("username", author?.optString("username") ?: "")
                         put("photo", author?.optString("photoURL") ?: "")
                         put("frame", author?.optString("frame") ?: "")
+                        put("frameId", author?.optString("frameId") ?: (author?.optString("frame") ?: ""))
                         put("badges", author?.optJSONArray("badges") ?: JSONArray())
+                        put("customTitle", author?.optString("customTitle") ?: "")
+                        put("title", author?.optString("title") ?: "")
+                        put("verified", author?.optBoolean("verified") ?: false)
+                        put("badgeType", author?.optString("badgeType") ?: "")
+                        put("nameColor", author?.optString("nameColor") ?: "")
+                        put("nameGradient", author?.optString("nameGradient") ?: "")
+                        put("nameFont", author?.optString("nameFont") ?: "")
                         put("isAdmin", author?.optBoolean("isAdmin") ?: false)
+                        put("isOwner", author?.optBoolean("isOwner") ?: false)
                         put("isPublisher", author?.optBoolean("publisher") ?: false)
                         put("text", d.getString("text") ?: "")
                         put("createdAt", d.getLong("createdAt") ?: 0L)
@@ -1636,8 +1963,17 @@ class CommunityFirestoreManager(
                         put("username", userMap?.optString("username") ?: "")
                         put("photo", userMap?.optString("photoURL") ?: (user.photoUrl?.toString() ?: ""))
                         put("frame", userMap?.optString("frame") ?: "")
+                        put("frameId", userMap?.optString("frameId") ?: (userMap?.optString("frame") ?: ""))
                         put("badges", userMap?.optJSONArray("badges") ?: JSONArray())
+                        put("customTitle", userMap?.optString("customTitle") ?: "")
+                        put("title", userMap?.optString("title") ?: "")
+                        put("verified", userMap?.optBoolean("verified") ?: false)
+                        put("badgeType", userMap?.optString("badgeType") ?: "")
+                        put("nameColor", userMap?.optString("nameColor") ?: "")
+                        put("nameGradient", userMap?.optString("nameGradient") ?: "")
+                        put("nameFont", userMap?.optString("nameFont") ?: "")
                         put("isAdmin", activity.currentUserIsAdmin)
+                        put("isOwner", userMap?.optBoolean("isOwner") ?: activity.isOwnerSession())
                         put("isPublisher", userMap?.optBoolean("publisher") ?: false)
                         put("text", cleanText)
                         put("createdAt", now)
@@ -2213,6 +2549,13 @@ class CommunityFirestoreManager(
                     .sortedByDescending { it.getLong("createdAt") ?: 0L }
                     .forEach { d ->
                         val uid = d.getString("uid") ?: d.id
+                        val nowMs = System.currentTimeMillis()
+                        val rawBlocked = d.getBoolean("blocked") ?: false
+                        val bUntil = d.getLong("blockedUntil") ?: 0L
+                        val rawMuted = d.getBoolean("muted") ?: false
+                        val mUntil = d.getLong("mutedUntil") ?: 0L
+                        val legacyFrame = d.getString("frame") ?: ""
+                        val legacyTitle = d.getString("customTitle") ?: ""
                         arr.put(JSONObject().apply {
                             put("uid", uid)
                             put("displayName", d.getString("displayName") ?: "مستخدم")
@@ -2220,12 +2563,24 @@ class CommunityFirestoreManager(
                             put("photoURL", d.getString("photoURL") ?: "")
                             put("bannerURL", d.getString("bannerURL") ?: "")
                             put("bio", d.getString("bio") ?: "")
-                            put("blocked", d.getBoolean("blocked") ?: false)
+                            put("blocked", rawBlocked && (bUntil == 0L || bUntil > nowMs))
+                            put("blockedUntil", bUntil)
+                            put("muted", rawMuted && (mUntil == 0L || mUntil > nowMs))
+                            put("mutedUntil", mUntil)
                             put("publisher", d.getBoolean("publisher") ?: false)
                             put("badges", JSONArray(extractStringList(d, "badges")))
-                            put("frame", d.getString("frame") ?: "")
-                            put("customTitle", d.getString("customTitle") ?: "")
+                            put("frame", legacyFrame)
+                            put("frameId", (d.getString("frameId") ?: "").ifBlank { legacyFrame })
+                            put("frameAssigned", JSONArray(extractStringList(d, "frameAssigned")))
+                            put("customTitle", legacyTitle)
+                            put("title", (d.getString("title") ?: "").ifBlank { legacyTitle })
+                            put("verified", d.getBoolean("verified") ?: false)
+                            put("badgeType", d.getString("badgeType") ?: "")
+                            put("nameColor", d.getString("nameColor") ?: "")
+                            put("nameGradient", d.getString("nameGradient") ?: "")
+                            put("nameFont", d.getString("nameFont") ?: "")
                             put("isAdmin", cachedAdminUids.contains(uid))
+                            put("isOwner", cachedOwnerUid == uid)
                             put("createdAt", d.getLong("createdAt") ?: 0L)
                         })
                     }
@@ -2265,15 +2620,69 @@ class CommunityFirestoreManager(
                         writeAuditLog("set_badges", "user", targetUid, "badges=${list.joinToString(",")}")
                     }
                     "set_frame" -> {
-                        val frame = data.optString("frame", "").trim()
-                        val safeFrame = if (frame in ALLOWED_FRAMES) frame else ""
-                        userRef.update("frame", safeFrame, "updatedAt", now).await()
-                        writeAuditLog("set_frame", "user", targetUid, "frame=$safeFrame")
+                        val rawFrameId = data.optString("frameId", data.optString("frame", "")).trim()
+                        val safeFrameId = if (rawFrameId.isEmpty() || SAFE_FRAME_ID_REGEX.matches(rawFrameId)) rawFrameId else ""
+                        val safeLegacy = if (safeFrameId in ALLOWED_FRAMES) safeFrameId else ""
+                        userRef.update(
+                            mapOf(
+                                "frameId" to safeFrameId,
+                                "frame" to safeLegacy,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        writeAuditLog("set_frame", "user", targetUid, "frameId=$safeFrameId")
+                    }
+                    "grant_frame" -> {
+                        val rawFrameId = data.optString("frameId", "").trim()
+                        if (SAFE_FRAME_ID_REGEX.matches(rawFrameId)) {
+                            val assigned = data.optBoolean("assigned", true)
+                            val equipNow = data.optBoolean("equipNow", false)
+                            val updates = hashMapOf<String, Any>(
+                                "frameAssigned" to if (assigned) FieldValue.arrayUnion(rawFrameId) else FieldValue.arrayRemove(rawFrameId),
+                                "updatedAt" to now
+                            )
+                            if (assigned && equipNow) updates["frameId"] = rawFrameId
+                            userRef.update(updates).await()
+                            writeAuditLog(if (assigned) "grant_frame" else "revoke_frame", "user", targetUid, "frameId=$rawFrameId")
+                        }
+                    }
+                    "set_verification" -> {
+                        val verified = data.optBoolean("verified", false)
+                        val rawType = data.optString("badgeType", if (verified) "verified" else "").trim()
+                        val safeType = if (!verified) "" else if (rawType in ALLOWED_BADGE_TYPES && rawType.isNotEmpty()) rawType else "verified"
+                        userRef.update(
+                            mapOf(
+                                "verified" to verified,
+                                "badgeType" to safeType,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        writeAuditLog("set_verification", "user", targetUid, "verified=$verified,type=$safeType")
+                    }
+                    "set_name_style" -> {
+                        val nColor = sanitizeNameColor(data.optString("nameColor", ""))
+                        val nGrad = sanitizeNameGradient(data.optString("nameGradient", ""))
+                        val nFont = sanitizeNameFont(data.optString("nameFont", ""))
+                        userRef.update(
+                            mapOf(
+                                "nameColor" to nColor,
+                                "nameGradient" to nGrad,
+                                "nameFont" to nFont,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        writeAuditLog("set_name_style", "user", targetUid, "color=$nColor font=$nFont")
                     }
                     "set_title" -> {
-                        val customTitle = data.optString("customTitle", "").trim().take(30)
-                        userRef.update("customTitle", customTitle, "updatedAt", now).await()
-                        writeAuditLog("set_title", "user", targetUid, "title=$customTitle")
+                        val titleVal = data.optString("title", data.optString("customTitle", "")).trim().take(30)
+                        userRef.update(
+                            mapOf(
+                                "title" to titleVal,
+                                "customTitle" to titleVal,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        writeAuditLog("set_title", "user", targetUid, "title=$titleVal")
                     }
                     "edit_profile" -> {
                         val newName = data.optString("displayName", "").trim().take(60)
@@ -2315,6 +2724,62 @@ class CommunityFirestoreManager(
                         }
                         userRef.delete().await()
                         writeAuditLog("delete_user", "user", targetUid, "old=@$oldUname")
+                    }
+                    "set_mute" -> {
+                        val muted = data.optBoolean("muted", false)
+                        val durationHours = data.optLong("durationHours", 0L).coerceAtLeast(0L)
+                        val mutedUntil = if (muted && durationHours > 0L) now + durationHours * 3_600_000L else 0L
+                        userRef.update(
+                            mapOf(
+                                "muted" to muted,
+                                "mutedUntil" to mutedUntil,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        if (muted) {
+                            val durLabel = if (durationHours > 0L) "لمدة $durationHours ساعة" else "بشكل مفتوح"
+                            sendUserNotification(
+                                targetUid = targetUid,
+                                type = "admin_mute",
+                                title = "🔇 تم تقييد الكتابة لحسابك",
+                                body = "تم تقييد النشر والتعليق في النادي $durLabel"
+                            )
+                        }
+                        writeAuditLog("set_mute", "user", targetUid, "muted=$muted,hours=$durationHours")
+                    }
+                    "set_block" -> {
+                        val blocked = data.optBoolean("blocked", false)
+                        val durationHours = data.optLong("durationHours", 0L).coerceAtLeast(0L)
+                        val blockedUntil = if (blocked && durationHours > 0L) now + durationHours * 3_600_000L else 0L
+                        userRef.update(
+                            mapOf(
+                                "blocked" to blocked,
+                                "blockedUntil" to blockedUntil,
+                                "updatedAt" to now
+                            )
+                        ).await()
+                        if (blocked) {
+                            val durLabel = if (durationHours > 0L) "لمدة $durationHours ساعة" else "بشكل دائم"
+                            sendUserNotification(
+                                targetUid = targetUid,
+                                type = "admin_block",
+                                title = "⛔ تم حظر حسابك",
+                                body = "تم تفعيل الحظر على الحساب $durLabel"
+                            )
+                        }
+                        writeAuditLog("set_block", "user", targetUid, "blocked=$blocked,hours=$durationHours")
+                    }
+                    "send_warning" -> {
+                        val msg = data.optString("message", "").trim().take(300)
+                        if (msg.isNotEmpty()) {
+                            sendUserNotification(
+                                targetUid = targetUid,
+                                type = "admin_warning",
+                                title = "⚠️ تنبيه إداري من مشرف النادي",
+                                body = msg
+                            )
+                            writeAuditLog("send_warning", "user", targetUid, msg)
+                        }
                     }
                 }
                 val res = JSONObject().apply {

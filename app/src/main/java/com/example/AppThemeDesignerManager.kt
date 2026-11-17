@@ -9,7 +9,6 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.json.JSONArray
@@ -37,26 +36,49 @@ class AppThemeDesignerManager(
         )
         private val ALLOWED_CARD_STYLES = setOf("glass", "flat", "outlined", "neon", "soft")
         private val ALLOWED_SHADOWS = setOf("none", "soft", "glow")
-        private val ALLOWED_NAV_TYPES = setOf("bottom-floating", "bottom-bar", "top-tabs", "side-drawer")
+        private val ALLOWED_SPACING = setOf("compact", "cozy", "airy")
+        private val ALLOWED_ICON_STYLES = setOf("outline", "filled", "duotone", "rounded")
+        private val ALLOWED_NAV_TYPES = setOf(
+            "bottom-floating", "bottom-bar", "top-tabs", "side-drawer", "rail-left", "dock-center-fab"
+        )
         private val ALLOWED_NAV_ACTIVE = setOf("filled", "glass-capsule")
-        private val ALLOWED_NAV_ORDER = setOf("home", "explore", "favorites", "downloads", "messages", "settings")
+        private val ALLOWED_NAV_ORDER = setOf("home", "explore", "club", "favorites", "downloads", "messages", "settings")
         private val ALLOWED_NAV_TABS = setOf("themes", "icon_pack", "live_wallpaper", "font", "aod", "ringtone")
-        private val ALLOWED_SEARCH_STYLES = setOf("card", "pill-bar")
-        private val ALLOWED_SECTION_LAYOUTS = setOf("vertical-grid", "horizontal-rows")
+        private val ALLOWED_HEADERS = setOf("large-title", "compact", "none", "hero-profile")
+        private val ALLOWED_SEARCH_STYLES = setOf("card", "pill-bar", "icon-only", "full-width-top")
+        private val ALLOWED_SECTION_LAYOUTS = setOf(
+            "vertical-grid", "horizontal-rows", "magazine", "stories-top", "masonry", "list"
+        )
         private val ALLOWED_HERO_STYLES = setOf("carousel", "big-card", "none")
         private val ALLOWED_HOME_SECTIONS = setOf(
             "search", "deviceDetector", "brandChips", "banner",
             "categories", "topDownloads", "featured", "newReleases"
         )
         private val ALLOWED_GRID_LAYOUTS = setOf("grid2", "grid3", "list", "masonry", "carousel")
-        private val ALLOWED_CARD_INFO = setOf("overlay", "below", "minimal")
-        private val ALLOWED_DETAILS_LAYOUT = setOf("classic", "hero-gallery")
+        private val ALLOWED_CARD_INFO = setOf(
+            "overlay-title", "below-title", "minimal", "tall-9-16", "square", "wide-banner", "list-row", "polaroid"
+        )
+        private val ALLOWED_DETAILS_LAYOUT = setOf(
+            "classic", "hero-gallery", "split-sheet", "fullscreen-phone", "tabs"
+        )
         private val ALLOWED_DETAILS_STATS = setOf("three-cards", "inline")
-        private val ALLOWED_ACTION_BAR = setOf("classic", "floating-wide-primary")
+        private val ALLOWED_ACTION_BAR = setOf("classic-bottom", "floating-wide", "side-fab", "top-inline")
         private val ALLOWED_DESC_STYLE = setOf("card", "plain")
-        private val ALLOWED_PHONE_FRAMES = setOf("gold", "titanium", "black", "none")
-        private val ALLOWED_ANIMATIONS = setOf("none", "smooth", "playful")
+        private val ALLOWED_CLUB_FEED = setOf("cards", "flat-list", "compact", "timeline", "magazine")
+        private val ALLOWED_PROFILE_LAYOUT = setOf("banner-top", "centered", "side-card", "cover-overlap")
+        private val ALLOWED_PHONE_FRAMES = setOf("gold", "titanium", "black", "pharaoh", "none")
+        private val ALLOWED_ANIMATIONS = setOf("none", "smooth", "playful", "snappy")
+        private val ALLOWED_TRANSITIONS = setOf("slide", "fade", "zoom", "shared-element")
         private val ALLOWED_MODES = setOf("dark", "light", "auto")
+        private val ALLOWED_GLASS_CRACKS = setOf("none", "light", "heavy")
+
+        private val ALLOWED_FRAME_TYPES = setOf("solid", "gradient", "conic", "animated", "pattern")
+        private val ALLOWED_FRAME_ANIMS = setOf("none", "spin", "pulse", "shimmer", "breathe")
+        private val ALLOWED_FRAME_ORNAMENTS = setOf(
+            "none", "crown", "wings", "stars", "flames", "lotus", "laurel", "eye-of-horus", "cartouche", "pyramid"
+        )
+        private val ALLOWED_FRAME_SHAPES = setOf("circle", "rounded-square", "hexagon")
+        private val ALLOWED_FRAME_ACCESS = setOf("everyone", "admins", "owner", "assigned")
     }
 
     fun startAppThemeListener() {
@@ -176,7 +198,6 @@ class AppThemeDesignerManager(
                     .set(docData, SetOptions.merge())
                     .await()
 
-                // Append to appThemeHistory and keep at most 10 latest versions
                 val histData = hashMapOf(
                     "templateId" to templateId,
                     "templateName" to templateName,
@@ -434,6 +455,172 @@ class AppThemeDesignerManager(
         }
     }
 
+    // ---------------- AVATAR FRAMES CATALOG (frames/{id}) ----------------
+    fun fetchFrames() {
+        scope.launch {
+            try {
+                val snap = db.collection("frames").limit(100).get().await()
+                val arr = JSONArray()
+                snap.documents.forEach { d ->
+                    val rawColors = (d.get("colors") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                    val cleanColors = JSONArray()
+                    rawColors.take(6).forEach { c ->
+                        if (HEX_COLOR_REGEX.matches(c.trim())) cleanColors.put(c.trim())
+                    }
+                    arr.put(JSONObject().apply {
+                        put("id", d.id)
+                        put("name", stripUnsafeText(d.getString("name").orEmpty(), 48).ifEmpty { d.id })
+                        put("category", stripUnsafeText(d.getString("category").orEmpty(), 32))
+                        put("type", d.getString("type").takeIf { it in ALLOWED_FRAME_TYPES } ?: "gradient")
+                        put("colors", cleanColors)
+                        put("angle", (d.getLong("angle")?.toInt() ?: 135).coerceIn(0, 360))
+                        put("width", (d.getLong("width")?.toInt() ?: 3).coerceIn(2, 8))
+                        put("glow", (d.getLong("glow")?.toInt() ?: 8).coerceIn(0, 20))
+                        put("animation", d.getString("animation").takeIf { it in ALLOWED_FRAME_ANIMS } ?: "none")
+                        put("ornament", d.getString("ornament").takeIf { it in ALLOWED_FRAME_ORNAMENTS } ?: "none")
+                        put("shape", d.getString("shape").takeIf { it in ALLOWED_FRAME_SHAPES } ?: "circle")
+                        put("access", d.getString("access").takeIf { it in ALLOWED_FRAME_ACCESS } ?: "everyone")
+                        put("builtIn", d.getBoolean("builtIn") ?: false)
+                    })
+                }
+                val payload = JSONObject().apply {
+                    put("ok", true)
+                    put("frames", arr)
+                }.toString()
+                activity.evaluateJs("window.onFramesLoaded?.($payload);")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val err = JSONObject().apply {
+                    put("ok", false)
+                    put("error", AuthErrorFormatter.format(e))
+                }.toString()
+                activity.evaluateJs("window.onFramesLoaded?.($err);")
+            }
+        }
+    }
+
+    private fun sanitizeFrameMap(src: JSONObject): HashMap<String, Any>? {
+        val rawId = src.optString("id", "").trim()
+        val id = if (SAFE_ID_REGEX.matches(rawId)) rawId else "frame_${System.currentTimeMillis()}"
+        val name = stripUnsafeText(src.optString("name", ""), 48)
+        if (name.isEmpty()) return null
+        val type = src.optString("type", "gradient").takeIf { it in ALLOWED_FRAME_TYPES } ?: "gradient"
+        val access = src.optString("access", "everyone").takeIf { it in ALLOWED_FRAME_ACCESS } ?: "everyone"
+        val rawColors = src.optJSONArray("colors")
+        val colors = mutableListOf<String>()
+        if (rawColors != null) {
+            for (i in 0 until rawColors.length()) {
+                val hex = rawColors.optString(i, "").trim()
+                if (HEX_COLOR_REGEX.matches(hex) && colors.size < 6) colors.add(hex)
+            }
+        }
+        if (colors.isEmpty()) colors.add("#D4AF37")
+        val anim = src.optString("animation", "none").takeIf { it in ALLOWED_FRAME_ANIMS } ?: "none"
+        val ornament = src.optString("ornament", "none").takeIf { it in ALLOWED_FRAME_ORNAMENTS } ?: "none"
+        val shape = src.optString("shape", "circle").takeIf { it in ALLOWED_FRAME_SHAPES } ?: "circle"
+        val category = stripUnsafeText(src.optString("category", "مخصص"), 32).ifEmpty { "مخصص" }
+
+        return hashMapOf(
+            "id" to id,
+            "name" to name,
+            "category" to category,
+            "type" to type,
+            "colors" to colors,
+            "angle" to src.optInt("angle", 135).coerceIn(0, 360),
+            "width" to src.optInt("width", 3).coerceIn(2, 8),
+            "glow" to src.optInt("glow", 8).coerceIn(0, 20),
+            "animation" to anim,
+            "ornament" to ornament,
+            "shape" to shape,
+            "access" to access,
+            "builtIn" to src.optBoolean("builtIn", false),
+            "updatedAt" to System.currentTimeMillis()
+        )
+    }
+
+    fun seedDefaultFrames(framesArrayJson: String) {
+        if (!activity.currentUserIsAdmin) return
+        val arr = runCatching { JSONArray(framesArrayJson) }.getOrNull() ?: return
+        scope.launch {
+            try {
+                val existingIds = db.collection("frames").get().await().documents.map { it.id }.toSet()
+                val batch = db.batch()
+                var count = 0
+                for (i in 0 until arr.length()) {
+                    val obj = arr.optJSONObject(i) ?: continue
+                    val map = sanitizeFrameMap(obj) ?: continue
+                    val fid = map["id"] as String
+                    if (fid !in existingIds) {
+                        map["builtIn"] = true
+                        batch.set(db.collection("frames").document(fid), map, SetOptions.merge())
+                        count++
+                    }
+                }
+                if (count > 0) {
+                    batch.commit().await()
+                }
+                val payload = JSONObject().put("ok", true).put("seeded", count).toString()
+                activity.evaluateJs("window.onDefaultFramesSeeded?.($payload);")
+                fetchFrames()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val payload = JSONObject().put("ok", false).put("error", AuthErrorFormatter.format(e)).toString()
+                activity.evaluateJs("window.onDefaultFramesSeeded?.($payload);")
+            }
+        }
+    }
+
+    fun saveCustomFrame(frameJson: String) {
+        if (!activity.currentUserIsAdmin) {
+            val err = JSONObject().put("ok", false).put("error", "صلاحية المشرف مطلوبة").toString()
+            activity.evaluateJs("window.onCustomFrameSaved?.($err);")
+            return
+        }
+        val parsed = runCatching { JSONObject(frameJson) }.getOrNull()
+        val map = parsed?.let { sanitizeFrameMap(it) }
+        if (map == null) {
+            val err = JSONObject().put("ok", false).put("error", "بيانات الإطار غير صالحة").toString()
+            activity.evaluateJs("window.onCustomFrameSaved?.($err);")
+            return
+        }
+        val fid = map["id"] as String
+        val fname = map["name"] as String
+        scope.launch {
+            try {
+                db.collection("frames").document(fid).set(map, SetOptions.merge()).await()
+                activity.communityManager.writeAuditLog("save_frame", "frame", fid, "name=$fname")
+                val ok = JSONObject().put("ok", true).put("frameId", fid).put("name", fname).toString()
+                activity.evaluateJs("window.onCustomFrameSaved?.($ok);")
+                fetchFrames()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val err = JSONObject().put("ok", false).put("error", AuthErrorFormatter.format(e)).toString()
+                activity.evaluateJs("window.onCustomFrameSaved?.($err);")
+            }
+        }
+    }
+
+    fun deleteCustomFrame(frameId: String) {
+        if (!activity.currentUserIsAdmin || !SAFE_ID_REGEX.matches(frameId)) return
+        scope.launch {
+            try {
+                db.collection("frames").document(frameId).delete().await()
+                activity.communityManager.writeAuditLog("delete_frame", "frame", frameId, "deleted")
+                val ok = JSONObject().put("ok", true).put("frameId", frameId).toString()
+                activity.evaluateJs("window.onCustomFrameDeleted?.($ok);")
+                fetchFrames()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val err = JSONObject().put("ok", false).put("error", AuthErrorFormatter.format(e)).toString()
+                activity.evaluateJs("window.onCustomFrameDeleted?.($err);")
+            }
+        }
+    }
+
     private fun stripUnsafeText(input: String, maxLen: Int): String {
         return input
             .replace(Regex("[<>]"), "")
@@ -445,6 +632,39 @@ class AppThemeDesignerManager(
     private fun validHex(value: String?, fallback: String): String {
         val v = value?.trim().orEmpty()
         return if (HEX_COLOR_REGEX.matches(v)) v else fallback
+    }
+
+    private fun sanitizeGlassSurface(
+        src: JSONObject?,
+        defOpacity: Int,
+        defBlur: Int,
+        defSat: Int,
+        defTint: String,
+        defTintOpacity: Int,
+        defBorderWidth: Double,
+        defBorderColor: String,
+        defBorderOpacity: Int,
+        defHighlight: Boolean,
+        defShadow: String,
+        defNoise: Int,
+        defCrack: String
+    ): JSONObject {
+        val s = src ?: JSONObject()
+        return JSONObject().apply {
+            put("opacity", s.optInt("opacity", defOpacity).coerceIn(0, 100))
+            put("blur", s.optInt("blur", defBlur).coerceIn(0, 40))
+            put("saturation", s.optInt("saturation", defSat).coerceIn(80, 220))
+            put("tint", validHex(s.optString("tint"), defTint))
+            put("tintOpacity", s.optInt("tintOpacity", defTintOpacity).coerceIn(0, 100))
+            val bw = s.optDouble("borderWidth", defBorderWidth).let { if (it.isNaN()) defBorderWidth else it.coerceIn(0.0, 2.0) }
+            put("borderWidth", bw)
+            put("borderColor", validHex(s.optString("borderColor"), defBorderColor))
+            put("borderOpacity", s.optInt("borderOpacity", defBorderOpacity).coerceIn(0, 100))
+            put("highlight", s.optBoolean("highlight", defHighlight))
+            put("shadow", s.optString("shadow", defShadow).takeIf { it in ALLOWED_SHADOWS } ?: defShadow)
+            put("noise", s.optInt("noise", defNoise).coerceIn(0, 10))
+            put("crack", s.optString("crack", defCrack).takeIf { it in ALLOWED_GLASS_CRACKS } ?: defCrack)
+        }
     }
 
     private fun sanitizeThemeConfig(src: JSONObject): JSONObject {
@@ -481,8 +701,28 @@ class AppThemeDesignerManager(
             put("radius", srcShape.optInt("radius", 20).coerceIn(0, 32))
             put("cardStyle", srcShape.optString("cardStyle", "glass").takeIf { it in ALLOWED_CARD_STYLES } ?: "glass")
             put("shadow", srcShape.optString("shadow", "soft").takeIf { it in ALLOWED_SHADOWS } ?: "soft")
+            put("spacing", srcShape.optString("spacing", "cozy").takeIf { it in ALLOWED_SPACING } ?: "cozy")
             put("pillButtons", srcShape.optBoolean("pillButtons", false))
         })
+
+        val srcIcons = src.optJSONObject("icons") ?: JSONObject()
+        out.put("icons", JSONObject().apply {
+            put("style", srcIcons.optString("style", "outline").takeIf { it in ALLOWED_ICON_STYLES } ?: "outline")
+        })
+
+        val srcGlass = src.optJSONObject("glass") ?: JSONObject()
+        val defaultSurfaceHex = colors.optString("surface", "#1A1A23")
+        val defaultPrimaryHex = colors.optString("primary", "#7C5CFF")
+        val glassObj = JSONObject().apply {
+            put("nav", sanitizeGlassSurface(srcGlass.optJSONObject("nav"), 82, 18, 140, defaultSurfaceHex, 15, 1.0, "#FFFFFF", 14, true, "soft", 2, "none"))
+            put("capsule", sanitizeGlassSurface(srcGlass.optJSONObject("capsule"), 74, 14, 150, defaultPrimaryHex, 18, 1.0, "#FFFFFF", 18, true, "none", 0, "none"))
+            put("card", sanitizeGlassSurface(srcGlass.optJSONObject("card"), 88, 12, 120, defaultSurfaceHex, 10, 1.0, "#FFFFFF", 10, true, "soft", 2, "none"))
+            put("sheet", sanitizeGlassSurface(srcGlass.optJSONObject("sheet"), 92, 24, 140, defaultSurfaceHex, 12, 1.0, "#FFFFFF", 14, true, "soft", 2, "none"))
+            put("search", sanitizeGlassSurface(srcGlass.optJSONObject("search"), 85, 16, 130, defaultSurfaceHex, 10, 1.0, "#FFFFFF", 14, false, "soft", 0, "none"))
+            put("actionBar", sanitizeGlassSurface(srcGlass.optJSONObject("actionBar"), 84, 20, 140, defaultSurfaceHex, 14, 1.0, "#FFFFFF", 14, true, "soft", 0, "none"))
+            put("modal", sanitizeGlassSurface(srcGlass.optJSONObject("modal"), 94, 24, 140, defaultSurfaceHex, 14, 1.0, "#FFFFFF", 16, true, "soft", 2, "none"))
+        }
+        out.put("glass", glassObj)
 
         val srcNav = src.optJSONObject("nav") ?: JSONObject()
         val rawOrder = srcNav.optJSONArray("order")
@@ -494,7 +734,7 @@ class AppThemeDesignerManager(
                 if (item in ALLOWED_NAV_ORDER && seenOrder.add(item)) cleanOrder.put(item)
             }
         }
-        listOf("home", "explore", "favorites", "downloads", "messages", "settings").forEach {
+        listOf("home", "explore", "club", "favorites", "downloads", "messages", "settings").forEach {
             if (seenOrder.add(it)) cleanOrder.put(it)
         }
         val rawTabs = srcNav.optJSONArray("tabs")
@@ -513,6 +753,8 @@ class AppThemeDesignerManager(
             put("order", cleanOrder)
             put("tabs", cleanTabs)
         })
+
+        out.put("header", src.optString("header", "large-title").takeIf { it in ALLOWED_HEADERS } ?: "large-title")
 
         val srcSearch = src.optJSONObject("search") ?: JSONObject()
         out.put("search", JSONObject().apply {
@@ -541,18 +783,42 @@ class AppThemeDesignerManager(
         })
 
         val srcGrid = src.optJSONObject("themeGrid") ?: JSONObject()
+        val rawCardInfo = srcGrid.optString("cardInfo", "overlay-title").let {
+            when (it) {
+                "overlay" -> "overlay-title"
+                "below" -> "below-title"
+                else -> it
+            }
+        }
         out.put("themeGrid", JSONObject().apply {
             put("layout", srcGrid.optString("layout", "grid2").takeIf { it in ALLOWED_GRID_LAYOUTS } ?: "grid2")
-            put("cardInfo", srcGrid.optString("cardInfo", "overlay").takeIf { it in ALLOWED_CARD_INFO } ?: "overlay")
+            put("cardInfo", rawCardInfo.takeIf { it in ALLOWED_CARD_INFO } ?: "overlay-title")
         })
 
-        val srcDetails = src.optJSONObject("details") ?: JSONObject()
+        val srcDet = src.optJSONObject("details") ?: JSONObject()
+        val rawActionBar = srcDet.optString("actionBar", "classic-bottom").let {
+            when (it) {
+                "classic" -> "classic-bottom"
+                "floating-wide-primary" -> "floating-wide"
+                else -> it
+            }
+        }
         out.put("details", JSONObject().apply {
-            put("layout", srcDetails.optString("layout", "classic").takeIf { it in ALLOWED_DETAILS_LAYOUT } ?: "classic")
-            put("badges", srcDetails.optBoolean("badges", true))
-            put("stats", srcDetails.optString("stats", "three-cards").takeIf { it in ALLOWED_DETAILS_STATS } ?: "three-cards")
-            put("actionBar", srcDetails.optString("actionBar", "classic").takeIf { it in ALLOWED_ACTION_BAR } ?: "classic")
-            put("descriptionStyle", srcDetails.optString("descriptionStyle", "plain").takeIf { it in ALLOWED_DESC_STYLE } ?: "plain")
+            put("layout", srcDet.optString("layout", "classic").takeIf { it in ALLOWED_DETAILS_LAYOUT } ?: "classic")
+            put("badges", srcDet.optBoolean("badges", true))
+            put("stats", srcDet.optString("stats", "three-cards").takeIf { it in ALLOWED_DETAILS_STATS } ?: "three-cards")
+            put("actionBar", rawActionBar.takeIf { it in ALLOWED_ACTION_BAR } ?: "classic-bottom")
+            put("descriptionStyle", srcDet.optString("descriptionStyle", "plain").takeIf { it in ALLOWED_DESC_STYLE } ?: "plain")
+        })
+
+        val srcClub = src.optJSONObject("club") ?: JSONObject()
+        out.put("club", JSONObject().apply {
+            put("feedStyle", srcClub.optString("feedStyle", "cards").takeIf { it in ALLOWED_CLUB_FEED } ?: "cards")
+        })
+
+        val srcProfile = src.optJSONObject("profile") ?: JSONObject()
+        out.put("profile", JSONObject().apply {
+            put("layout", srcProfile.optString("layout", "banner-top").takeIf { it in ALLOWED_PROFILE_LAYOUT } ?: "banner-top")
         })
 
         val srcFrame = src.optJSONObject("phoneFrame") ?: JSONObject()
@@ -583,6 +849,7 @@ class AppThemeDesignerManager(
         out.put("texts", textsObj)
 
         out.put("animation", src.optString("animation", "smooth").takeIf { it in ALLOWED_ANIMATIONS } ?: "smooth")
+        out.put("transition", src.optString("transition", "slide").takeIf { it in ALLOWED_TRANSITIONS } ?: "slide")
         out.put("mode", src.optString("mode", "dark").takeIf { it in ALLOWED_MODES } ?: "dark")
         return out
     }

@@ -819,7 +819,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
-  min-width: 40px;
+  min-width: 0;
+  padding: 2px;
 }
 .nav-item svg {
   width: 20px;
@@ -2609,7 +2610,7 @@ body[data-search-style="pill-bar"] #home-classic-search { display: none; }
 }
 .nav-label {
   display: none;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   line-height: 1.1;
   max-width: 100%;
@@ -3495,6 +3496,430 @@ a[href] {
   border-color: rgba(124, 92, 255, 0.55);
   background: rgba(124, 92, 255, 0.08);
 }
+
+/* ==========================================================================
+   CLUB ("النادي") SOCIAL COMMUNITY STYLES
+   ========================================================================== */
+.club-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.club-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.club-subtabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+.club-subtabs::-webkit-scrollbar { display: none; }
+.club-subtab-pill {
+  flex: none;
+  min-height: 36px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.club-subtab-pill.active {
+  background: var(--grad);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(124, 92, 255, 0.35);
+}
+.club-cat-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+.club-cat-strip::-webkit-scrollbar { display: none; }
+.club-cat-chip {
+  flex: none;
+  min-height: 32px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.club-cat-chip.active {
+  border-color: var(--a1);
+  color: var(--a1);
+  background: rgba(124, 92, 255, 0.14);
+}
+.club-maintenance-banner {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #FCD34D;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.club-new-posts-pill {
+  display: none;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--grad);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(124, 92, 255, 0.38);
+}
+.club-new-posts-pill.visible { display: block; }
+.club-post-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+.club-post-card.pinned {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.08);
+}
+.club-post-card.announcement {
+  border-color: rgba(124, 92, 255, 0.55);
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.09), var(--surface));
+}
+.club-post-card.hidden-post {
+  border-color: rgba(255, 77, 109, 0.45);
+  opacity: 0.85;
+}
+.club-post-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.club-post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+}
+.club-post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--grad);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.club-post-badges-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.club-post-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+.club-mention-chip {
+  color: var(--a2);
+  font-weight: 800;
+  background: rgba(77, 163, 255, 0.12);
+  padding: 1px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-block;
+}
+.club-safe-link {
+  color: var(--a1);
+  text-decoration: underline;
+  font-weight: 700;
+  cursor: pointer;
+  word-break: break-all;
+}
+.club-media-grid {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.club-media-grid.cols-1 { grid-template-columns: 1fr; }
+.club-media-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.club-media-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+.club-media-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+.club-media-item {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  background: var(--surface2);
+  cursor: pointer;
+  display: block;
+}
+.club-media-grid.cols-1 .club-media-item {
+  height: auto;
+  max-height: 310px;
+}
+.club-media-grid.cols-3 .club-media-item:first-child {
+  grid-column: span 2;
+  height: 185px;
+}
+.club-video-box {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+.club-video-box video {
+  width: 100%;
+  max-height: 290px;
+  display: block;
+  background: #000;
+}
+.club-attached-theme-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border-radius: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.club-attached-theme-thumb {
+  width: 52px;
+  height: 68px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.club-poll-box {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 11px;
+  margin-bottom: 10px;
+}
+.club-poll-opt {
+  position: relative;
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+  text-align: start;
+  padding: 8px 11px;
+  margin-top: 7px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.club-poll-opt.voted {
+  border-color: var(--a1);
+}
+.club-poll-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: rgba(124, 92, 255, 0.22);
+  pointer-events: none;
+  transition: width 0.3s ease;
+}
+.club-reactions-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.club-post-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  position: relative;
+}
+.club-action-btn {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.club-action-btn.active {
+  color: var(--a1);
+  background: rgba(124, 92, 255, 0.12);
+}
+.club-reaction-picker {
+  display: none;
+  position: absolute;
+  bottom: 46px;
+  inset-inline-start: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 8px;
+  gap: 6px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  z-index: 12;
+}
+.club-reaction-picker.open {
+  display: flex;
+}
+.club-reaction-emoji-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  font-size: 19px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease;
+}
+.club-reaction-emoji-btn:hover { transform: scale(1.22); }
+.club-fab-btn {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 84px);
+  inset-inline-end: 18px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: none;
+  background: var(--grad);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(124, 92, 255, 0.48);
+  cursor: pointer;
+  z-index: 25;
+  display: none;
+  place-items: center;
+}
+#view-club.active .club-fab-btn { display: grid; }
+.club-composer-media-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.club-composer-thumb {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  aspect-ratio: 1 / 1;
+}
+.club-composer-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.club-composer-thumb-del {
+  position: absolute;
+  top: 3px;
+  inset-inline-end: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+.club-skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.club-skel-line {
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface2), rgba(255,255,255,0.08), var(--surface2));
+  background-size: 200% 100%;
+  animation: pulseSkel 1.2s infinite linear;
+  margin-bottom: 8px;
+}
+@keyframes pulseSkel {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.club-reply-indent {
+  margin-inline-start: 22px;
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid var(--line);
+  margin-top: 6px;
+}
+.profile-mod-bar {
+  background: rgba(255, 77, 109, 0.08);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 4px;
+}
 </style>
 </head>
 <body data-theme="dark" data-accent="purple">
@@ -3579,6 +4004,7 @@ a[href] {
   </div>
   <button type="button" class="drawer-nav-btn on" id="drawer-tab-home" onclick="switchView('home'); closeAppSideDrawer();">🏠 <span data-i18n="homeNav">الرئيسية</span></button>
   <button type="button" class="drawer-nav-btn" id="drawer-tab-explore" onclick="switchView('explore'); closeAppSideDrawer();">🧭 <span data-i18n="exploreNav">الثيمات</span></button>
+  <button type="button" class="drawer-nav-btn" id="drawer-tab-club" onclick="switchView('club'); closeAppSideDrawer();">🏟️ <span data-i18n="clubNav">النادي</span></button>
   <button type="button" class="drawer-nav-btn" id="drawer-tab-favorites" onclick="switchView('favorites'); closeAppSideDrawer();">❤️ <span data-i18n="favorites">المفضلة</span></button>
   <button type="button" class="drawer-nav-btn" id="drawer-tab-downloads" onclick="switchView('downloads'); closeAppSideDrawer();">⬇️ <span data-i18n="downloads">التحميلات</span></button>
   <button type="button" class="drawer-nav-btn" id="drawer-tab-messages" onclick="switchView('messages'); closeAppSideDrawer();">💬 <span data-i18n="messagesNav">الرسائل</span></button>
@@ -3596,6 +4022,7 @@ a[href] {
   <nav id="top-tabs-nav" aria-label="التنقل العلوي">
     <button type="button" class="top-tab-pill on" id="toptab-home" onclick="switchView('home')">🏠 <span data-i18n="homeNav">الرئيسية</span></button>
     <button type="button" class="top-tab-pill" id="toptab-explore" onclick="switchView('explore')">🧭 <span data-i18n="exploreNav">الثيمات</span></button>
+    <button type="button" class="top-tab-pill" id="toptab-club" onclick="switchView('club')">🏟️ <span data-i18n="clubNav">النادي</span></button>
     <button type="button" class="top-tab-pill" id="toptab-favorites" onclick="switchView('favorites')">❤️ <span data-i18n="favorites">المفضلة</span></button>
     <button type="button" class="top-tab-pill" id="toptab-downloads" onclick="switchView('downloads')">⬇️ <span data-i18n="downloads">التحميلات</span></button>
     <button type="button" class="top-tab-pill" id="toptab-messages" onclick="switchView('messages')">💬 <span data-i18n="messagesNav">الرسائل</span></button>
@@ -4093,9 +4520,44 @@ a[href] {
       </div>
     </div>
 
+    <!-- VIEW 7: CLUB ("النادي") SOCIAL COMMUNITY -->
+    <div id="view-club" class="view">
+      <div class="club-top-header">
+        <div>
+          <div class="title" data-i18n="clubNav">النادي</div>
+          <div style="font-size:11px; color:var(--muted);">مجتمع Theme Hub المباشر</div>
+        </div>
+        <div class="club-header-actions">
+          <button type="button" class="mini-action-btn" id="btn-club-bookmarks-shortcut" onclick="setClubFeedTab('bookmarks')" title="المحفوظات">🔖 المحفوظات</button>
+          <button type="button" class="mini-action-btn" onclick="refreshClubFeed(true)" title="تحديث">🔄</button>
+          <button type="button" class="btn main" style="flex:none; min-height:36px; height:36px; padding:0 12px; font-size:11.5px;" onclick="openClubComposer()">+ منشور</button>
+        </div>
+      </div>
+
+      <div id="club-maintenance-banner" class="club-maintenance-banner" style="display:none;"></div>
+
+      <button type="button" id="club-new-posts-pill" class="club-new-posts-pill" onclick="applyPendingClubNewPosts()">
+        ✨ منشورات جديدة متاحة — اضغط للتحديث
+      </button>
+
+      <div class="club-subtabs" id="club-subtabs-bar">
+        <button type="button" class="club-subtab-pill active" data-club-tab="all" onclick="setClubFeedTab('all')">🌐 الكل</button>
+        <button type="button" class="club-subtab-pill" data-club-tab="following" onclick="setClubFeedTab('following')">👥 المتابَعون</button>
+        <button type="button" class="club-subtab-pill" data-club-tab="trending" onclick="setClubFeedTab('trending')">🔥 الأكثر تفاعلاً</button>
+        <button type="button" class="club-subtab-pill" data-club-tab="bookmarks" onclick="setClubFeedTab('bookmarks')">🔖 المحفوظات</button>
+      </div>
+
+      <div class="club-cat-strip" id="club-category-chips"></div>
+
+      <div id="club-feed-list"></div>
+      <div id="club-feed-more-loader" style="display:none; text-align:center; padding:14px; font-size:12px; color:var(--muted);">جاري تحميل المزيد…</div>
+
+      <button type="button" class="club-fab-btn" onclick="openClubComposer()" aria-label="إنشاء منشور جديد" title="إنشاء منشور جديد">+</button>
+    </div>
+
   </div> <!-- /view-container -->
 
-  <!-- 6 EQUAL SVG ICONS IN GLASS BOTTOM NAV BAR -->
+  <!-- 7 EQUAL SVG ICONS IN GLASS BOTTOM NAV BAR -->
   <nav class="nav" id="bottom-nav">
     <div class="nav-item on" id="tab-home" data-nav-key="home" onclick="switchView('home')" title="الرئيسية">
       <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -4104,6 +4566,10 @@ a[href] {
     <div class="nav-item" id="tab-explore" data-nav-key="explore" onclick="switchView('explore')" title="الثيمات">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span class="nav-label" data-i18n="exploreNav">الثيمات</span>
+    </div>
+    <div class="nav-item" id="tab-club" data-nav-key="club" onclick="switchView('club')" title="النادي">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label" data-i18n="clubNav">النادي</span>
     </div>
     <div class="nav-item" id="tab-favorites" data-nav-key="favorites" onclick="switchView('favorites')" title="المفضلة">
       <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -4672,6 +5138,7 @@ a[href] {
       <div class="admin-tab" id="atab-submissions" onclick="switchAdminTab('submissions')">📦 الطلبات <span id="admin-submissions-badge" class="tab-count-pill" style="display:none;">0</span></div>
       <div class="admin-tab" id="atab-users" onclick="switchAdminTab('users')">👥 المستخدمون</div>
       <div class="admin-tab" id="atab-content" onclick="switchAdminTab('content')">📝 المحتوى</div>
+      <div class="admin-tab" id="atab-club" onclick="switchAdminTab('club')">🏟️ النادي</div>
       <div class="admin-tab" id="atab-reports" onclick="switchAdminTab('reports')">🚩 البلاغات</div>
       <div class="admin-tab" id="atab-stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
       <div class="admin-tab" id="atab-designer" onclick="switchAdminTab('designer')">🎨 مصمم التطبيق</div>
@@ -4884,6 +5351,70 @@ a[href] {
       <div id="admin-stats-cards-root"></div>
       <div style="font-size:var(--fs-xs); font-weight:800; color:var(--text); margin:12px 0 8px;">📜 سجل الإجراءات الإدارية (auditLog)</div>
       <div id="admin-audit-log-list"></div>
+    </div>
+
+    <!-- TAB 10: CLUB ("النادي") MODERATION & SETTINGS -->
+    <div id="admin-subtab-club" style="display:none;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <button type="button" class="btn main" style="flex:1; min-height:40px; font-size:12px;" onclick="openClubComposer(null, { announcement: true })">
+          📢 نشر إعلان رسمي في النادي
+        </button>
+        <button type="button" class="btn" style="flex:none; min-height:40px; font-size:11.5px;" onclick="initAdminClubTab()">🔄 تحديث</button>
+      </div>
+
+      <div style="background:var(--surface2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px; margin-bottom:14px;">
+        <div style="font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:8px;">⚙️ إعدادات وقوانين الفلترة للنادي</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+          <label style="display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700; cursor:pointer;">
+            <input type="checkbox" id="adm-club-enabled" checked> تفعيل قسم النادي للجميع (أغلق لتفعيل وضع الصيانة)
+          </label>
+          <input type="text" id="adm-club-maint-msg" class="form-input" placeholder="رسالة الصيانة (تظهر عند إغلاق النادي مؤقتاً)…" style="min-height:38px; font-size:12px;">
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">التصنيفات المتاحة (مفصولة بفاصلة ,)</label>
+          <input type="text" id="adm-club-categories" class="form-input" placeholder="عام, استفسارات, عروض ثيمات, مراجعات, خلفيات" style="min-height:38px; font-size:12px;">
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">الكلمات المحظورة (مفصولة بفاصلة ,)</label>
+          <textarea id="adm-club-banned-words" class="form-textarea" rows="2" placeholder="كلمة1, كلمة2…" style="min-height:52px; font-size:12px;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">النطاقات المسموحة للروابط (اتركه فارغاً للسماح لكل https://)</label>
+          <input type="text" id="adm-club-allowed-domains" dir="ltr" class="form-input" placeholder="github.com, zaim9002.github.io, youtube.com" style="min-height:38px; font-size:12px;">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
+          <div>
+            <label class="form-label" style="font-size:10px;">منشورات/يوم</label>
+            <input type="number" id="adm-club-max-daily" class="form-input" min="1" max="100" value="15" style="min-height:36px; font-size:12px;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px;">للأعضاء الجدد</label>
+            <input type="number" id="adm-club-new-daily" class="form-input" min="1" max="50" value="5" style="min-height:36px; font-size:12px;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px;">الانتظار (ثانية)</label>
+            <input type="number" id="adm-club-cooldown" class="form-input" min="5" max="3600" value="30" style="min-height:36px; font-size:12px;">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; font-size:11.5px; font-weight:700;">
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="adm-club-allow-images" checked> السماح بالصور</label>
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="adm-club-allow-videos" checked> السماح بالفيديو</label>
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="adm-club-allow-links" checked> السماح بالروابط</label>
+        </div>
+        <button type="button" class="btn main" id="btn-adm-club-save-cfg" style="width:100%; min-height:40px; font-size:12px;" onclick="adminSaveClubConfigClick()">💾 حفظ إعدادات النادي</button>
+      </div>
+
+      <div style="font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:8px;">📋 إدارة منشورات النادي</div>
+      <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px;" id="admin-club-post-filters">
+        <button type="button" class="mini-action-btn" data-club-adm-filter="all" onclick="adminFetchClubPostsList('all')">الكل</button>
+        <button type="button" class="mini-action-btn" data-club-adm-filter="visible" onclick="adminFetchClubPostsList('visible')">مرئي</button>
+        <button type="button" class="mini-action-btn" data-club-adm-filter="hidden" onclick="adminFetchClubPostsList('hidden')">مخفي</button>
+        <button type="button" class="mini-action-btn" data-club-adm-filter="pinned" onclick="adminFetchClubPostsList('pinned')">مثبت</button>
+      </div>
+      <div id="admin-club-posts-list" style="margin-bottom:14px;"></div>
+
+      <div style="font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:8px;">🚩 بلاغات النادي والمنشورات المخفية تلقائياً</div>
+      <div id="admin-club-reports-list"></div>
     </div>
 
     <!-- TAB 6: APP THEME DESIGNER STUDIO -->
@@ -5195,21 +5726,31 @@ a[href] {
           <span id="profile-role-badge" class="badge badge-honor">عضو</span>
           <span id="profile-custom-title-badge" class="user-badge-chip custom-title" style="display:none;"></span>
           <span id="profile-publisher-badge" class="badge badge-publisher-verified" style="display:none;">ناشر معتمد ✓</span>
+          <span id="profile-muted-badge" class="badge" style="display:none; background:rgba(245,158,11,0.2); color:#FBBF24;">مكتوم 🔇</span>
           <span id="profile-blocked-badge" class="badge" style="display:none; background:rgba(255,77,109,0.2); color:#FF7A92;">محظور</span>
         </div>
         <div id="profile-username-text" class="user-handle-chip" style="margin-top:2px;"></div>
+        <div style="font-size:10.5px; color:var(--muted); margin-top:3px;">انضم: <b id="profile-join-date" style="color:var(--text);">—</b></div>
         <div id="profile-badges-row" style="display:none; flex-wrap:wrap; gap:4px; margin-top:6px;"></div>
       </div>
     </div>
 
-    <div class="profile-stats-bar">
+    <div class="profile-stats-bar" style="flex-wrap:wrap;">
+      <div class="profile-stat-pill">
+        <b id="profile-posts-count">0</b>
+        <span>المنشورات</span>
+      </div>
+      <div class="profile-stat-pill">
+        <b id="profile-followers-count">0</b>
+        <span>المتابِعون</span>
+      </div>
+      <div class="profile-stat-pill">
+        <b id="profile-following-count">0</b>
+        <span>يتابِع</span>
+      </div>
       <div class="profile-stat-pill" id="profile-comments-stat-pill">
         <b id="profile-comments-count">0</b>
         <span>التعليقات</span>
-      </div>
-      <div class="profile-stat-pill">
-        <b id="profile-join-date">—</b>
-        <span>تاريخ الانضمام</span>
       </div>
     </div>
 
@@ -5297,9 +5838,14 @@ a[href] {
     </div>
 
     <div style="display:flex; flex-direction:column; gap:8px;">
-      <button type="button" class="btn gold-accent-btn" id="btn-profile-message-admin" style="display:none; width:100%;" onclick="startChatWithViewedPeer()">
-        💬 مراسلة
-      </button>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn main" id="btn-profile-follow-toggle" style="display:none; flex:1;" onclick="toggleFollowViewedUser()">
+          👥 متابعة
+        </button>
+        <button type="button" class="btn gold-accent-btn" id="btn-profile-message-admin" style="display:none; flex:1;" onclick="startChatWithViewedPeer()">
+          💬 مراسلة
+        </button>
+      </div>
 
       <button type="button" class="btn" id="btn-profile-edit-toggle" style="display:none; width:100%;" onclick="toggleProfileEditForm(true)">
         ✏️ تعديل الملف الشخصي والصور
@@ -5319,6 +5865,26 @@ a[href] {
         <button type="button" class="btn" id="btn-profile-report" style="display:none; flex:1;" onclick="reportViewedProfile()">
           🚩 إبلاغ
         </button>
+      </div>
+
+      <div id="profile-admin-club-mod-box" class="profile-mod-bar" style="display:none;">
+        <div style="font-size:11.5px; font-weight:800; color:#FCA5A5; margin-bottom:7px;">🛡️ إجراءات المشرف (كتم / تحذير / حظر مؤقت)</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+          <button type="button" class="mini-action-btn" onclick="adminWarnViewedUser()">⚠️ توجيه تنبيه</button>
+          <button type="button" class="mini-action-btn" onclick="adminMuteViewedUser(1)">🔇 كتم 1س</button>
+          <button type="button" class="mini-action-btn" onclick="adminMuteViewedUser(24)">🔇 كتم 24س</button>
+          <button type="button" class="mini-action-btn" onclick="adminMuteViewedUser(168)">🔇 كتم 7أيام</button>
+          <button type="button" class="mini-action-btn" id="btn-profile-unmute" style="display:none; color:#34D399;" onclick="adminMuteViewedUser(0)">🔊 فك الكتم</button>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="mini-action-btn" onclick="adminTimedBlockViewedUser(24)">⏳ حظر 24س</button>
+          <button type="button" class="mini-action-btn" onclick="adminTimedBlockViewedUser(168)">⏳ حظر 7أيام</button>
+        </div>
+      </div>
+
+      <div id="profile-club-posts-section" style="margin-top:10px;">
+        <div style="font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:8px;">🏟️ منشورات العضو في النادي</div>
+        <div id="profile-club-posts-list"></div>
       </div>
     </div>
   </div>
@@ -5559,6 +6125,141 @@ a[href] {
   <div id="admin-sub-prev-body"></div>
 </div>
 
+<!-- 12. CLUB RULES FIRST-POST CONSENT MODAL -->
+<div class="dim" id="club-rules-dim" onclick="closeClubRulesSheet()"></div>
+<div class="sheet" id="club-rules-sheet">
+  <div class="grab" onclick="closeClubRulesSheet()"></div>
+  <h4>
+    <span>📜 قوانين مجتمع النادي</span>
+    <div class="sheet-close" onclick="closeClubRulesSheet()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </div>
+  </h4>
+  <div style="font-size:12.5px; line-height:1.7; color:var(--text); background:var(--surface2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px; margin-bottom:14px;">
+    <div>• احترم جميع الأعضاء والمصممين وابتعد عن الإساءة أو الألفاظ البذيئة.</div>
+    <div>• يُمنع نشر روابط مشبوهة أو سبام أو إعلانات متكررة.</div>
+    <div>• انسب الثيمات لصاحبها الحقيقي، واستخدم التصنيف المناسب لمنشورك.</div>
+    <div>• أي منشور يتلقى 5 بلاغات يُخفى تلقائياً للمراجعة من قِبل الإدارة.</div>
+  </div>
+  <button type="button" class="btn main" id="btn-club-accept-rules" style="width:100%;" onclick="confirmAcceptClubRules()">
+    ✅ أوافق على قوانين النادي وأبدأ النشر
+  </button>
+</div>
+
+<!-- 13. CLUB POST COMPOSER / EDITOR SHEET -->
+<div class="dim" id="club-composer-dim" onclick="closeClubComposer()"></div>
+<div class="sheet" id="club-composer-sheet">
+  <div class="grab" onclick="closeClubComposer()"></div>
+  <h4>
+    <span id="club-comp-sheet-title">✍️ منشور جديد في النادي</span>
+    <div class="sheet-close" onclick="closeClubComposer()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </div>
+  </h4>
+
+  <div id="club-comp-draft-bar" style="display:none; font-size:11px; color:var(--a2); margin-bottom:8px; justify-content:space-between; align-items:center;">
+    <span>💾 تم استعادة المسودة المحفوظة تلقائياً</span>
+    <button type="button" class="mini-action-btn" onclick="clearClubComposerDraft(true)">مسح المسودة</button>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><span>التصنيف</span></label>
+    <select id="club-comp-category" class="form-select"></select>
+  </div>
+
+  <div id="club-comp-admin-opts" style="display:none; background:rgba(124,92,255,0.1); border:1px solid rgba(124,92,255,0.3); border-radius:var(--radius-sm); padding:9px 11px; margin-bottom:10px; gap:14px; flex-wrap:wrap; font-size:12px; font-weight:700;">
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="club-comp-announcement"> 📢 إعلان رسمي</label>
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="club-comp-pinned"> 📌 تثبيت بالأعلى</label>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">
+      <span>محتوى المنشور</span>
+      <small id="club-comp-char-counter">0 / 2000</small>
+    </label>
+    <textarea id="club-comp-text" class="form-textarea" maxlength="2000" rows="4" placeholder="شارك فكرتك، استفسارك، أو استعرض ثيماً جميلاً… (يمكنك الإشارة بـ @username)" oninput="onClubComposerTextInput()"></textarea>
+  </div>
+
+  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+    <button type="button" class="btn" id="btn-club-add-images" style="flex:1; min-height:38px; font-size:11.5px;" onclick="document.getElementById('club-comp-images-input').click()">🖼 صور (حتى 4)</button>
+    <button type="button" class="btn" id="btn-club-toggle-poll" style="flex:1; min-height:38px; font-size:11.5px;" onclick="toggleClubComposerPoll()">📊 تصويت</button>
+    <button type="button" class="btn" id="btn-club-toggle-video" style="flex:1; min-height:38px; font-size:11.5px;" onclick="toggleClubComposerVideo()">🎬 فيديو</button>
+    <input type="file" id="club-comp-images-input" accept="image/png,image/jpeg,image/webp" multiple style="display:none;" onchange="onClubComposerImagesSelected(this)">
+  </div>
+
+  <div id="club-comp-images-preview" class="club-composer-media-grid" style="display:none; margin-bottom:10px;"></div>
+
+  <div id="club-comp-video-box" style="display:none; background:var(--surface2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px; margin-bottom:10px;">
+    <label class="form-label"><span>رابط فيديو (https:// MP4/WebM حتى 120 ثانية)</span><small id="club-comp-video-dur-badge"></small></label>
+    <input type="url" id="club-comp-video-url" dir="ltr" class="form-input" placeholder="https://example.com/clip.mp4" style="min-height:38px; font-size:12px;" oninput="onClubComposerVideoUrlChange()">
+    <div id="club-comp-admin-video-upload-wrap" style="display:none; margin-top:8px;">
+      <button type="button" class="btn" id="btn-club-upload-admin-video" style="width:100%; min-height:36px; font-size:11.5px;" onclick="document.getElementById('club-comp-video-file-input').click()">
+        ⬆️ رفع فيديو مباشر للمشرف (≤ 120ث → GitHub)
+      </button>
+      <input type="file" id="club-comp-video-file-input" accept="video/mp4,video/webm" style="display:none;" onchange="onAdminClubVideoFileSelected(this)">
+      <div id="club-comp-video-upload-status" style="font-size:11px; color:var(--a2); margin-top:5px; display:none;"></div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><span>إرفاق ثيم من المتجر (اختياري)</span></label>
+    <select id="club-comp-theme-select" class="form-select" onchange="saveClubComposerDraft()"></select>
+  </div>
+
+  <div id="club-comp-poll-box" style="display:none; background:var(--surface2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <b style="font-size:12px;">📊 خيارات التصويت</b>
+      <button type="button" class="mini-action-btn" onclick="addClubComposerPollOption()">+ خيار</button>
+    </div>
+    <input type="text" id="club-comp-poll-q" class="form-input" maxlength="200" placeholder="سؤال التصويت…" style="min-height:38px; margin-bottom:6px; font-size:12px;" oninput="saveClubComposerDraft()">
+    <div id="club-comp-poll-opts-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+
+  <div id="club-comp-error" style="display:none; color:var(--danger); font-size:11.5px; margin-bottom:8px; line-height:1.45;"></div>
+
+  <div style="display:flex; gap:8px;">
+    <button type="button" class="btn main" id="btn-club-submit-post" style="flex:1;" onclick="submitClubPostForm()">🚀 نشر المنشور</button>
+    <button type="button" class="btn" style="flex:none;" onclick="closeClubComposer()">إلغاء</button>
+  </div>
+</div>
+
+<!-- 14. CLUB POST DETAIL & COMMENTS SHEET -->
+<div class="dim" id="club-post-detail-dim" onclick="closeClubPostDetailSheet()"></div>
+<div class="sheet" id="club-post-detail-sheet">
+  <div class="grab" onclick="closeClubPostDetailSheet()"></div>
+  <h4>
+    <span id="club-detail-sheet-title">💬 تفاصيل المنشور</span>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button type="button" class="mini-action-btn" id="btn-club-detail-bookmark" onclick="toggleClubDetailBookmark()">🔖</button>
+      <button type="button" class="mini-action-btn" id="btn-club-detail-share" onclick="shareClubDetailPost()">📤</button>
+      <div class="sheet-close" onclick="closeClubPostDetailSheet()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+    </div>
+  </h4>
+
+  <div id="club-detail-post-container"></div>
+
+  <div style="font-size:12.5px; font-weight:800; color:var(--text); margin:10px 0 8px;">💬 التعليقات</div>
+
+  <div id="club-detail-comments-locked-banner" style="display:none; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); color:#FCD34D; border-radius:var(--radius-sm); padding:9px 11px; font-size:11.5px; margin-bottom:8px;">
+    🔒 تم قفل التعليقات على هذا المنشور من قِبل الإدارة.
+  </div>
+
+  <div id="club-detail-replying-to" style="display:none; background:rgba(124,92,255,0.12); border:1px solid rgba(124,92,255,0.3); border-radius:10px; padding:6px 10px; font-size:11.5px; margin-bottom:6px; justify-content:space-between; align-items:center;">
+    <span>↩️ رد على: <b id="club-detail-reply-target-name"></b></span>
+    <button type="button" class="mini-action-btn" onclick="cancelClubReplyTarget()">إلغاء</button>
+  </div>
+
+  <div id="club-detail-comment-form" style="display:flex; gap:8px; align-items:flex-end; margin-bottom:12px;">
+    <textarea id="club-detail-comment-input" class="form-textarea" maxlength="800" rows="2" placeholder="اكتب تعليقك هنا…" style="flex:1; min-height:42px; max-height:90px; font-size:12.5px; padding:8px 10px;"></textarea>
+    <button type="button" class="btn main" id="btn-club-send-comment" style="flex:none; min-height:42px; height:42px; padding:0 14px; font-size:12px;" onclick="submitClubDetailComment()">إرسال</button>
+  </div>
+
+  <div id="club-detail-comments-list"></div>
+  <button type="button" class="btn" id="btn-club-detail-comments-more" style="display:none; width:100%; margin-top:8px;" onclick="loadMoreClubDetailComments()">تحميل تعليقات أقدم</button>
+</div>
+
 <!-- ==========================================================================
      JAVASCRIPT LOGIC & ENGINE
      ========================================================================== -->
@@ -5700,6 +6401,7 @@ const I18N = {
     autoLanguage: "تلقائي (حسب لغة الجهاز)",
     homeNav: "الرئيسية",
     exploreNav: "الثيمات",
+    clubNav: "النادي",
     messagesNav: "الرسائل",
     settingsNav: "الإعدادات",
     themeDetailsPill: "التفاصيل",
@@ -5787,20 +6489,21 @@ const I18N = {
     autoLanguage: "Auto (Device Language)",
     homeNav: "Home",
     exploreNav: "Themes",
+    clubNav: "Club",
     messagesNav: "Messages",
     settingsNav: "Settings",
     themeDetailsPill: "Details",
     aboutTheme: "About this theme"
   },
-  zh: { welcome: "欢迎", splashSub: "手机主题与个性化中心", searchPlaceholder: "搜索主题、图标、壁纸…", all: "全部", explore: "探索", download: "下载", applyTheme: "应用主题", favorites: "收藏", downloads: "下载记录", settingsTitle: "设置", format: "格式" },
-  tr: { welcome: "Hoş Geldiniz", splashSub: "Telefon Temaları ve Kişiselleştirme", searchPlaceholder: "Tema, simge, duvar kağıdı ara…", all: "Tümü", explore: "Keşfet", download: "İndir", applyTheme: "Temayı Uygula", favorites: "Favoriler", downloads: "İndirmeler", settingsTitle: "Ayarlar", format: "Biçim" },
-  fr: { welcome: "Bienvenue", splashSub: "Centre de Thèmes & Personnalisation", searchPlaceholder: "Rechercher des thèmes, icônes…", all: "Tous", explore: "Explorer", download: "Télécharger", applyTheme: "Appliquer le thème", favorites: "Favoris", downloads: "Téléchargements", settingsTitle: "Paramètres", format: "Format" },
-  es: { welcome: "Bienvenido", splashSub: "Centro de Temas y Personalización", searchPlaceholder: "Buscar temas, iconos, fondos…", all: "Todos", explore: "Explorar", download: "Descargar", applyTheme: "Aplicar Tema", favorites: "Favoritos", downloads: "Descargas", settingsTitle: "Ajustes", format: "Formato" },
-  ru: { welcome: "Добро пожаловать", splashSub: "Центр тем и кастомизации", searchPlaceholder: "Поиск тем, значков, обоев…", all: "Все", explore: "Обзор", download: "Скачать", applyTheme: "Применить тему", favorites: "Избранное", downloads: "Загрузки", settingsTitle: "Настройки", format: "Формат" },
-  fa: { welcome: "خوش آمدید", splashSub: "مرکز تم‌ها و شخصی‌سازی گوشی", searchPlaceholder: "جستجوی تم، آیکون، تصویر زمینه…", all: "همه", explore: "کاوش", download: "دانلود", applyTheme: "اعمال روی گوشی", favorites: "علاقه‌مندی‌ها", downloads: "دانلودها", settingsTitle: "تنظیمات", format: "فرمت" },
-  ur: { welcome: "خوش آمدید", splashSub: "تھیمز اور فون کسٹمائزیشن ہب", searchPlaceholder: "تھیم، شبیہیں، وال پیپرز تلاش کریں…", all: "تمام", explore: "دریافت کریں", download: "ڈاؤن لوڈ", applyTheme: "لاگو کریں", favorites: "پسندیدہ", downloads: "ڈاؤن لوڈز", settingsTitle: "ترتیبات", format: "فارمیٹ" },
-  hi: { welcome: "स्वागत है", splashSub: "थीम और फ़ोन अनुकूलन हब", searchPlaceholder: "थीम, आइकन, वॉलपेपर खोजें…", all: "सभी", explore: "खोजें", download: "डाउनलोड", applyTheme: "लागू करें", favorites: "पसंदीदा", downloads: "डाउनलोड", settingsTitle: "सेटिंग्स", format: "प्रारूप" },
-  id: { welcome: "Selamat Datang", splashSub: "Pusat Tema & Kustomisasi Ponsel", searchPlaceholder: "Cari tema, ikon, wallpaper…", all: "Semua", explore: "Jelajahi", download: "Unduh", applyTheme: "Terapkan Tema", favorites: "Favorit", downloads: "Unduhan", settingsTitle: "Pengaturan", format: "Format" }
+  zh: { welcome: "欢迎", splashSub: "手机主题与个性化中心", searchPlaceholder: "搜索主题、图标、壁纸…", all: "全部", explore: "探索", clubNav: "社区", download: "下载", applyTheme: "应用主题", favorites: "收藏", downloads: "下载记录", settingsTitle: "设置", format: "格式" },
+  tr: { welcome: "Hoş Geldiniz", splashSub: "Telefon Temaları ve Kişiselleştirme", searchPlaceholder: "Tema, simge, duvar kağıdı ara…", all: "Tümü", explore: "Keşfet", clubNav: "Kulüp", download: "İndir", applyTheme: "Temayı Uygula", favorites: "Favoriler", downloads: "İndirmeler", settingsTitle: "Ayarlar", format: "Biçim" },
+  fr: { welcome: "Bienvenue", splashSub: "Centre de Thèmes & Personnalisation", searchPlaceholder: "Rechercher des thèmes, icônes…", all: "Tous", explore: "Explorer", clubNav: "Club", download: "Télécharger", applyTheme: "Appliquer le thème", favorites: "Favoris", downloads: "Téléchargements", settingsTitle: "Paramètres", format: "Format" },
+  es: { welcome: "Bienvenido", splashSub: "Centro de Temas y Personalización", searchPlaceholder: "Buscar temas, iconos, fondos…", all: "Todos", explore: "Explorar", clubNav: "Club", download: "Descargar", applyTheme: "Aplicar Tema", favorites: "Favoritos", downloads: "Descargas", settingsTitle: "Ajustes", format: "Format" },
+  ru: { welcome: "Добро пожаловать", splashSub: "Центр тем и кастомизации", searchPlaceholder: "Поиск тем, значков, обоев…", all: "Все", explore: "Обзор", clubNav: "Клуб", download: "Скачать", applyTheme: "Применить тему", favorites: "Избранное", downloads: "Загрузки", settingsTitle: "Настройки", format: "Формат" },
+  fa: { welcome: "خوش آمدید", splashSub: "مرکز تم‌ها و شخصی‌سازی گوشی", searchPlaceholder: "جستجوی تم، آیکون، تصویر زمینه…", all: "همه", explore: "کاوش", clubNav: "باشگاه", download: "دانلود", applyTheme: "اعمال روی گوشی", favorites: "علاقه‌مندی‌ها", downloads: "دانلودها", settingsTitle: "تنظیمات", format: "فرمت" },
+  ur: { welcome: "خوش آمدید", splashSub: "تھیمز اور فون کسٹمائزیشن ہب", searchPlaceholder: "تھیم، شبیہیں، وال پیپرز تلاش کریں…", all: "تمام", explore: "دریافت کریں", clubNav: "کلب", download: "ڈاؤن لوڈ", applyTheme: "لاگو کریں", favorites: "پسندیدہ", downloads: "ڈاؤن لوڈز", settingsTitle: "ترتیبات", format: "فارمیٹ" },
+  hi: { welcome: "स्वागत है", splashSub: "थीम और फ़ोन अनुकूलन हब", searchPlaceholder: "थीम, आइकन, वॉलपेपर खोजें…", all: "सभी", explore: "खोजें", clubNav: "क्लब", download: "डाउनलोड", applyTheme: "लागू करें", favorites: "पसंदीदा", downloads: "डाउनलोड", settingsTitle: "सेटिंग्स", format: "प्रारूप" },
+  id: { welcome: "Selamat Datang", splashSub: "Pusat Tema & Kustomisasi Ponsel", searchPlaceholder: "Cari tema, ikon, wallpaper…", all: "Semua", explore: "Jelajahi", clubNav: "Klub", download: "Unduh", applyTheme: "Terapkan Tema", favorites: "Favorit", downloads: "Unduhan", settingsTitle: "Pengaturan", format: "Format" }
 };
 const RTL_LANGS = ["ar", "fa", "ur"];
 const SUPPORTED_LANGUAGES = [
@@ -6329,6 +7032,14 @@ function switchView(viewName, options = {}) {
   if (prevView === "messages" && viewName !== "messages") {
     try { stopActiveMessageListeners(); } catch (_) {}
   }
+  if (prevView === "club" && viewName !== "club") {
+    try { pauseClubVideos(); } catch (_) {}
+    try {
+      if (window.AndroidBridge && window.AndroidBridge.stopClubNewPostsListener) {
+        window.AndroidBridge.stopClubNewPostsListener();
+      }
+    } catch (_) {}
+  }
 
   currentView = viewName;
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
@@ -6350,6 +7061,8 @@ function switchView(viewName, options = {}) {
     try { updateSettingsUserCard(); } catch (_) {}
   } else if (viewName === "messages") {
     try { renderMessagesView(); } catch (_) {}
+  } else if (viewName === "club") {
+    try { enterClubView(); } catch (_) {}
   }
 }
 
@@ -6367,6 +7080,21 @@ window.handleAndroidBack = function() {
     const usernameSetupSheet = document.getElementById("username-setup-sheet");
     if (usernameSetupSheet && usernameSetupSheet.classList.contains("open")) {
       showToast("يرجى اختيار اسم المستخدم أولاً أو الضغط على خروج");
+      return "handled";
+    }
+    const lightbox = document.getElementById("image-lightbox");
+    if (lightbox && lightbox.classList.contains("open")) {
+      closeImageLightbox();
+      return "handled";
+    }
+    const clubRulesSheet = document.getElementById("club-rules-sheet");
+    if (clubRulesSheet && clubRulesSheet.classList.contains("open")) {
+      if (typeof closeClubRulesSheet === "function") closeClubRulesSheet();
+      return "handled";
+    }
+    const clubCompSheet = document.getElementById("club-composer-sheet");
+    if (clubCompSheet && clubCompSheet.classList.contains("open")) {
+      if (typeof closeClubComposer === "function") closeClubComposer();
       return "handled";
     }
     const subPreviewSheet = document.getElementById("admin-sub-preview-sheet");
@@ -6399,9 +7127,9 @@ window.handleAndroidBack = function() {
       closeProfileSheet();
       return "handled";
     }
-    const lightbox = document.getElementById("image-lightbox");
-    if (lightbox && lightbox.classList.contains("open")) {
-      closeImageLightbox();
+    const clubDetailSheet = document.getElementById("club-post-detail-sheet");
+    if (clubDetailSheet && clubDetailSheet.classList.contains("open")) {
+      if (typeof closeClubPostDetailSheet === "function") closeClubPostDetailSheet();
       return "handled";
     }
     const applySheet = document.getElementById("apply-sheet");
@@ -6686,6 +7414,11 @@ async function loadCachedImageNow(imgEl, url, skelEl) {
     };
     imgEl.src = srcToSet;
   };
+
+  if (String(url).startsWith("data:")) {
+    finishLoad(url);
+    return;
+  }
 
   if (objectUrlMemoryCache.has(url)) {
     finishLoad(objectUrlMemoryCache.get(url));
@@ -7782,6 +8515,19 @@ function openImageLightbox(index = 0) {
   initLightboxGestures();
 }
 
+function openClubImagesLightbox(urls, index = 0) {
+  const clean = (Array.isArray(urls) ? urls : []).map(u => sanitizeMediaUrl(u)).filter(Boolean);
+  if (clean.length === 0) return;
+  try { pauseClubVideos(); } catch (_) {}
+  lbState.images = clean;
+  lbState.index = Math.max(0, Math.min(index, clean.length - 1));
+  resetLightboxZoom();
+  renderLightboxImage();
+  const lb = document.getElementById("image-lightbox");
+  if (lb) lb.classList.add("open");
+  initLightboxGestures();
+}
+
 function closeImageLightbox() {
   const lb = document.getElementById("image-lightbox");
   if (lb) lb.classList.remove("open");
@@ -8733,6 +9479,7 @@ function switchAdminTab(tab) {
   const repTab = document.getElementById("atab-reports");
   const usersTab = document.getElementById("atab-users");
   const contentTab = document.getElementById("atab-content");
+  const clubTab = document.getElementById("atab-club");
   const statsTab = document.getElementById("atab-stats");
   const designerTab = document.getElementById("atab-designer");
   const adminsTab = document.getElementById("atab-admins");
@@ -8743,12 +9490,13 @@ function switchAdminTab(tab) {
   const repPane = document.getElementById("admin-subtab-reports");
   const usersPane = document.getElementById("admin-subtab-users");
   const contentPane = document.getElementById("admin-subtab-content");
+  const clubPane = document.getElementById("admin-subtab-club");
   const statsPane = document.getElementById("admin-subtab-stats");
   const designerPane = document.getElementById("admin-subtab-designer");
   const adminsPane = document.getElementById("admin-subtab-admins");
 
-  [addTab, manageTab, subTab, repTab, usersTab, contentTab, statsTab, designerTab, adminsTab].forEach(el => { if (el) el.classList.remove("active"); });
-  [addPane, managePane, subPane, repPane, usersPane, contentPane, statsPane, designerPane, adminsPane].forEach(el => { if (el) el.style.display = "none"; });
+  [addTab, manageTab, subTab, repTab, usersTab, contentTab, clubTab, statsTab, designerTab, adminsTab].forEach(el => { if (el) el.classList.remove("active"); });
+  [addPane, managePane, subPane, repPane, usersPane, contentPane, clubPane, statsPane, designerPane, adminsPane].forEach(el => { if (el) el.style.display = "none"; });
 
   if (tab === "manage") {
     if (manageTab) manageTab.classList.add("active");
@@ -8770,6 +9518,10 @@ function switchAdminTab(tab) {
     if (contentTab) contentTab.classList.add("active");
     if (contentPane) contentPane.style.display = "block";
     if (typeof loadAdminContentTab === "function") loadAdminContentTab();
+  } else if (tab === "club") {
+    if (clubTab) clubTab.classList.add("active");
+    if (clubPane) clubPane.style.display = "block";
+    if (typeof initAdminClubTab === "function") initAdminClubTab();
   } else if (tab === "stats") {
     if (statsTab) statsTab.classList.add("active");
     if (statsPane) statsPane.style.display = "block";
@@ -11620,6 +12372,8 @@ function parseDeepLinkFromUrl() {
     const params = new URLSearchParams(window.location.search || "");
     const tid = params.get("theme");
     if (tid && tid.trim()) pendingDeepLinkThemeId = tid.trim();
+    const pid = params.get("post");
+    if (pid && pid.trim()) pendingDeepLinkPostId = pid.trim();
   } catch (_) {}
 }
 
@@ -11639,6 +12393,15 @@ function bootThemeHubApp() {
     }
   } catch (e) { console.warn(e); }
   try { loadThemesData(); } catch (e) { console.warn(e); }
+  if (pendingDeepLinkPostId) {
+    setTimeout(() => {
+      if (pendingDeepLinkPostId && typeof window.openClubPostById === "function") {
+        const pid = pendingDeepLinkPostId;
+        pendingDeepLinkPostId = "";
+        window.openClubPostById(pid);
+      }
+    }, 300);
+  }
 
   setTimeout(() => {
     const splash = document.getElementById("splash");
@@ -11695,6 +12458,8 @@ let firestoreRatingsMap = {};
 let firestoreThemesMeta = {};
 let viewedProfileData = null;
 let pendingDeepLinkThemeId = "";
+let pendingDeepLinkPostId = "";
+let pendingMentionProfileLookup = "";
 let activeChatPeerUid = "";
 let currentChatState = { convId: "", peerUid: "", peerName: "", peerUsername: "", peerPhoto: "", peerIsAdmin: false, personalBlockedByMe: false };
 let detailCommentsState = { themeId: "", comments: [], hasMore: false, loading: false, repliesByComment: {}, loadingReplies: {} };
@@ -11904,6 +12669,10 @@ window.onUserSessionChanged = function(payload) {
     customTitle: (payload && payload.customTitle) || "",
     createdAt: Number(payload && payload.createdAt) || 0,
     blocked: Boolean(payload && payload.blocked),
+    blockedUntil: Number(payload && payload.blockedUntil) || 0,
+    muted: Boolean(payload && payload.muted),
+    mutedUntil: Number(payload && payload.mutedUntil) || 0,
+    clubRulesAccepted: Boolean(payload && payload.clubRulesAccepted),
     publisher: Boolean(payload && payload.publisher),
     isAdmin: Boolean(payload && payload.isAdmin),
     isOwner: Boolean(payload && payload.isOwner),
@@ -11936,6 +12705,9 @@ window.onUserSessionChanged = function(payload) {
   }
   if (currentView === "messages") {
     renderMessagesView();
+  }
+  if (currentView === "club" && typeof renderClubFeedList === "function") {
+    renderClubFeedList();
   }
 };
 
@@ -12069,7 +12841,7 @@ function renderNotificationsList() {
   listEl.innerHTML = notificationsCache.map(n => {
     const dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString("ar-EG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
     return `
-      <div class="notif-item-row ${n.read ? "" : "unread"}" onclick="markNotifReadAndOpen('${escapeHTML(n.id || "")}', '${escapeHTML(n.themeId || "")}', '${escapeHTML(n.submissionId || "")}')">
+      <div class="notif-item-row ${n.read ? "" : "unread"}" onclick="markNotifReadAndOpen('${escapeHTML(n.id || "")}', '${escapeHTML(n.themeId || "")}', '${escapeHTML(n.submissionId || "")}', '${escapeHTML(n.postId || "")}', '${escapeHTML(n.type || "")}', '${escapeHTML(n.actorUid || "")}')">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <b style="font-size:12.5px; color:var(--text);">${escapeHTML(n.title || "إشعار")}</b>
           ${!n.read ? `<span style="width:8px; height:8px; border-radius:50%; background:var(--a1); flex-shrink:0;"></span>` : ""}
@@ -12081,12 +12853,16 @@ function renderNotificationsList() {
   }).join("");
 }
 
-function markNotifReadAndOpen(notifId, themeId, submissionId) {
+function markNotifReadAndOpen(notifId, themeId, submissionId, postId, nType, actorUid) {
   if (notifId && window.AndroidBridge && window.AndroidBridge.markNotificationRead) {
     window.AndroidBridge.markNotificationRead(notifId);
   }
   closeNotificationsSheet();
-  if (themeId) {
+  if (postId && typeof window.openClubPostById === "function") {
+    window.openClubPostById(postId);
+  } else if (nType === "follow" && actorUid) {
+    openUserProfileModal(actorUid);
+  } else if (themeId) {
     window.openThemeById(themeId);
   } else if (submissionId) {
     openPublisherSheet("mine");
@@ -12256,9 +13032,13 @@ window.onUserProfileLoaded = function(payload) {
   const roleBadge = document.getElementById("profile-role-badge");
   const customTitleBadge = document.getElementById("profile-custom-title-badge");
   const pubBadge = document.getElementById("profile-publisher-badge");
+  const mutedBadge = document.getElementById("profile-muted-badge");
   const blockedBadge = document.getElementById("profile-blocked-badge");
   const badgesRow = document.getElementById("profile-badges-row");
   const linksRow = document.getElementById("profile-links-row");
+  const postsCountEl = document.getElementById("profile-posts-count");
+  const followersCountEl = document.getElementById("profile-followers-count");
+  const followingCountEl = document.getElementById("profile-following-count");
   const commentsStatPill = document.getElementById("profile-comments-stat-pill");
   const commentsCountEl = document.getElementById("profile-comments-count");
   const joinEl = document.getElementById("profile-join-date");
@@ -12317,7 +13097,16 @@ window.onUserProfileLoaded = function(payload) {
     }
   }
   if (pubBadge) pubBadge.style.display = isTargetPublisher ? "inline-flex" : "none";
-  if (blockedBadge) blockedBadge.style.display = payload.blocked ? "inline-flex" : "none";
+  if (mutedBadge) mutedBadge.style.display = payload.muted ? "inline-flex" : "none";
+  if (blockedBadge) {
+    blockedBadge.style.display = payload.blocked ? "inline-flex" : "none";
+    if (payload.blocked && Number(payload.blockedUntil) > 0) {
+      const bStr = new Date(Number(payload.blockedUntil)).toLocaleDateString("ar-EG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      blockedBadge.textContent = `محظور حتى ${bStr}`;
+    } else {
+      blockedBadge.textContent = "محظور";
+    }
+  }
 
   if (badgesRow) {
     const badgesList = Array.isArray(payload.badges) ? payload.badges.filter(Boolean) : [];
@@ -12347,6 +13136,9 @@ window.onUserProfileLoaded = function(payload) {
 
   const isSelf = communitySession.authenticated && communitySession.uid === payload.uid;
   const hideCommentsForViewer = Boolean(payload.hideCommentsCount) && !isSelf && !communitySession.isAdmin;
+  if (postsCountEl) postsCountEl.textContent = String(Number(payload.postsCount) || 0);
+  if (followersCountEl) followersCountEl.textContent = String(Number(payload.followersCount) || 0);
+  if (followingCountEl) followingCountEl.textContent = String(Number(payload.followingCount) || 0);
   if (commentsStatPill) commentsStatPill.style.display = hideCommentsForViewer ? "none" : "block";
   if (commentsCountEl) commentsCountEl.textContent = String(Number(payload.commentsCount) || 0);
   if (joinEl) {
@@ -12360,13 +13152,21 @@ window.onUserProfileLoaded = function(payload) {
     bioEl.textContent = payload.bio || "لا توجد نبذة شخصية.";
   }
 
+  const followBtn = document.getElementById("btn-profile-follow-toggle");
   const msgPeerBtn = document.getElementById("btn-profile-message-admin");
   const editToggleBtn = document.getElementById("btn-profile-edit-toggle");
   const pubToggleBtn = document.getElementById("btn-profile-publisher-toggle");
   const personalBlockBtn = document.getElementById("btn-profile-personal-block");
   const blockToggleBtn = document.getElementById("btn-profile-block-toggle");
   const reportBtn = document.getElementById("btn-profile-report");
+  const modBox = document.getElementById("profile-admin-club-mod-box");
+  const unmuteBtn = document.getElementById("btn-profile-unmute");
 
+  if (followBtn) {
+    followBtn.style.display = (!isSelf && communitySession.authenticated) ? "flex" : "none";
+    followBtn.className = payload.isFollowingByMe ? "btn" : "btn main";
+    followBtn.textContent = payload.isFollowingByMe ? "✓ متابَع" : "👥 متابعة";
+  }
   if (msgPeerBtn) {
     msgPeerBtn.style.display = !isSelf ? "flex" : "none";
     msgPeerBtn.textContent = isTargetAdmin ? "💬 مراسلة المشرف" : "💬 مراسلة";
@@ -12388,6 +13188,16 @@ window.onUserProfileLoaded = function(payload) {
   }
   if (reportBtn) {
     reportBtn.style.display = (!isSelf && communitySession.authenticated) ? "flex" : "none";
+  }
+  if (modBox) {
+    modBox.style.display = (communitySession.isAdmin && !isSelf && !isTargetAdmin) ? "block" : "none";
+  }
+  if (unmuteBtn) {
+    unmuteBtn.style.display = payload.muted ? "inline-flex" : "none";
+  }
+
+  if (typeof loadProfileClubPosts === "function" && payload.uid) {
+    loadProfileClubPosts(payload.uid);
   }
 };
 
@@ -13720,6 +14530,18 @@ function onNewMessageSearchInput(val) {
 }
 
 window.onMemberSearchResults = function(payload) {
+  if (pendingMentionProfileLookup) {
+    const targetUname = pendingMentionProfileLookup.toLowerCase();
+    pendingMentionProfileLookup = "";
+    const list = (payload && payload.ok && Array.isArray(payload.users)) ? payload.users : [];
+    const exact = list.find(u => String(u.username || "").toLowerCase() === targetUname) || list[0];
+    if (exact && exact.uid) {
+      openUserProfileModal(exact.uid);
+    } else {
+      showToast(`لم يتم العثور على العضو @${targetUname}`);
+    }
+    return;
+  }
   const resEl = document.getElementById("new-msg-search-results");
   if (!resEl) return;
   if (!payload || !payload.ok) {
@@ -14645,6 +15467,9 @@ function adminToggleUserPublisher(uid, nextPub) {
 window.onAdminUserModerated = function(res) {
   if (res && res.ok) {
     loadAdminUsersList();
+    if (viewedProfileData && viewedProfileData.uid === res.uid && window.AndroidBridge && window.AndroidBridge.fetchUserProfile) {
+      window.AndroidBridge.fetchUserProfile(res.uid);
+    }
   }
 };
 
@@ -14827,7 +15652,7 @@ const DESIGNER_WHITELISTS = {
   shadows: ["none", "soft", "glow"],
   navTypes: ["bottom-floating", "bottom-bar", "top-tabs", "side-drawer"],
   navActiveStyles: ["filled", "glass-capsule"],
-  navOrder: ["home", "explore", "favorites", "downloads", "messages", "settings"],
+  navOrder: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"],
   navTabs: ["themes", "icon_pack", "live_wallpaper", "font", "aod", "ringtone"],
   searchStyles: ["card", "pill-bar"],
   sectionLayouts: ["vertical-grid", "horizontal-rows"],
@@ -14886,7 +15711,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Cairo", body: "Cairo", scale: 1 },
     shape: { radius: 20, cardStyle: "glass", shadow: "soft", pillButtons: false },
-    nav: { type: "bottom-floating", labels: false, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "bottom-floating", labels: false, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "card" },
     home: { sections: ["search", "deviceDetector", "brandChips", "banner", "categories", "topDownloads", "featured", "newReleases"], sectionLayout: "vertical-grid", sectionSubtitles: false, heroStyle: "carousel" },
     themeGrid: { layout: "grid2", cardInfo: "overlay" },
@@ -14912,7 +15737,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Playfair Display", body: "Cairo", scale: 1 },
     shape: { radius: 22, cardStyle: "outlined", shadow: "glow", pillButtons: false },
-    nav: { type: "bottom-floating", labels: false, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "bottom-floating", labels: false, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "card" },
     home: { sections: ["search", "deviceDetector", "banner", "brandChips", "featured", "topDownloads", "newReleases"], sectionLayout: "vertical-grid", sectionSubtitles: true, heroStyle: "carousel" },
     themeGrid: { layout: "grid2", cardInfo: "overlay" },
@@ -14938,7 +15763,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Space Grotesk", body: "Cairo", scale: 1 },
     shape: { radius: 18, cardStyle: "neon", shadow: "glow", pillButtons: true },
-    nav: { type: "bottom-floating", labels: true, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "bottom-floating", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "pill-bar" },
     home: { sections: ["search", "banner", "brandChips", "topDownloads", "newReleases", "featured"], sectionLayout: "vertical-grid", sectionSubtitles: false, heroStyle: "carousel" },
     themeGrid: { layout: "grid3", cardInfo: "overlay" },
@@ -14964,7 +15789,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Inter", body: "Cairo", scale: 1 },
     shape: { radius: 16, cardStyle: "flat", shadow: "none", pillButtons: false },
-    nav: { type: "bottom-bar", labels: true, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "bottom-bar", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "card" },
     home: { sections: ["search", "deviceDetector", "brandChips", "categories", "topDownloads", "newReleases"], sectionLayout: "vertical-grid", sectionSubtitles: true, heroStyle: "carousel" },
     themeGrid: { layout: "grid2", cardInfo: "below" },
@@ -14990,7 +15815,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Playfair Display", body: "Tajawal", scale: 1.05 },
     shape: { radius: 12, cardStyle: "soft", shadow: "soft", pillButtons: false },
-    nav: { type: "top-tabs", labels: true, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "top-tabs", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "card" },
     home: { sections: ["banner", "search", "categories", "featured", "topDownloads", "newReleases"], sectionLayout: "vertical-grid", sectionSubtitles: true, heroStyle: "big-card" },
     themeGrid: { layout: "masonry", cardInfo: "below" },
@@ -15016,7 +15841,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Almarai", body: "Cairo", scale: 1 },
     shape: { radius: 22, cardStyle: "soft", shadow: "soft", pillButtons: true },
-    nav: { type: "side-drawer", labels: true, activeStyle: "filled", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: [] },
+    nav: { type: "side-drawer", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
     search: { style: "card" },
     home: { sections: ["search", "categories", "topDownloads", "featured", "newReleases"], sectionLayout: "horizontal-rows", sectionSubtitles: true, heroStyle: "carousel" },
     themeGrid: { layout: "grid2", cardInfo: "below" },
@@ -15042,7 +15867,7 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     fonts: { heading: "Nunito", body: "Cairo", scale: 1 },
     shape: { radius: 28, cardStyle: "soft", shadow: "none", pillButtons: true },
-    nav: { type: "bottom-floating", labels: true, activeStyle: "glass-capsule", order: ["home", "explore", "favorites", "downloads", "messages", "settings"], tabs: ["themes", "icon_pack", "live_wallpaper", "font"] },
+    nav: { type: "bottom-floating", labels: true, activeStyle: "glass-capsule", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: ["themes", "icon_pack", "live_wallpaper", "font"] },
     search: { style: "pill-bar" },
     home: { sections: ["search", "brandChips", "topDownloads", "featured", "categories"], sectionLayout: "horizontal-rows", sectionSubtitles: true, heroStyle: "none" },
     themeGrid: { layout: "carousel", cardInfo: "below" },
@@ -16040,6 +16865,1746 @@ window.onAppThemeRestored = function(res) {
   syncDesignerControlsFromDraft();
   renderSectionsOrderList();
   showToast(`✓ تم استرجاع "${res.templateName || activeCloudTemplate.name}" للجميع`);
+};
+
+/* ==========================================================================
+   20. CLUB ("النادي") SOCIAL COMMUNITY ENGINE
+   ========================================================================== */
+const CLUB_DRAFT_KEY = "themehub_club_draft_v1";
+const CLUB_REACTIONS_META = {
+  like: { emoji: "👍", label: "إعجاب" },
+  love: { emoji: "❤️", label: "أحببته" },
+  haha: { emoji: "😂", label: "هاها" },
+  wow: { emoji: "😮", label: "واو" },
+  fire: { emoji: "🔥", label: "نار" }
+};
+
+let clubConfig = {
+  clubEnabled: true,
+  maintenanceMessage: "",
+  categories: ["عام", "استفسارات", "عروض ثيمات", "مراجعات", "خلفيات"],
+  bannedWords: [],
+  maxDailyPosts: 15,
+  newUserDailyPosts: 5,
+  postCooldownSec: 30,
+  allowImages: true,
+  allowVideos: true,
+  allowLinks: true,
+  allowedDomains: []
+};
+
+let clubState = {
+  tab: "all",
+  category: "",
+  posts: [],
+  hasMore: false,
+  nextCursor: 0,
+  loading: false,
+  error: "",
+  configLoaded: false,
+  pendingNewPosts: false,
+  newestPostTs: 0,
+  scrollBound: false,
+  openPickerPostId: ""
+};
+
+let clubDetailState = {
+  postId: "",
+  post: null,
+  comments: [],
+  hasMore: false,
+  loading: false,
+  error: "",
+  repliesByComment: {},
+  expandedReplies: {},
+  replyTargetCommentId: "",
+  replyTargetAuthorName: ""
+};
+
+let clubComposerState = {
+  editPostId: "",
+  images: [],
+  imagesChanged: false,
+  pollOpen: false,
+  videoOpen: false,
+  videoDurationSec: 0,
+  uploadingVideo: false,
+  submitting: false
+};
+
+let adminClubState = {
+  filter: "all",
+  posts: [],
+  reports: [],
+  reportedPosts: []
+};
+
+function enterClubView() {
+  initClubScrollListener();
+  if (!clubState.configLoaded && window.AndroidBridge && window.AndroidBridge.fetchClubConfig) {
+    window.AndroidBridge.fetchClubConfig();
+  }
+  renderClubCategoryChips();
+  syncClubSubtabsUi();
+  if (clubState.posts.length === 0 && !clubState.loading) {
+    refreshClubFeed(false);
+  } else {
+    renderClubFeedList();
+    if (clubState.tab === "all" && clubState.newestPostTs > 0 && window.AndroidBridge && window.AndroidBridge.startClubNewPostsListener) {
+      window.AndroidBridge.startClubNewPostsListener(clubState.newestPostTs);
+    }
+  }
+}
+
+function pauseClubVideos() {
+  document.querySelectorAll("#view-club video, #club-post-detail-sheet video, #profile-club-posts-list video").forEach(v => {
+    try { v.pause(); } catch (_) {}
+  });
+}
+
+function initClubScrollListener() {
+  if (clubState.scrollBound) return;
+  clubState.scrollBound = true;
+  const checkScroll = (el) => {
+    if (currentView !== "club" || clubState.loading || !clubState.hasMore || !clubState.nextCursor) return;
+    if ((el.scrollHeight - el.scrollTop - el.clientHeight) < 260) {
+      loadMoreClubFeed();
+    }
+  };
+  const vc = document.querySelector(".view-container");
+  const clubViewEl = document.getElementById("view-club");
+  if (vc) vc.addEventListener("scroll", () => checkScroll(vc), { passive: true });
+  if (clubViewEl) clubViewEl.addEventListener("scroll", () => checkScroll(clubViewEl), { passive: true });
+
+  document.addEventListener("play", (e) => {
+    const target = e.target;
+    if (target && target.tagName === "VIDEO") {
+      document.querySelectorAll("#view-club video, #club-post-detail-sheet video").forEach(other => {
+        if (other !== target) {
+          try { other.pause(); } catch (_) {}
+        }
+      });
+    }
+  }, true);
+}
+
+window.onClubConfigLoaded = function(payload) {
+  if (!payload || !payload.ok) return;
+  clubState.configLoaded = true;
+  clubConfig = {
+    clubEnabled: payload.clubEnabled !== false,
+    maintenanceMessage: String(payload.maintenanceMessage || ""),
+    categories: Array.isArray(payload.categories) && payload.categories.length ? payload.categories : ["عام", "استفسارات", "عروض ثيمات", "مراجعات", "خلفيات"],
+    bannedWords: Array.isArray(payload.bannedWords) ? payload.bannedWords : [],
+    maxDailyPosts: Number(payload.maxDailyPosts) || 15,
+    newUserDailyPosts: Number(payload.newUserDailyPosts) || 5,
+    postCooldownSec: Number(payload.postCooldownSec) || 30,
+    allowImages: payload.allowImages !== false,
+    allowVideos: payload.allowVideos !== false,
+    allowLinks: payload.allowLinks !== false,
+    allowedDomains: Array.isArray(payload.allowedDomains) ? payload.allowedDomains : []
+  };
+
+  const maintEl = document.getElementById("club-maintenance-banner");
+  if (maintEl) {
+    if (!clubConfig.clubEnabled) {
+      maintEl.textContent = "🔧 " + (clubConfig.maintenanceMessage || "قسم النادي في وضع الصيانة مؤقتاً من قِبل الإدارة.");
+      maintEl.style.display = "block";
+    } else {
+      maintEl.style.display = "none";
+    }
+  }
+  renderClubCategoryChips();
+  syncAdminClubConfigInputs();
+};
+
+function syncClubSubtabsUi() {
+  document.querySelectorAll("#club-subtabs-bar .club-subtab-pill").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-club-tab") === clubState.tab);
+  });
+}
+
+function renderClubCategoryChips() {
+  const wrap = document.getElementById("club-category-chips");
+  if (!wrap) return;
+  const showCats = clubState.tab === "all";
+  wrap.style.display = showCats ? "flex" : "none";
+  if (!showCats) return;
+
+  const cats = ["", ...clubConfig.categories];
+  wrap.innerHTML = cats.map(c => {
+    const active = (clubState.category === c) ? "active" : "";
+    const label = c ? c : "الكل";
+    return `<button type="button" class="club-cat-chip ${active}" onclick="setClubCategoryFilter('${escapeHTML(c)}')">${escapeHTML(label)}</button>`;
+  }).join("");
+}
+
+function setClubFeedTab(tab) {
+  const allowed = ["all", "following", "trending", "bookmarks"];
+  const next = allowed.includes(tab) ? tab : "all";
+  if ((next === "following" || next === "bookmarks") && !communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  clubState.tab = next;
+  clubState.category = "";
+  clubState.pendingNewPosts = false;
+  document.getElementById("club-new-posts-pill")?.classList.remove("visible");
+  syncClubSubtabsUi();
+  renderClubCategoryChips();
+  refreshClubFeed(true);
+}
+
+function setClubCategoryFilter(cat) {
+  clubState.category = cat || "";
+  renderClubCategoryChips();
+  refreshClubFeed(true);
+}
+
+function refreshClubFeed(clearExisting) {
+  if (clearExisting) {
+    clubState.posts = [];
+    clubState.hasMore = false;
+    clubState.nextCursor = 0;
+  }
+  clubState.loading = true;
+  clubState.error = "";
+  clubState.pendingNewPosts = false;
+  document.getElementById("club-new-posts-pill")?.classList.remove("visible");
+  renderClubFeedList();
+
+  if (window.AndroidBridge && window.AndroidBridge.fetchClubFeed) {
+    window.AndroidBridge.fetchClubFeed(clubState.tab, clubState.category, 0, "");
+  } else {
+    clubState.loading = false;
+    clubState.error = "تعذر الاتصال بقاعدة البيانات حالياً";
+    renderClubFeedList();
+  }
+}
+
+function loadMoreClubFeed() {
+  if (clubState.loading || !clubState.hasMore || !clubState.nextCursor) return;
+  clubState.loading = true;
+  const loader = document.getElementById("club-feed-more-loader");
+  if (loader) loader.style.display = "block";
+  if (window.AndroidBridge && window.AndroidBridge.fetchClubFeed) {
+    window.AndroidBridge.fetchClubFeed(clubState.tab, clubState.category, clubState.nextCursor, "");
+  }
+}
+
+window.onClubNewPostAvailable = function(newestTs) {
+  if (clubState.tab === "all" && !clubState.category && Number(newestTs) > clubState.newestPostTs) {
+    clubState.pendingNewPosts = true;
+    document.getElementById("club-new-posts-pill")?.classList.add("visible");
+  }
+};
+
+function applyPendingClubNewPosts() {
+  clubState.pendingNewPosts = false;
+  document.getElementById("club-new-posts-pill")?.classList.remove("visible");
+  refreshClubFeed(true);
+}
+
+window.onClubFeedLoaded = function(payload) {
+  if (payload && payload.filterUid) {
+    renderProfileClubPostsResult(payload);
+    return;
+  }
+  clubState.loading = false;
+  const loader = document.getElementById("club-feed-more-loader");
+  if (loader) loader.style.display = "none";
+
+  if (!payload || !payload.ok) {
+    clubState.error = (payload && payload.error) || "تعذر تحميل منشورات النادي";
+    renderClubFeedList();
+    return;
+  }
+  if (payload.tab !== clubState.tab) return;
+
+  const incoming = Array.isArray(payload.posts) ? payload.posts : [];
+  if (payload.append) {
+    const existingIds = new Set(clubState.posts.map(p => p.id));
+    incoming.forEach(p => { if (!existingIds.has(p.id)) clubState.posts.push(p); });
+  } else {
+    clubState.posts = incoming;
+    if (incoming.length > 0 && payload.tab === "all" && !payload.category) {
+      const topTs = Math.max(...incoming.map(p => Number(p.createdAt) || 0));
+      clubState.newestPostTs = topTs;
+      if (window.AndroidBridge && window.AndroidBridge.startClubNewPostsListener) {
+        window.AndroidBridge.startClubNewPostsListener(topTs);
+      }
+    }
+  }
+  clubState.hasMore = Boolean(payload.hasMore);
+  clubState.nextCursor = Number(payload.nextCursor) || 0;
+  clubState.error = "";
+  renderClubFeedList();
+};
+
+function renderClubSkeletonsHtml() {
+  return [1, 2, 3].map(() => `
+    <div class="club-skeleton-card">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:10px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:var(--surface2);"></div>
+        <div style="flex:1;">
+          <div class="club-skel-line" style="width:45%;"></div>
+          <div class="club-skel-line" style="width:28%; height:9px;"></div>
+        </div>
+      </div>
+      <div class="club-skel-line" style="width:94%;"></div>
+      <div class="club-skel-line" style="width:76%;"></div>
+      <div class="club-skel-line" style="width:55%; margin-bottom:0;"></div>
+    </div>
+  `).join("");
+}
+
+function formatClubRelativeTime(ts) {
+  const n = Number(ts) || 0;
+  if (!n) return "";
+  const diffSec = Math.max(0, Math.floor((Date.now() - n) / 1000));
+  if (diffSec < 60) return "الآن";
+  if (diffSec < 3600) return `منذ ${Math.floor(diffSec / 60)} د`;
+  if (diffSec < 86400) return `منذ ${Math.floor(diffSec / 3600)} س`;
+  if (diffSec < 604800) return `منذ ${Math.floor(diffSec / 86400)} ي`;
+  return new Date(n).toLocaleDateString("ar-EG", { month: "short", day: "numeric" });
+}
+
+function linkifyClubTextHtml(rawText) {
+  const safe = escapeHTML(rawText || "");
+  return safe.replace(/(https:\/\/[^\s<>"']+|@[a-z0-9_]{3,20})/gi, (token) => {
+    if (token.startsWith("@")) {
+      const uname = token.slice(1).toLowerCase();
+      return `<span class="club-mention-chip" onclick="openClubMemberByUsername('${escapeHTML(uname)}')">${token}</span>`;
+    }
+    const cleanUrl = sanitizeHttpUrl(token.replace(/&amp;/g, "&"));
+    if (!cleanUrl) return token;
+    const uIdx = registerCopyPayload(cleanUrl);
+    return `<span class="club-safe-link" onclick="openClubExternalLink('${uIdx}')">${token}</span>`;
+  });
+}
+
+function openClubExternalLink(regIdx) {
+  const url = copyPayloadRegistry[Number(regIdx)];
+  if (!url) return;
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    const allowed = Array.isArray(clubConfig.allowedDomains) ? clubConfig.allowedDomains.filter(Boolean) : [];
+    if (allowed.length > 0 && !allowed.some(d => host === d || host.endsWith("." + d))) {
+      showToast(`⛔ النطاق ${host} غير مدرج ضمن النطاقات المسموحة`);
+      return;
+    }
+    if (host !== "zaim9002.github.io" && host !== "github.com") {
+      if (!confirm(`فتح رابط خارجي؟\n${url}`)) return;
+    }
+    openUrlWithAndroidOrBrowser(url);
+  } catch (_) {}
+}
+
+function openClubMemberByUsername(uname) {
+  const clean = String(uname || "").replace(/^@+/, "").trim().toLowerCase();
+  if (!clean) return;
+  if (window.AndroidBridge && window.AndroidBridge.searchMembers) {
+    pendingMentionProfileLookup = clean;
+    window.AndroidBridge.searchMembers("@" + clean);
+  }
+}
+
+function renderClubPostCard(post, opts = {}) {
+  const isDetail = Boolean(opts.isDetail);
+  const pId = escapeHTML(post.id || "");
+  const aUid = escapeHTML(post.authorUid || "");
+  const aName = escapeHTML(post.authorName || "عضو");
+  const aUname = post.authorUsername ? `@${escapeHTML(post.authorUsername)}` : "";
+  const safePhoto = sanitizeMediaUrl(post.authorPhoto);
+  const frameCls = getAvatarFrameClass(post.authorFrame);
+  const avatarInner = safePhoto
+    ? `<img src="${escapeHTML(safePhoto)}" alt="${aName}" class="club-post-avatar">`
+    : `<div class="club-post-avatar">${escapeHTML((post.authorName || "U").charAt(0).toUpperCase())}</div>`;
+  const avatarHtml = frameCls ? `<div class="avatar-frame-wrap ${frameCls}">${avatarInner}</div>` : avatarInner;
+
+  const isMine = communitySession.authenticated && communitySession.uid === post.authorUid;
+  const canEdit = isMine || communitySession.isAdmin;
+
+  const cardClasses = [
+    "club-post-card",
+    post.pinned ? "pinned" : "",
+    post.isAnnouncement ? "announcement" : "",
+    post.status === "hidden" ? "hidden-post" : ""
+  ].filter(Boolean).join(" ");
+
+  const badgesTop = [];
+  if (post.pinned) badgesTop.push(`<span class="badge" style="background:rgba(245,158,11,0.2); color:#FCD34D;">📌 مثبت</span>`);
+  if (post.isAnnouncement) badgesTop.push(`<span class="badge" style="background:rgba(124,92,255,0.22); color:#C4B5FD;">📢 إعلان رسمي</span>`);
+  if (post.status === "hidden") badgesTop.push(`<span class="badge" style="background:rgba(255,77,109,0.2); color:#FCA5A5;">🙈 مخفي (${Number(post.reportsCount) || 0} بلاغات)</span>`);
+  if (post.commentsLocked) badgesTop.push(`<span class="badge" style="background:rgba(245,158,11,0.16); color:#FBBF24;">🔒 التعليقات مقفلة</span>`);
+  if (post.category) badgesTop.push(`<span class="badge">${escapeHTML(post.category)}</span>`);
+
+  // Images
+  const imgs = (Array.isArray(post.images) ? post.images : []).map(u => sanitizeMediaUrl(u)).filter(Boolean);
+  let mediaHtml = "";
+  if (imgs.length > 0) {
+    const colCls = `cols-${Math.min(4, imgs.length)}`;
+    const regIdx = registerCopyPayload(JSON.stringify(imgs));
+    mediaHtml = `<div class="club-media-grid ${colCls}">${imgs.map((u, idx) =>
+      `<img src="${escapeHTML(u)}" class="club-media-item" loading="lazy" alt="صورة منشور ${idx + 1}" onclick="openClubImagesLightboxFromReg(${regIdx}, ${idx})">`
+    ).join("")}</div>`;
+  }
+
+  // Video
+  let videoHtml = "";
+  const safeVid = sanitizeHttpUrl(post.videoUrl);
+  if (safeVid) {
+    const durStr = post.videoDurationSec ? `<span style="position:absolute; bottom:8px; inset-inline-end:8px; background:rgba(0,0,0,0.7); color:#fff; font-size:10px; padding:2px 6px; border-radius:6px; pointer-events:none;">⏱ ${Number(post.videoDurationSec)}ث</span>` : "";
+    videoHtml = `<div class="club-video-box" style="position:relative;"><video controls playsinline preload="metadata" src="${escapeHTML(safeVid)}"></video>${durStr}</div>`;
+  }
+
+  // Attached Theme
+  let themeHtml = "";
+  if (post.themeRef && post.themeSnapshot && post.themeSnapshot.name) {
+    const snap = post.themeSnapshot;
+    const tCover = sanitizeMediaUrl(snap.coverUrl);
+    themeHtml = `
+      <div class="club-attached-theme-card" onclick="window.openThemeById('${escapeHTML(post.themeRef)}')">
+        ${tCover ? `<img src="${escapeHTML(tCover)}" class="club-attached-theme-thumb" alt="${escapeHTML(snap.name)}">` : `<div class="club-attached-theme-thumb" style="display:grid;place-items:center;">🎨</div>`}
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:12.5px; font-weight:800; color:var(--text);">${escapeHTML(snap.name)}</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">${escapeHTML(snap.brand || "")} ${snap.category ? "• " + escapeHTML(snap.category) : ""}</div>
+        </div>
+        <button type="button" class="mini-action-btn" style="color:var(--a1);">عرض الثيم</button>
+      </div>
+    `;
+  }
+
+  // Interactive Poll
+  let pollHtml = "";
+  if (post.poll && post.poll.question && Array.isArray(post.poll.options)) {
+    const total = Number(post.poll.totalVotes) || 0;
+    const votedIdx = Number(post.myPollVote);
+    const hasVoted = votedIdx >= 0;
+    pollHtml = `
+      <div class="club-poll-box">
+        <div style="font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:2px;">📊 ${escapeHTML(post.poll.question)}</div>
+        ${post.poll.options.map((opt, idx) => {
+          const votes = Number(opt.votes) || 0;
+          const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+          const isMyOpt = hasVoted && votedIdx === idx;
+          return `
+            <button type="button" class="club-poll-opt ${isMyOpt ? "voted" : ""}" onclick="voteClubPostPoll('${pId}', ${idx})" ${hasVoted ? "disabled" : ""}>
+              <div class="club-poll-fill" style="width:${hasVoted ? pct : 0}%;"></div>
+              <span style="position:relative; z-index:1;">${isMyOpt ? "✓ " : ""}${escapeHTML(opt.text || "")}</span>
+              <span style="position:relative; z-index:1; color:var(--muted); font-size:11px;">${hasVoted ? `${pct}% (${votes})` : ""}</span>
+            </button>
+          `;
+        }).join("")}
+        <div style="font-size:10.5px; color:var(--muted); margin-top:6px;">إجمالي الأصوات: ${total}</div>
+      </div>
+    `;
+  }
+
+  // Reactions Summary
+  const reactions = post.reactions || {};
+  const activeReacts = Object.keys(CLUB_REACTIONS_META).filter(k => (Number(reactions[k]) || 0) > 0);
+  const reactIconsStr = activeReacts.map(k => CLUB_REACTIONS_META[k].emoji).join("");
+  const likesCount = Number(post.likesCount) || 0;
+  const commentsCount = Number(post.commentsCount) || 0;
+  const myReactMeta = post.myReaction ? CLUB_REACTIONS_META[post.myReaction] : null;
+  const pickerOpen = clubState.openPickerPostId === post.id ? "open" : "";
+
+  const textBody = post.text
+    ? `<div class="club-post-text">${linkifyClubTextHtml(post.text)}</div>`
+    : "";
+
+  const modTools = canEdit ? `
+    <button type="button" class="mini-action-btn" onclick="openClubComposerById('${pId}')" title="تعديل">✏️</button>
+    <button type="button" class="mini-action-btn" style="color:var(--danger);" onclick="deleteClubPostConfirm('${pId}')" title="حذف">🗑️</button>
+  ` : "";
+
+  return `
+    <div class="${cardClasses}" data-club-post-id="${pId}">
+      <div class="club-post-header">
+        <div class="club-post-author-row" onclick="openUserProfileModal('${aUid}')">
+          ${avatarHtml}
+          <div style="min-width:0;">
+            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+              <b style="font-size:13px; color:var(--text);">${aName}</b>
+              ${buildAuthorBadgesHtml({ isAdmin: post.authorIsAdmin, isPublisher: post.authorIsPublisher, badges: post.authorBadges, customTitle: post.authorCustomTitle })}
+            </div>
+            <div style="font-size:10.5px; color:var(--muted); margin-top:1px;">
+              ${aUname ? `${aUname} • ` : ""}${escapeHTML(formatClubRelativeTime(post.createdAt))}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+          ${modTools}
+          <button type="button" class="mini-action-btn" onclick="reportClubPostAction('${pId}')" title="إبلاغ">🚩</button>
+        </div>
+      </div>
+
+      ${badgesTop.length ? `<div class="club-post-badges-top">${badgesTop.join("")}</div>` : ""}
+      ${textBody}
+      ${mediaHtml}
+      ${videoHtml}
+      ${themeHtml}
+      ${pollHtml}
+
+      <div class="club-reactions-summary">
+        <span>${reactIconsStr ? `${reactIconsStr} ` : ""}${likesCount} تفاعل</span>
+        <span style="cursor:pointer;" onclick="${isDetail ? "" : `openClubPostDetailSheet('${pId}')`}">${commentsCount} تعليق</span>
+      </div>
+
+      <div class="club-post-actions-bar">
+        <div class="club-reaction-picker ${pickerOpen}" id="club-react-picker-${pId}">
+          ${Object.entries(CLUB_REACTIONS_META).map(([k, m]) =>
+            `<button type="button" class="club-reaction-emoji-btn" onclick="selectClubReaction('${pId}', '${k}')" title="${m.label}">${m.emoji}</button>`
+          ).join("")}
+        </div>
+        <button type="button" class="club-action-btn ${myReactMeta ? "active" : ""}" onclick="onClubReactionButtonClick('${pId}')">
+          <span>${myReactMeta ? myReactMeta.emoji : "👍"}</span>
+          <span>${myReactMeta ? myReactMeta.label : "تفاعل"}</span>
+        </button>
+        <button type="button" class="club-action-btn" onclick="${isDetail ? "focusClubDetailCommentInput()" : `openClubPostDetailSheet('${pId}')`}">
+          <span>💬</span><span>تعليق</span>
+        </button>
+        <button type="button" class="club-action-btn ${post.bookmarked ? "active" : ""}" onclick="toggleClubBookmarkAction('${pId}', ${!post.bookmarked})">
+          <span>${post.bookmarked ? "🔖" : "📑"}</span><span>حفظ</span>
+        </button>
+        <button type="button" class="club-action-btn" onclick="shareClubPostAction('${pId}')">
+          <span>📤</span><span>مشاركة</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function openClubImagesLightboxFromReg(regIdx, idx) {
+  try {
+    const urls = JSON.parse(copyPayloadRegistry[Number(regIdx)] || "[]");
+    openClubImagesLightbox(urls, idx);
+  } catch (_) {}
+}
+
+function renderClubFeedList() {
+  const listEl = document.getElementById("club-feed-list");
+  if (!listEl) return;
+
+  if (clubState.loading && clubState.posts.length === 0) {
+    listEl.innerHTML = renderClubSkeletonsHtml();
+    return;
+  }
+  if (clubState.error && clubState.posts.length === 0) {
+    listEl.innerHTML = renderErrorCardHtml(clubState.error, { retryFn: "refreshClubFeed(true)" });
+    return;
+  }
+  if (!clubState.posts || clubState.posts.length === 0) {
+    let title = "لا توجد منشورات بعد";
+    let desc = "كن أول من يشارك في مجتمع النادي!";
+    let cta = `<button type="button" class="btn main" style="margin-top:10px;" onclick="openClubComposer()">✍️ نشر أول منشور</button>`;
+    if (clubState.tab === "following") {
+      title = "لا توجد منشورات من المتابَعين";
+      desc = "تصفح منشورات النادي واضغط «متابعة» على المصممين والأعضاء المفضلين لديك.";
+      cta = `<button type="button" class="btn main" style="margin-top:10px;" onclick="setClubFeedTab('all')">🌐 تصفح جميع المنشورات</button>`;
+    } else if (clubState.tab === "bookmarks") {
+      title = "لا توجد منشورات محفوظة";
+      desc = "اضغط «حفظ» على أي منشور للعودة إليه لاحقاً هنا.";
+      cta = "";
+    }
+    listEl.innerHTML = `<div class="empty-state"><h4>${title}</h4><p>${desc}</p>${cta}</div>`;
+    return;
+  }
+  listEl.innerHTML = clubState.posts.map(p => renderClubPostCard(p)).join("");
+}
+
+function onClubReactionButtonClick(postId) {
+  const current = clubState.openPickerPostId === postId;
+  clubState.openPickerPostId = current ? "" : postId;
+  document.querySelectorAll(".club-reaction-picker").forEach(el => el.classList.remove("open"));
+  if (!current) {
+    document.querySelectorAll(`[id="club-react-picker-${CSS.escape(postId)}"]`).forEach(el => el.classList.add("open"));
+  }
+}
+
+function selectClubReaction(postId, reaction) {
+  clubState.openPickerPostId = "";
+  document.querySelectorAll(".club-reaction-picker").forEach(el => el.classList.remove("open"));
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  if (window.AndroidBridge && window.AndroidBridge.togglePostReaction) {
+    window.AndroidBridge.togglePostReaction(postId, reaction);
+  }
+}
+
+window.onClubPostReactionUpdated = function(payload) {
+  if (!payload || !payload.ok) return;
+  const applyUpdate = (p) => {
+    if (!p || p.id !== payload.postId) return p;
+    return {
+      ...p,
+      myReaction: payload.myReaction || "",
+      likesCount: Number(payload.likesCount) || 0,
+      engagementScore: Number(payload.engagementScore) || p.engagementScore,
+      reactions: payload.reactions || p.reactions
+    };
+  };
+  clubState.posts = clubState.posts.map(applyUpdate);
+  renderClubFeedList();
+  if (clubDetailState.post && clubDetailState.post.id === payload.postId) {
+    clubDetailState.post = applyUpdate(clubDetailState.post);
+    renderClubDetailPostHeader();
+  }
+};
+
+function voteClubPostPoll(postId, optionIndex) {
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  if (window.AndroidBridge && window.AndroidBridge.votePoll) {
+    window.AndroidBridge.votePoll(postId, Number(optionIndex));
+  }
+}
+
+window.onClubPollVoted = function(payload) {
+  if (!payload || !payload.ok) return;
+  const applyPoll = (p) => {
+    if (!p || p.id !== payload.postId) return p;
+    return { ...p, myPollVote: payload.myPollVote, poll: payload.poll };
+  };
+  clubState.posts = clubState.posts.map(applyPoll);
+  renderClubFeedList();
+  if (clubDetailState.post && clubDetailState.post.id === payload.postId) {
+    clubDetailState.post = applyPoll(clubDetailState.post);
+    renderClubDetailPostHeader();
+  }
+};
+
+function toggleClubBookmarkAction(postId, nextState) {
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  if (window.AndroidBridge && window.AndroidBridge.toggleBookmarkPost) {
+    window.AndroidBridge.toggleBookmarkPost(postId, Boolean(nextState));
+  }
+}
+
+window.onClubBookmarkToggled = function(payload) {
+  if (!payload || !payload.ok) return;
+  clubState.posts = clubState.posts.map(p => p.id === payload.postId ? { ...p, bookmarked: Boolean(payload.bookmarked) } : p);
+  if (clubState.tab === "bookmarks" && !payload.bookmarked) {
+    clubState.posts = clubState.posts.filter(p => p.id !== payload.postId);
+  }
+  renderClubFeedList();
+  if (clubDetailState.post && clubDetailState.post.id === payload.postId) {
+    clubDetailState.post.bookmarked = Boolean(payload.bookmarked);
+    syncClubDetailBookmarkBtn();
+    renderClubDetailPostHeader();
+  }
+};
+
+function shareClubPostAction(postId) {
+  const post = clubState.posts.find(p => p.id === postId) || (clubDetailState.post && clubDetailState.post.id === postId ? clubDetailState.post : null);
+  const snippet = (post && post.text) ? post.text.slice(0, 100) : "شاهد هذا المنشور في مجتمع النادي — Theme Hub";
+  if (window.AndroidBridge && window.AndroidBridge.shareClubPost) {
+    window.AndroidBridge.shareClubPost(postId, snippet);
+  } else {
+    const shareUrl = `https://zaim9002.github.io/theme-hub/?post=${encodeURIComponent(postId)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => showToast("✓ تم نسخ رابط المنشور"));
+    }
+  }
+}
+
+function reportClubPostAction(postId) {
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  openReasonDialog("الإبلاغ عن منشور", "اذكر سبب الإبلاغ (5 بلاغات مختلفة تُخفي المنشور تلقائياً للمراجعة):", "محتوى مخالف أو سبام", (reason) => {
+    if (window.AndroidBridge && window.AndroidBridge.reportClubTarget) {
+      window.AndroidBridge.reportClubTarget("post", postId, postId, reason);
+    }
+  });
+}
+
+window.onClubReportSubmitted = function(payload) {
+  if (!payload) return;
+  if (!payload.ok) {
+    showToast((payload && payload.error) || "تعذر إرسال البلاغ");
+    return;
+  }
+  if (payload.autoHidden && payload.targetType === "post") {
+    clubState.posts = clubState.posts.filter(p => p.id !== payload.targetId);
+    renderClubFeedList();
+    if (clubDetailState.postId === payload.targetId) closeClubPostDetailSheet();
+  }
+};
+
+window.onClubAuthRequired = function() {
+  triggerUserGoogleSignIn();
+};
+
+// ---------------- CLUB RULES GATE & COMPOSER ----------------
+function openClubComposerById(postId) {
+  const found = clubState.posts.find(p => p.id === postId)
+    || (clubDetailState.post && clubDetailState.post.id === postId ? clubDetailState.post : null)
+    || (adminClubState.posts.find(p => p.id === postId));
+  if (found) openClubComposer(found);
+}
+
+let pendingComposerAfterRules = null;
+
+function openClubComposer(editPost = null, opts = {}) {
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  if (communitySession.blocked) {
+    showToast("⛔ حسابك محظور من النشر في النادي");
+    return;
+  }
+  if (communitySession.muted && !communitySession.isAdmin) {
+    showToast("🔇 حسابك مكتوم حالياً ولا يمكنك النشر");
+    return;
+  }
+  if (!clubConfig.clubEnabled && !communitySession.isAdmin) {
+    showToast(clubConfig.maintenanceMessage || "النادي في وضع الصيانة مؤقتاً");
+    return;
+  }
+  if (!editPost && !communitySession.clubRulesAccepted && !communitySession.isAdmin) {
+    pendingComposerAfterRules = { editPost, opts };
+    document.getElementById("club-rules-dim")?.classList.add("open");
+    document.getElementById("club-rules-sheet")?.classList.add("open");
+    return;
+  }
+
+  clubComposerState = {
+    editPostId: editPost ? editPost.id : "",
+    images: editPost && Array.isArray(editPost.images) ? [...editPost.images] : [],
+    imagesChanged: false,
+    pollOpen: false,
+    videoOpen: Boolean(editPost && editPost.videoUrl),
+    videoDurationSec: editPost ? (Number(editPost.videoDurationSec) || 0) : 0,
+    uploadingVideo: false,
+    submitting: false
+  };
+
+  const titleEl = document.getElementById("club-comp-sheet-title");
+  if (titleEl) titleEl.textContent = editPost ? "✏️ تعديل المنشور" : (opts.announcement ? "📢 نشر إعلان رسمي" : "✍️ منشور جديد في النادي");
+
+  const catSel = document.getElementById("club-comp-category");
+  if (catSel) {
+    catSel.innerHTML = clubConfig.categories.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
+  }
+  const themeSel = document.getElementById("club-comp-theme-select");
+  if (themeSel) {
+    const optsHtml = [`<option value="">بدون ثيم مرفق</option>`];
+    (appThemes || []).slice(0, 120).forEach(t => {
+      optsHtml.push(`<option value="${escapeHTML(t.id)}">${escapeHTML(t.name)} (${escapeHTML(t.brand || "")})</option>`);
+    });
+    themeSel.innerHTML = optsHtml.join("");
+  }
+
+  const adminOpts = document.getElementById("club-comp-admin-opts");
+  const annChk = document.getElementById("club-comp-announcement");
+  const pinChk = document.getElementById("club-comp-pinned");
+  if (adminOpts) adminOpts.style.display = (!editPost && communitySession.isAdmin) ? "flex" : "none";
+  if (annChk) annChk.checked = Boolean(opts.announcement);
+  if (pinChk) pinChk.checked = Boolean(opts.announcement);
+
+  const adminVidWrap = document.getElementById("club-comp-admin-video-upload-wrap");
+  if (adminVidWrap) adminVidWrap.style.display = communitySession.isAdmin ? "block" : "none";
+
+  const textEl = document.getElementById("club-comp-text");
+  const vidUrlEl = document.getElementById("club-comp-video-url");
+  const draftBar = document.getElementById("club-comp-draft-bar");
+  const pollBtn = document.getElementById("btn-club-toggle-poll");
+
+  if (pollBtn) pollBtn.style.display = editPost ? "none" : "flex";
+  document.getElementById("club-comp-poll-box").style.display = "none";
+  document.getElementById("club-comp-video-box").style.display = clubComposerState.videoOpen ? "block" : "none";
+  document.getElementById("club-comp-error").style.display = "none";
+  document.getElementById("btn-club-submit-post").textContent = editPost ? "💾 حفظ التعديلات" : "🚀 نشر المنشور";
+
+  if (editPost) {
+    if (draftBar) draftBar.style.display = "none";
+    if (catSel && editPost.category) catSel.value = editPost.category;
+    if (textEl) textEl.value = editPost.text || "";
+    if (themeSel) themeSel.value = editPost.themeRef || "";
+    if (vidUrlEl) vidUrlEl.value = editPost.videoUrl || "";
+  } else {
+    let loadedDraft = false;
+    try {
+      const rawDraft = localStorage.getItem(CLUB_DRAFT_KEY);
+      if (rawDraft) {
+        const d = JSON.parse(rawDraft);
+        if (d && (d.text || (Array.isArray(d.images) && d.images.length) || d.videoUrl || d.themeRef)) {
+          if (catSel && d.category) catSel.value = d.category;
+          if (textEl) textEl.value = d.text || "";
+          if (themeSel && d.themeRef) themeSel.value = d.themeRef;
+          if (vidUrlEl && d.videoUrl) {
+            vidUrlEl.value = d.videoUrl;
+            clubComposerState.videoOpen = true;
+            clubComposerState.videoDurationSec = Number(d.videoDurationSec) || 0;
+            document.getElementById("club-comp-video-box").style.display = "block";
+          }
+          if (Array.isArray(d.images)) clubComposerState.images = d.images.slice(0, 4);
+          loadedDraft = true;
+        }
+      }
+    } catch (_) {}
+    if (!loadedDraft) {
+      if (textEl) textEl.value = "";
+      if (vidUrlEl) vidUrlEl.value = "";
+      if (themeSel) themeSel.value = "";
+    }
+    if (draftBar) draftBar.style.display = loadedDraft ? "flex" : "none";
+  }
+
+  onClubComposerTextInput();
+  renderClubComposerImages();
+  resetClubComposerPollInputs();
+  document.getElementById("club-composer-dim")?.classList.add("open");
+  document.getElementById("club-composer-sheet")?.classList.add("open");
+}
+
+function closeClubRulesSheet() {
+  pendingComposerAfterRules = null;
+  document.getElementById("club-rules-dim")?.classList.remove("open");
+  document.getElementById("club-rules-sheet")?.classList.remove("open");
+}
+
+function confirmAcceptClubRules() {
+  const btn = document.getElementById("btn-club-accept-rules");
+  if (btn) btn.disabled = true;
+  if (window.AndroidBridge && window.AndroidBridge.acceptClubRules) {
+    window.AndroidBridge.acceptClubRules();
+  } else if (btn) btn.disabled = false;
+}
+
+window.onClubRulesAccepted = function(payload) {
+  const btn = document.getElementById("btn-club-accept-rules");
+  if (btn) btn.disabled = false;
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "تعذر تأكيد الموافقة على القوانين");
+    return;
+  }
+  communitySession.clubRulesAccepted = true;
+  const pending = pendingComposerAfterRules;
+  closeClubRulesSheet();
+  if (pending) openClubComposer(pending.editPost, pending.opts);
+  else openClubComposer();
+};
+
+function closeClubComposer() {
+  document.getElementById("club-composer-dim")?.classList.remove("open");
+  document.getElementById("club-composer-sheet")?.classList.remove("open");
+}
+
+function onClubComposerTextInput() {
+  const textEl = document.getElementById("club-comp-text");
+  const counterEl = document.getElementById("club-comp-char-counter");
+  if (textEl && counterEl) counterEl.textContent = `${textEl.value.length} / 2000`;
+  if (!clubComposerState.editPostId) saveClubComposerDraft();
+}
+
+function saveClubComposerDraft() {
+  if (clubComposerState.editPostId) return;
+  try {
+    const draft = {
+      category: document.getElementById("club-comp-category")?.value || "عام",
+      text: document.getElementById("club-comp-text")?.value || "",
+      themeRef: document.getElementById("club-comp-theme-select")?.value || "",
+      videoUrl: document.getElementById("club-comp-video-url")?.value || "",
+      videoDurationSec: clubComposerState.videoDurationSec || 0,
+      images: clubComposerState.images || []
+    };
+    localStorage.setItem(CLUB_DRAFT_KEY, JSON.stringify(draft));
+  } catch (_) {}
+}
+
+function clearClubComposerDraft(resetFields) {
+  try { localStorage.removeItem(CLUB_DRAFT_KEY); } catch (_) {}
+  const draftBar = document.getElementById("club-comp-draft-bar");
+  if (draftBar) draftBar.style.display = "none";
+  if (resetFields) {
+    const textEl = document.getElementById("club-comp-text");
+    const vidEl = document.getElementById("club-comp-video-url");
+    const themeSel = document.getElementById("club-comp-theme-select");
+    if (textEl) textEl.value = "";
+    if (vidEl) vidEl.value = "";
+    if (themeSel) themeSel.value = "";
+    clubComposerState.images = [];
+    clubComposerState.videoDurationSec = 0;
+    onClubComposerTextInput();
+    renderClubComposerImages();
+  }
+}
+
+async function onClubComposerImagesSelected(inputEl) {
+  const files = Array.from(inputEl.files || []);
+  inputEl.value = "";
+  if (!files.length) return;
+  if (!clubConfig.allowImages && !communitySession.isAdmin) {
+    showToast("رفع الصور معطّل حالياً من قبل الإدارة");
+    return;
+  }
+  const remaining = 4 - clubComposerState.images.length;
+  if (remaining <= 0) {
+    showToast("الحد الأقصى 4 صور لكل منشور");
+    return;
+  }
+  for (const file of files.slice(0, remaining)) {
+    try {
+      const webpUrl = await compressProfileImageToWebp(file, 1080, 1080);
+      if (webpUrl && webpUrl.length <= 215000) {
+        clubComposerState.images.push(webpUrl);
+        clubComposerState.imagesChanged = true;
+      } else {
+        showToast("تعذر ضغط إحدى الصور تحت 200KB");
+      }
+    } catch (e) {
+      showToast(e.message || "فشل قراءة الصورة");
+    }
+  }
+  renderClubComposerImages();
+  saveClubComposerDraft();
+}
+
+function renderClubComposerImages() {
+  const wrap = document.getElementById("club-comp-images-preview");
+  if (!wrap) return;
+  if (!clubComposerState.images.length) {
+    wrap.style.display = "none";
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.style.display = "grid";
+  wrap.innerHTML = clubComposerState.images.map((u, idx) => `
+    <div class="club-composer-thumb">
+      <img src="${escapeHTML(u)}" alt="معاينة ${idx + 1}">
+      <button type="button" class="club-composer-thumb-del" onclick="removeClubComposerImage(${idx})">✕</button>
+    </div>
+  `).join("");
+}
+
+function removeClubComposerImage(idx) {
+  clubComposerState.images.splice(idx, 1);
+  clubComposerState.imagesChanged = true;
+  renderClubComposerImages();
+  saveClubComposerDraft();
+}
+
+function toggleClubComposerVideo() {
+  if (!clubConfig.allowVideos && !communitySession.isAdmin) {
+    showToast("إرفاق الفيديو معطّل حالياً من قبل الإدارة");
+    return;
+  }
+  clubComposerState.videoOpen = !clubComposerState.videoOpen;
+  const box = document.getElementById("club-comp-video-box");
+  if (box) box.style.display = clubComposerState.videoOpen ? "block" : "none";
+}
+
+function onClubComposerVideoUrlChange() {
+  const url = String(document.getElementById("club-comp-video-url")?.value || "").trim();
+  const badge = document.getElementById("club-comp-video-dur-badge");
+  if (!url) {
+    clubComposerState.videoDurationSec = 0;
+    if (badge) badge.textContent = "";
+    saveClubComposerDraft();
+    return;
+  }
+  const v = document.createElement("video");
+  v.preload = "metadata";
+  v.onloadedmetadata = () => {
+    const dur = Math.round(Number(v.duration) || 0);
+    clubComposerState.videoDurationSec = dur;
+    if (badge) {
+      badge.textContent = dur > 120 ? `⛔ ${dur}ث (> 120ث)` : `✓ ${dur}ث`;
+      badge.style.color = dur > 120 ? "var(--danger)" : "#34D399";
+    }
+    saveClubComposerDraft();
+  };
+  v.src = url;
+}
+
+async function onAdminClubVideoFileSelected(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  inputEl.value = "";
+  if (!file || !communitySession.isAdmin) return;
+  const statusEl = document.getElementById("club-comp-video-upload-status");
+  if (!adminToken) {
+    showToast("يتطلب الرفع المباشر وجود توكن GitHub (للمشرف)");
+    return;
+  }
+  if (file.size > 24 * 1024 * 1024) {
+    showToast("الحد الأقصى لحجم فيديو النادي المباشر 24MB (≤ 120 ثانية)");
+    return;
+  }
+  const objUrl = URL.createObjectURL(file);
+  try {
+    const dur = await new Promise((resolve, reject) => {
+      const v = document.createElement("video");
+      v.preload = "metadata";
+      v.onloadedmetadata = () => resolve(Math.round(Number(v.duration) || 0));
+      v.onerror = () => reject(new Error("تعذر قراءة مدة الفيديو"));
+      v.src = objUrl;
+    });
+    if (dur > 120) {
+      showToast(`⛔ مدة الفيديو (${dur}ث) تتجاوز الحد الأقصى 120 ثانية`);
+      return;
+    }
+    clubComposerState.uploadingVideo = true;
+    if (statusEl) { statusEl.style.display = "block"; statusEl.textContent = "جاري تجهيز ورفع الفيديو 0%…"; }
+    const buf = await file.arrayBuffer();
+    const ext = file.name.toLowerCase().endsWith(".webm") ? "webm" : "mp4";
+    const ghPath = `club-videos/club-${Date.now()}.${ext}`;
+    await putGithubFileWithProgress(ghPath, `Upload club video (${dur}s)`, arrayBufferToChunkedBase64(buf), (pct) => {
+      if (statusEl) statusEl.textContent = `جاري الرفع إلى GitHub… ${pct}%`;
+    });
+    const rawUrl = `${GH_RAW_BASE}${ghPath}`;
+    const vidInput = document.getElementById("club-comp-video-url");
+    if (vidInput) vidInput.value = rawUrl;
+    clubComposerState.videoDurationSec = dur;
+    const badge = document.getElementById("club-comp-video-dur-badge");
+    if (badge) { badge.textContent = `✓ ${dur}ث`; badge.style.color = "#34D399"; }
+    if (statusEl) statusEl.textContent = "✓ تم رفع الفيديو بنجاح";
+    saveClubComposerDraft();
+  } catch (e) {
+    showToast(e.message || "فشل رفع الفيديو");
+    if (statusEl) statusEl.textContent = "❌ فشل الرفع";
+  } finally {
+    clubComposerState.uploadingVideo = false;
+    URL.revokeObjectURL(objUrl);
+  }
+}
+
+function toggleClubComposerPoll() {
+  if (clubComposerState.editPostId) return;
+  clubComposerState.pollOpen = !clubComposerState.pollOpen;
+  const box = document.getElementById("club-comp-poll-box");
+  if (box) box.style.display = clubComposerState.pollOpen ? "block" : "none";
+}
+
+function resetClubComposerPollInputs() {
+  const qEl = document.getElementById("club-comp-poll-q");
+  const listEl = document.getElementById("club-comp-poll-opts-list");
+  if (qEl) qEl.value = "";
+  if (listEl) {
+    listEl.innerHTML = [1, 2].map(i =>
+      `<input type="text" class="form-input club-poll-opt-in" maxlength="80" placeholder="خيار ${i}…" style="min-height:36px; font-size:12px;">`
+    ).join("");
+  }
+}
+
+function addClubComposerPollOption() {
+  const listEl = document.getElementById("club-comp-poll-opts-list");
+  if (!listEl) return;
+  const count = listEl.querySelectorAll(".club-poll-opt-in").length;
+  if (count >= 4) {
+    showToast("الحد الأقصى 4 خيارات للتصويت");
+    return;
+  }
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.className = "form-input club-poll-opt-in";
+  inp.maxLength = 80;
+  inp.placeholder = `خيار ${count + 1}…`;
+  inp.style.minHeight = "36px";
+  inp.style.fontSize = "12px";
+  listEl.appendChild(inp);
+}
+
+function submitClubPostForm() {
+  if (clubComposerState.submitting) return;
+  if (clubComposerState.uploadingVideo) {
+    showToast("يرجى انتظار اكتمال رفع الفيديو أولاً");
+    return;
+  }
+  const errEl = document.getElementById("club-comp-error");
+  const showErr = (m) => { if (errEl) { errEl.textContent = m; errEl.style.display = "block"; } };
+  if (errEl) errEl.style.display = "none";
+
+  const category = document.getElementById("club-comp-category")?.value || "عام";
+  const text = (document.getElementById("club-comp-text")?.value || "").trim();
+  const videoUrl = clubComposerState.videoOpen ? (document.getElementById("club-comp-video-url")?.value || "").trim() : "";
+  const themeRef = document.getElementById("club-comp-theme-select")?.value || "";
+
+  if (videoUrl && !videoUrl.startsWith("https://")) {
+    showErr("رابط الفيديو يجب أن يبدأ بـ https://");
+    return;
+  }
+  if (clubComposerState.videoDurationSec > 120) {
+    showErr("الحد الأقصى لمدة الفيديو 120 ثانية (دقيقتان)");
+    return;
+  }
+
+  let themeSnapshot = null;
+  if (themeRef) {
+    const foundT = (appThemes || []).find(t => t.id === themeRef);
+    if (foundT) {
+      const cover = getThemePreviewItems(foundT).find(i => i.type !== "video")?.url || foundT.image || "";
+      themeSnapshot = {
+        id: foundT.id,
+        name: foundT.name || "",
+        category: foundT.category || "",
+        brand: foundT.brand || "",
+        coverUrl: cover
+      };
+    }
+  }
+
+  let pollObj = null;
+  if (!clubComposerState.editPostId && clubComposerState.pollOpen) {
+    const q = (document.getElementById("club-comp-poll-q")?.value || "").trim();
+    const opts = Array.from(document.querySelectorAll("#club-comp-poll-opts-list .club-poll-opt-in"))
+      .map(el => el.value.trim()).filter(Boolean);
+    if (!q || opts.length < 2) {
+      showErr("التصويت يتطلب سؤالاً وخيارين على الأقل");
+      return;
+    }
+    pollObj = { question: q, options: opts };
+  }
+
+  if (!text && clubComposerState.images.length === 0 && !videoUrl && !pollObj && !themeRef) {
+    showErr("أضف نصاً أو صورة أو تصويتاً أو ثيماً قبل النشر");
+    return;
+  }
+
+  const payload = {
+    category,
+    text,
+    videoUrl,
+    videoDurationSec: Number(clubComposerState.videoDurationSec) || 0,
+    images: clubComposerState.images,
+    imagesChanged: clubComposerState.imagesChanged,
+    themeRef,
+    themeSnapshot,
+    poll: pollObj,
+    isAnnouncement: Boolean(document.getElementById("club-comp-announcement")?.checked),
+    pinned: Boolean(document.getElementById("club-comp-pinned")?.checked)
+  };
+
+  clubComposerState.submitting = true;
+  const btn = document.getElementById("btn-club-submit-post");
+  if (btn) btn.disabled = true;
+
+  if (clubComposerState.editPostId) {
+    window.AndroidBridge?.editClubPost?.(clubComposerState.editPostId, JSON.stringify(payload));
+  } else {
+    window.AndroidBridge?.createClubPost?.(JSON.stringify(payload));
+  }
+}
+
+window.onClubPostSaved = function(payload) {
+  clubComposerState.submitting = false;
+  const btn = document.getElementById("btn-club-submit-post");
+  if (btn) btn.disabled = false;
+  if (!payload || !payload.ok) {
+    const errEl = document.getElementById("club-comp-error");
+    if (errEl) {
+      errEl.textContent = (payload && payload.error) || "تعذر حفظ المنشور";
+      errEl.style.display = "block";
+    }
+    return;
+  }
+  closeClubComposer();
+  const saved = payload.post;
+  if (payload.mode === "create") {
+    clearClubComposerDraft(false);
+    if (saved && saved.id) {
+      clubState.posts = [saved, ...clubState.posts.filter(p => p.id !== saved.id)];
+      clubState.newestPostTs = Math.max(clubState.newestPostTs, Number(saved.createdAt) || 0);
+      renderClubFeedList();
+    }
+  } else if (saved && saved.id) {
+    clubState.posts = clubState.posts.map(p => p.id === saved.id ? saved : p);
+    renderClubFeedList();
+    if (clubDetailState.post && clubDetailState.post.id === saved.id) {
+      clubDetailState.post = saved;
+      renderClubDetailPostHeader();
+    }
+  }
+};
+
+function deleteClubPostConfirm(postId) {
+  if (!confirm("هل تريد حذف هذا المنشور نهائياً؟")) return;
+  window.AndroidBridge?.deleteClubPost?.(postId);
+}
+
+window.onClubPostDeleted = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "تعذر حذف المنشور");
+    return;
+  }
+  clubState.posts = clubState.posts.filter(p => p.id !== payload.postId);
+  renderClubFeedList();
+  adminClubState.posts = adminClubState.posts.filter(p => p.id !== payload.postId);
+  renderAdminClubPostsList();
+  if (clubDetailState.postId === payload.postId) closeClubPostDetailSheet();
+};
+
+// ---------------- CLUB POST DETAIL SHEET + COMMENTS + 1-LEVEL REPLIES ----------------
+window.openClubPostById = function(postId) {
+  const clean = String(postId || "").trim();
+  if (!clean) return;
+  openClubPostDetailSheet(clean);
+};
+
+function openClubPostDetailSheet(postId) {
+  const existing = clubState.posts.find(p => p.id === postId)
+    || adminClubState.posts.find(p => p.id === postId)
+    || adminClubState.reportedPosts.find(p => p.id === postId);
+
+  clubDetailState = {
+    postId,
+    post: existing || null,
+    comments: [],
+    hasMore: false,
+    loading: true,
+    error: "",
+    repliesByComment: {},
+    expandedReplies: {},
+    replyTargetCommentId: "",
+    replyTargetAuthorName: ""
+  };
+
+  cancelClubReplyTarget();
+  document.getElementById("club-post-detail-dim")?.classList.add("open");
+  document.getElementById("club-post-detail-sheet")?.classList.add("open");
+  renderClubDetailPostHeader();
+  document.getElementById("club-detail-comments-list").innerHTML = `<div style="text-align:center; padding:14px; font-size:12px; color:var(--muted);">جاري تحميل التعليقات…</div>`;
+  document.getElementById("btn-club-detail-comments-more").style.display = "none";
+
+  window.AndroidBridge?.fetchClubPostDetail?.(postId);
+  window.AndroidBridge?.fetchPostComments?.(postId, 0);
+}
+
+function closeClubPostDetailSheet() {
+  try { pauseClubVideos(); } catch (_) {}
+  clubDetailState.postId = "";
+  document.getElementById("club-post-detail-dim")?.classList.remove("open");
+  document.getElementById("club-post-detail-sheet")?.classList.remove("open");
+}
+
+window.onClubPostDetailLoaded = function(payload) {
+  if (!payload || !payload.ok) {
+    if (!clubDetailState.post) {
+      document.getElementById("club-detail-post-container").innerHTML = renderErrorCardHtml((payload && payload.error) || "تعذر تحميل المنشور");
+    }
+    return;
+  }
+  clubDetailState.post = payload.post;
+  syncClubDetailBookmarkBtn();
+  renderClubDetailPostHeader();
+};
+
+function syncClubDetailBookmarkBtn() {
+  const btn = document.getElementById("btn-club-detail-bookmark");
+  if (!btn || !clubDetailState.post) return;
+  btn.textContent = clubDetailState.post.bookmarked ? "🔖 محفوظ" : "📑 حفظ";
+}
+
+function toggleClubDetailBookmark() {
+  if (!clubDetailState.post) return;
+  toggleClubBookmarkAction(clubDetailState.post.id, !clubDetailState.post.bookmarked);
+}
+
+function shareClubDetailPost() {
+  if (!clubDetailState.postId) return;
+  shareClubPostAction(clubDetailState.postId);
+}
+
+function renderClubDetailPostHeader() {
+  const wrap = document.getElementById("club-detail-post-container");
+  const lockedBanner = document.getElementById("club-detail-comments-locked-banner");
+  const formEl = document.getElementById("club-detail-comment-form");
+  if (!wrap) return;
+  if (!clubDetailState.post) {
+    wrap.innerHTML = renderClubSkeletonsHtml();
+    return;
+  }
+  wrap.innerHTML = renderClubPostCard(clubDetailState.post, { isDetail: true });
+  syncClubDetailBookmarkBtn();
+
+  const locked = Boolean(clubDetailState.post.commentsLocked) && !communitySession.isAdmin;
+  if (lockedBanner) lockedBanner.style.display = clubDetailState.post.commentsLocked ? "block" : "none";
+  if (formEl) formEl.style.display = locked ? "none" : "flex";
+}
+
+function focusClubDetailCommentInput() {
+  const inp = document.getElementById("club-detail-comment-input");
+  if (inp) inp.focus();
+}
+
+function startClubReplyToComment(commentId, authorName) {
+  clubDetailState.replyTargetCommentId = commentId;
+  clubDetailState.replyTargetAuthorName = authorName || "عضو";
+  const banner = document.getElementById("club-detail-replying-to");
+  const nameEl = document.getElementById("club-detail-reply-target-name");
+  if (nameEl) nameEl.textContent = clubDetailState.replyTargetAuthorName;
+  if (banner) banner.style.display = "flex";
+  focusClubDetailCommentInput();
+}
+
+function cancelClubReplyTarget() {
+  clubDetailState.replyTargetCommentId = "";
+  clubDetailState.replyTargetAuthorName = "";
+  const banner = document.getElementById("club-detail-replying-to");
+  if (banner) banner.style.display = "none";
+}
+
+function submitClubDetailComment() {
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  const inp = document.getElementById("club-detail-comment-input");
+  const txt = (inp ? inp.value : "").trim();
+  if (!txt || !clubDetailState.postId) return;
+
+  if (clubDetailState.replyTargetCommentId) {
+    window.AndroidBridge?.addPostCommentReply?.(clubDetailState.postId, clubDetailState.replyTargetCommentId, txt);
+  } else {
+    window.AndroidBridge?.addPostComment?.(clubDetailState.postId, txt);
+  }
+}
+
+function loadMoreClubDetailComments() {
+  if (!clubDetailState.postId || clubDetailState.comments.length === 0) return;
+  const lastTs = clubDetailState.comments[clubDetailState.comments.length - 1].createdAt || 0;
+  window.AndroidBridge?.fetchPostComments?.(clubDetailState.postId, lastTs);
+}
+
+window.onClubCommentsLoaded = function(payload) {
+  if (!payload || payload.postId !== clubDetailState.postId) return;
+  clubDetailState.loading = false;
+  if (!payload.ok) {
+    document.getElementById("club-detail-comments-list").innerHTML = renderErrorCardHtml(payload.error || "تعذر تحميل التعليقات");
+    return;
+  }
+  const incoming = Array.isArray(payload.comments) ? payload.comments : [];
+  if (payload.append) {
+    const ids = new Set(clubDetailState.comments.map(c => c.id));
+    incoming.forEach(c => { if (!ids.has(c.id)) clubDetailState.comments.push(c); });
+  } else {
+    clubDetailState.comments = incoming;
+  }
+  clubDetailState.hasMore = Boolean(payload.hasMore);
+  renderClubDetailComments();
+};
+
+window.onClubCommentAdded = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "تعذر إرسال التعليق");
+    return;
+  }
+  const inp = document.getElementById("club-detail-comment-input");
+  if (inp) inp.value = "";
+  if (payload.postId === clubDetailState.postId && payload.comment) {
+    clubDetailState.comments = [payload.comment, ...clubDetailState.comments];
+    if (clubDetailState.post) {
+      clubDetailState.post.commentsCount = Number(payload.commentsCount) || clubDetailState.comments.length;
+      renderClubDetailPostHeader();
+    }
+    renderClubDetailComments();
+  }
+  clubState.posts = clubState.posts.map(p => p.id === payload.postId ? { ...p, commentsCount: Number(payload.commentsCount) || (p.commentsCount + 1) } : p);
+  renderClubFeedList();
+};
+
+window.onClubCommentDeleted = function(payload) {
+  if (!payload || !payload.ok) return;
+  clubDetailState.comments = clubDetailState.comments.filter(c => c.id !== payload.commentId);
+  if (clubDetailState.post && clubDetailState.post.id === payload.postId) {
+    clubDetailState.post.commentsCount = Number(payload.commentsCount) || 0;
+    renderClubDetailPostHeader();
+  }
+  renderClubDetailComments();
+  clubState.posts = clubState.posts.map(p => p.id === payload.postId ? { ...p, commentsCount: Number(payload.commentsCount) || 0 } : p);
+  renderClubFeedList();
+};
+
+window.onClubCommentLikeToggled = function(payload) {
+  if (!payload || !payload.ok) return;
+  clubDetailState.comments = clubDetailState.comments.map(c =>
+    c.id === payload.commentId ? { ...c, likedByMe: Boolean(payload.liked), likes: Number(payload.likes) || 0 } : c
+  );
+  renderClubDetailComments();
+};
+
+function toggleClubCommentReplies(commentId) {
+  const expanded = Boolean(clubDetailState.expandedReplies[commentId]);
+  clubDetailState.expandedReplies[commentId] = !expanded;
+  if (!expanded && !clubDetailState.repliesByComment[commentId]) {
+    window.AndroidBridge?.fetchPostCommentReplies?.(clubDetailState.postId, commentId);
+  }
+  renderClubDetailComments();
+}
+
+window.onClubRepliesLoaded = function(payload) {
+  if (!payload || !payload.ok || payload.postId !== clubDetailState.postId) return;
+  clubDetailState.repliesByComment[payload.commentId] = Array.isArray(payload.replies) ? payload.replies : [];
+  clubDetailState.expandedReplies[payload.commentId] = true;
+  renderClubDetailComments();
+};
+
+window.onClubReplyAdded = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "تعذر إرسال الرد");
+    return;
+  }
+  const inp = document.getElementById("club-detail-comment-input");
+  if (inp) inp.value = "";
+  cancelClubReplyTarget();
+  if (payload.postId === clubDetailState.postId && payload.reply) {
+    const arr = clubDetailState.repliesByComment[payload.commentId] || [];
+    clubDetailState.repliesByComment[payload.commentId] = [...arr, payload.reply];
+    clubDetailState.expandedReplies[payload.commentId] = true;
+    clubDetailState.comments = clubDetailState.comments.map(c =>
+      c.id === payload.commentId ? { ...c, replyCount: Number(payload.replyCount) || (c.replyCount + 1) } : c
+    );
+    renderClubDetailComments();
+  }
+};
+
+window.onClubReplyDeleted = function(payload) {
+  if (!payload || !payload.ok) return;
+  const arr = clubDetailState.repliesByComment[payload.commentId] || [];
+  clubDetailState.repliesByComment[payload.commentId] = arr.filter(r => r.id !== payload.replyId);
+  clubDetailState.comments = clubDetailState.comments.map(c =>
+    c.id === payload.commentId ? { ...c, replyCount: Number(payload.replyCount) || 0 } : c
+  );
+  renderClubDetailComments();
+};
+
+window.onClubReplyLikeToggled = function(payload) {
+  if (!payload || !payload.ok) return;
+  const arr = clubDetailState.repliesByComment[payload.commentId] || [];
+  clubDetailState.repliesByComment[payload.commentId] = arr.map(r =>
+    r.id === payload.replyId ? { ...r, likedByMe: Boolean(payload.liked), likes: Number(payload.likes) || 0 } : r
+  );
+  renderClubDetailComments();
+};
+
+function renderClubDetailComments() {
+  const listEl = document.getElementById("club-detail-comments-list");
+  const moreBtn = document.getElementById("btn-club-detail-comments-more");
+  if (!listEl) return;
+  if (moreBtn) moreBtn.style.display = clubDetailState.hasMore ? "block" : "none";
+
+  if (!clubDetailState.comments.length) {
+    listEl.innerHTML = `<div style="text-align:center; padding:16px; font-size:12px; color:var(--muted);">لا توجد تعليقات بعد. كن أول المعلقين!</div>`;
+    return;
+  }
+  const postAuthorUid = (clubDetailState.post && clubDetailState.post.authorUid) || "";
+  listEl.innerHTML = clubDetailState.comments.map(c => {
+    const canDel = communitySession.isAdmin || (communitySession.authenticated && (communitySession.uid === c.uid || communitySession.uid === postAuthorUid));
+    const replies = clubDetailState.repliesByComment[c.id] || [];
+    const showReplies = Boolean(clubDetailState.expandedReplies[c.id]);
+    const repliesHtml = showReplies ? `
+      <div class="club-reply-indent">
+        ${replies.length ? replies.map(r => {
+          const canDelR = communitySession.isAdmin || (communitySession.authenticated && (communitySession.uid === r.uid || communitySession.uid === postAuthorUid));
+          return `
+            <div style="background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                <b style="font-size:11.5px; color:var(--text); cursor:pointer;" onclick="openUserProfileModal('${escapeHTML(r.uid)}')">${escapeHTML(r.name || "عضو")}</b>
+                <span style="font-size:10px; color:var(--muted);">${escapeHTML(formatClubRelativeTime(r.createdAt))}</span>
+              </div>
+              <div style="font-size:12px; color:var(--text); margin:4px 0; line-height:1.5;">${linkifyClubTextHtml(r.text)}</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button" class="mini-action-btn" style="${r.likedByMe ? "color:var(--a1);" : ""}" onclick="window.AndroidBridge?.togglePostCommentReplyLike?.('${escapeHTML(clubDetailState.postId)}','${escapeHTML(c.id)}','${escapeHTML(r.id)}')">👍 ${Number(r.likes) || 0}</button>
+                <button type="button" class="mini-action-btn" onclick="openReasonDialog('إبلاغ عن رد', 'سبب الإبلاغ:', 'مسيء', (rsn) => window.AndroidBridge?.reportClubTarget?.('club_reply', '${escapeHTML(r.id)}', '${escapeHTML(clubDetailState.postId)}', rsn))">🚩</button>
+                ${canDelR ? `<button type="button" class="mini-action-btn" style="color:var(--danger);" onclick="window.AndroidBridge?.deletePostCommentReply?.('${escapeHTML(clubDetailState.postId)}','${escapeHTML(c.id)}','${escapeHTML(r.id)}')">🗑️</button>` : ""}
+              </div>
+            </div>
+          `;
+        }).join("") : `<div style="font-size:11px; color:var(--muted); padding:4px 0;">جاري التحميل…</div>`}
+      </div>
+    ` : "";
+
+    return `
+      <div style="background:var(--surface2); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <div style="display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="openUserProfileModal('${escapeHTML(c.uid)}')">
+            <b style="font-size:12px; color:var(--text);">${escapeHTML(c.name || "عضو")}</b>
+            ${buildAuthorBadgesHtml(c)}
+          </div>
+          <span style="font-size:10px; color:var(--muted);">${escapeHTML(formatClubRelativeTime(c.createdAt))}</span>
+        </div>
+        <div style="font-size:12.5px; color:var(--text); margin:5px 0 7px; line-height:1.55;">${linkifyClubTextHtml(c.text)}</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button type="button" class="mini-action-btn" style="${c.likedByMe ? "color:var(--a1);" : ""}" onclick="window.AndroidBridge?.togglePostCommentLike?.('${escapeHTML(clubDetailState.postId)}','${escapeHTML(c.id)}')">👍 ${Number(c.likes) || 0}</button>
+          <button type="button" class="mini-action-btn" onclick="startClubReplyToComment('${escapeHTML(c.id)}', '${escapeHTML(c.name || "عضو")}')">↩️ رد</button>
+          ${c.replyCount > 0 ? `<button type="button" class="mini-action-btn" onclick="toggleClubCommentReplies('${escapeHTML(c.id)}')">💬 الردود (${c.replyCount})</button>` : ""}
+          <button type="button" class="mini-action-btn" onclick="openReasonDialog('إبلاغ عن تعليق', 'سبب الإبلاغ:', 'مسيء', (rsn) => window.AndroidBridge?.reportClubTarget?.('club_comment', '${escapeHTML(c.id)}', '${escapeHTML(clubDetailState.postId)}', rsn))">🚩</button>
+          ${canDel ? `<button type="button" class="mini-action-btn" style="color:var(--danger);" onclick="window.AndroidBridge?.deletePostComment?.('${escapeHTML(clubDetailState.postId)}','${escapeHTML(c.id)}')">🗑️</button>` : ""}
+        </div>
+        ${repliesHtml}
+      </div>
+    `;
+  }).join("");
+}
+
+// ---------------- PROFILE FOLLOW, MEMBER POSTS & TIMED MODERATION ----------------
+function toggleFollowViewedUser() {
+  if (!viewedProfileData || !viewedProfileData.uid) return;
+  if (!communitySession.authenticated) {
+    triggerUserGoogleSignIn();
+    return;
+  }
+  const nextFollow = !viewedProfileData.isFollowingByMe;
+  window.AndroidBridge?.toggleFollowUser?.(viewedProfileData.uid, nextFollow);
+}
+
+window.onUserFollowToggled = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "تعذر تحديث المتابعة");
+    return;
+  }
+  if (viewedProfileData && viewedProfileData.uid === payload.targetUid) {
+    const wasFollowing = Boolean(viewedProfileData.isFollowingByMe);
+    const nowFollowing = Boolean(payload.following);
+    viewedProfileData.isFollowingByMe = nowFollowing;
+    if (wasFollowing !== nowFollowing) {
+      viewedProfileData.followersCount = Math.max(0, (Number(viewedProfileData.followersCount) || 0) + (nowFollowing ? 1 : -1));
+    }
+    window.onUserProfileLoaded({ ...viewedProfileData, ok: true });
+  }
+};
+
+function loadProfileClubPosts(uid) {
+  const box = document.getElementById("profile-club-posts-list");
+  if (!box) return;
+  box.innerHTML = `<div style="font-size:11.5px; color:var(--muted); padding:8px 0;">جاري تحميل منشورات العضو…</div>`;
+  window.AndroidBridge?.fetchClubFeed?.("user", "", 0, uid);
+}
+
+function renderProfileClubPostsResult(payload) {
+  const box = document.getElementById("profile-club-posts-list");
+  if (!box) return;
+  if (!viewedProfileData || viewedProfileData.uid !== payload.filterUid) return;
+  if (!payload.ok) {
+    box.innerHTML = renderErrorCardHtml(payload.error || "تعذر جلب المنشورات");
+    return;
+  }
+  const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  if (!posts.length) {
+    box.innerHTML = `<div style="font-size:11.5px; color:var(--muted); padding:8px 0;">لا توجد منشورات لهذا العضو في النادي بعد.</div>`;
+    return;
+  }
+  box.innerHTML = posts.map(p => renderClubPostCard(p)).join("");
+}
+
+function adminWarnViewedUser() {
+  if (!viewedProfileData || !communitySession.isAdmin) return;
+  const uid = viewedProfileData.uid;
+  openReasonDialog("توجيه تنبيه إداري", "اكتب رسالة التنبيه التي ستصل في إشعارات العضو:", "يرجى الالتزام بقوانين النادي", (msg) => {
+    window.AndroidBridge?.adminModerateUser?.(uid, "send_warning", JSON.stringify({ message: msg }));
+  });
+}
+
+function adminMuteViewedUser(hours) {
+  if (!viewedProfileData || !communitySession.isAdmin) return;
+  const uid = viewedProfileData.uid;
+  window.AndroidBridge?.adminModerateUser?.(uid, "set_mute", JSON.stringify({
+    muted: hours > 0,
+    durationHours: Number(hours) || 0,
+    reason: hours > 0 ? `كتم من النشر والتعليق لمدة ${hours} ساعة` : ""
+  }));
+}
+
+function adminTimedBlockViewedUser(hours) {
+  if (!viewedProfileData || !communitySession.isAdmin) return;
+  const uid = viewedProfileData.uid;
+  window.AndroidBridge?.adminModerateUser?.(uid, "set_block", JSON.stringify({
+    blocked: true,
+    durationHours: Number(hours) || 24,
+    reason: `تقييد مؤقت لمدة ${hours} ساعة`
+  }));
+}
+
+// ---------------- ADMIN TAB 10: CLUB MODERATION & CONFIG ----------------
+function initAdminClubTab() {
+  window.AndroidBridge?.fetchClubConfig?.();
+  syncAdminClubConfigInputs();
+  adminFetchClubPostsList(adminClubState.filter || "all");
+  window.AndroidBridge?.adminFetchClubReports?.();
+}
+
+function syncAdminClubConfigInputs() {
+  const enEl = document.getElementById("adm-club-enabled");
+  const msgEl = document.getElementById("adm-club-maint-msg");
+  const catEl = document.getElementById("adm-club-categories");
+  const banEl = document.getElementById("adm-club-banned-words");
+  const domEl = document.getElementById("adm-club-allowed-domains");
+  const maxEl = document.getElementById("adm-club-max-daily");
+  const newEl = document.getElementById("adm-club-new-daily");
+  const cdEl = document.getElementById("adm-club-cooldown");
+  const imgEl = document.getElementById("adm-club-allow-images");
+  const vidEl = document.getElementById("adm-club-allow-videos");
+  const lnkEl = document.getElementById("adm-club-allow-links");
+
+  if (enEl) enEl.checked = clubConfig.clubEnabled !== false;
+  if (msgEl) msgEl.value = clubConfig.maintenanceMessage || "";
+  if (catEl) catEl.value = (clubConfig.categories || []).join(", ");
+  if (banEl) banEl.value = (clubConfig.bannedWords || []).join(", ");
+  if (domEl) domEl.value = (clubConfig.allowedDomains || []).join(", ");
+  if (maxEl) maxEl.value = String(clubConfig.maxDailyPosts || 15);
+  if (newEl) newEl.value = String(clubConfig.newUserDailyPosts || 5);
+  if (cdEl) cdEl.value = String(clubConfig.postCooldownSec || 30);
+  if (imgEl) imgEl.checked = clubConfig.allowImages !== false;
+  if (vidEl) vidEl.checked = clubConfig.allowVideos !== false;
+  if (lnkEl) lnkEl.checked = clubConfig.allowLinks !== false;
+}
+
+function adminSaveClubConfigClick() {
+  const parseCsv = (val) => String(val || "").split(/[,،\n]/).map(s => s.trim()).filter(Boolean);
+  const payload = {
+    clubEnabled: Boolean(document.getElementById("adm-club-enabled")?.checked),
+    maintenanceMessage: (document.getElementById("adm-club-maint-msg")?.value || "").trim(),
+    categories: parseCsv(document.getElementById("adm-club-categories")?.value),
+    bannedWords: parseCsv(document.getElementById("adm-club-banned-words")?.value),
+    allowedDomains: parseCsv(document.getElementById("adm-club-allowed-domains")?.value),
+    maxDailyPosts: Number(document.getElementById("adm-club-max-daily")?.value) || 15,
+    newUserDailyPosts: Number(document.getElementById("adm-club-new-daily")?.value) || 5,
+    postCooldownSec: Number(document.getElementById("adm-club-cooldown")?.value) || 30,
+    allowImages: Boolean(document.getElementById("adm-club-allow-images")?.checked),
+    allowVideos: Boolean(document.getElementById("adm-club-allow-videos")?.checked),
+    allowLinks: Boolean(document.getElementById("adm-club-allow-links")?.checked)
+  };
+  if (payload.categories.length === 0) payload.categories = ["عام"];
+  window.AndroidBridge?.adminSaveModerationConfig?.(JSON.stringify(payload));
+}
+
+window.onAdminClubConfigSaved = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "فشل حفظ إعدادات النادي");
+  }
+};
+
+function adminFetchClubPostsList(filter) {
+  adminClubState.filter = filter || "all";
+  document.querySelectorAll("#admin-club-post-filters [data-club-adm-filter]").forEach(btn => {
+    const active = btn.getAttribute("data-club-adm-filter") === adminClubState.filter;
+    btn.style.background = active ? "rgba(124,92,255,0.22)" : "";
+    btn.style.color = active ? "#fff" : "";
+  });
+  const listEl = document.getElementById("admin-club-posts-list");
+  if (listEl) listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:10px 0;">جاري تحميل منشورات النادي…</div>`;
+  window.AndroidBridge?.adminFetchClubPosts?.(adminClubState.filter);
+}
+
+window.onAdminClubPostsLoaded = function(payload) {
+  const listEl = document.getElementById("admin-club-posts-list");
+  if (!listEl) return;
+  if (!payload || !payload.ok) {
+    listEl.innerHTML = renderErrorCardHtml((payload && payload.error) || "تعذر تحميل المنشورات");
+    return;
+  }
+  adminClubState.posts = Array.isArray(payload.posts) ? payload.posts : [];
+  renderAdminClubPostsList();
+};
+
+function renderAdminClubPostsList() {
+  const listEl = document.getElementById("admin-club-posts-list");
+  if (!listEl) return;
+  if (!adminClubState.posts.length) {
+    listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); padding:10px 0;">لا توجد منشورات مطابقة للفلتر الحالي.</div>`;
+    return;
+  }
+  listEl.innerHTML = adminClubState.posts.map(p => {
+    const pId = escapeHTML(p.id);
+    return `
+      <div class="sub-card" style="padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <b style="font-size:12px; cursor:pointer;" onclick="openUserProfileModal('${escapeHTML(p.authorUid)}')">${escapeHTML(p.authorName || "عضو")}</b>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            ${p.pinned ? `<span class="pin-badge-pill">📌 مثبت</span>` : ""}
+            ${p.status === "hidden" ? `<span class="sub-status-pill rejected">🙈 مخفي</span>` : `<span class="sub-status-pill approved">👁 مرئي</span>`}
+          </div>
+        </div>
+        <div style="font-size:11.5px; color:var(--text); margin:6px 0; line-height:1.45;">${escapeHTML((p.text || "(منشور وسائط / تصويت)").slice(0, 140))}</div>
+        <div style="display:flex; gap:5px; flex-wrap:wrap;">
+          <button type="button" class="mini-action-btn" onclick="openClubPostDetailSheet('${pId}')">👁 عرض</button>
+          <button type="button" class="mini-action-btn" onclick="adminModClubPost('${pId}', 'pin', ${!p.pinned})">${p.pinned ? "إلغاء التثبيت" : "📌 تثبيت"}</button>
+          <button type="button" class="mini-action-btn" onclick="adminModClubPost('${pId}', 'hide', ${p.status !== "hidden"})">${p.status === "hidden" ? "✅ إظهار" : "🙈 إخفاء"}</button>
+          <button type="button" class="mini-action-btn" onclick="adminModClubPost('${pId}', 'lock_comments', ${!p.commentsLocked})">${p.commentsLocked ? "🔓 فتح التعليقات" : "🔒 قفل التعليقات"}</button>
+          <button type="button" class="mini-action-btn" onclick="openClubComposerById('${pId}')">✏️ تعديل</button>
+          <button type="button" class="mini-action-btn" style="color:var(--danger);" onclick="adminModClubPost('${pId}', 'delete', true)">🗑️ حذف</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function adminModClubPost(postId, action, value) {
+  if (action === "delete" && !confirm("حذف هذا المنشور نهائياً؟")) return;
+  window.AndroidBridge?.adminModerateClubPost?.(postId, action, JSON.stringify({ value: Boolean(value) }));
+}
+
+window.onAdminClubPostModerated = function(payload) {
+  if (!payload || !payload.ok) {
+    showToast((payload && payload.error) || "فشل تنفيذ الإجراء");
+    return;
+  }
+  adminFetchClubPostsList(adminClubState.filter || "all");
+  window.AndroidBridge?.adminFetchClubReports?.();
+  if (clubState.posts.some(p => p.id === payload.postId)) {
+    refreshClubFeed(true);
+  }
+};
+
+window.onAdminClubReportsLoaded = function(payload) {
+  const listEl = document.getElementById("admin-club-reports-list");
+  if (!listEl) return;
+  if (!payload || !payload.ok) {
+    listEl.innerHTML = renderErrorCardHtml((payload && payload.error) || "تعذر تحميل بلاغات النادي");
+    return;
+  }
+  adminClubState.reports = Array.isArray(payload.reports) ? payload.reports : [];
+  adminClubState.reportedPosts = Array.isArray(payload.reportedPosts) ? payload.reportedPosts : [];
+
+  const blocks = [];
+  adminClubState.reportedPosts.forEach(p => {
+    const pId = escapeHTML(p.id);
+    blocks.push(`
+      <div class="sub-card" style="padding:10px; border-color:rgba(255,77,109,0.4);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>🚩 منشور مُبلّغ عنه (${Number(p.reportsCount) || 0} بلاغ)</b>
+          <span class="sub-status-pill ${p.status === "hidden" ? "rejected" : "pending"}">${p.status === "hidden" ? "مخفي تلقائياً" : "مرئي"}</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--muted); margin:4px 0;">الكاتب: ${escapeHTML(p.authorName || "")} • ${escapeHTML((p.text || "").slice(0, 110))}</div>
+        <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;">
+          <button type="button" class="mini-action-btn" onclick="openClubPostDetailSheet('${pId}')">👁 معاينة</button>
+          <button type="button" class="mini-action-btn" onclick="openUserProfileModal('${escapeHTML(p.authorUid)}')">👤 الكاتب</button>
+          <button type="button" class="mini-action-btn" onclick="adminModClubPost('${pId}', 'hide', ${p.status !== "hidden"})">${p.status === "hidden" ? "✅ استعادة" : "🙈 إخفاء"}</button>
+          <button type="button" class="mini-action-btn" style="color:var(--danger);" onclick="adminModClubPost('${pId}', 'delete', true)">🗑️ حذف</button>
+        </div>
+      </div>
+    `);
+  });
+
+  adminClubState.reports.forEach(r => {
+    blocks.push(`
+      <div class="sub-card" style="padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>بلاغ (${escapeHTML(r.targetType)})</b>
+          <span style="font-size:10px; color:var(--muted);">${escapeHTML(formatClubRelativeTime(r.createdAt))}</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--text); margin:4px 0;">السبب: ${escapeHTML(r.reason || "")}</div>
+        <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;">
+          ${r.parentId ? `<button type="button" class="mini-action-btn" onclick="openClubPostDetailSheet('${escapeHTML(r.parentId)}')">👁 المنشور</button>` : ""}
+          <button type="button" class="mini-action-btn" style="color:#34D399;" onclick="window.AndroidBridge?.resolveReport?.('${escapeHTML(r.id)}', 'resolved'); setTimeout(() => window.AndroidBridge?.adminFetchClubReports?.(), 400);">✓ إغلاق البلاغ</button>
+        </div>
+      </div>
+    `);
+  });
+
+  listEl.innerHTML = blocks.length ? blocks.join("") : `<div style="font-size:12px; color:var(--muted); padding:8px 0;">لا توجد بلاغات أو منشورات مخفية في النادي حالياً.</div>`;
 };
 </script>
 </body>

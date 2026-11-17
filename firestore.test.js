@@ -82,16 +82,18 @@ test("Non-admin signed-in user: cannot read or write config/github or config/app
   await assertFails(aliceDb.collection("config").doc("appTheme").set({ id: "hacked" }));
 });
 
-test("Approved admin: can read config/github, cannot write config/github or admins", async () => {
+test("Approved admin: can read/write config/github and admins, and non-admins remain blocked", async () => {
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     await ctx.firestore().collection("admins").doc(ADMIN_EMAIL).set({ approved: true });
     await ctx.firestore().collection("config").doc("github").set({ token: "shared-token" });
   });
   const adminDb = testEnv.authenticatedContext("uid_admin", { email: ADMIN_EMAIL, email_verified: true }).firestore();
+  const bobDb = testEnv.authenticatedContext("uid_bob", { email: USER_B_EMAIL, email_verified: true }).firestore();
   await assertSucceeds(adminDb.collection("admins").doc(ADMIN_EMAIL).get());
   await assertSucceeds(adminDb.collection("config").doc("github").get());
-  await assertFails(adminDb.collection("config").doc("github").set({ token: "changed" }));
-  await assertFails(adminDb.collection("admins").doc(USER_A_EMAIL).set({ approved: true }));
+  await assertSucceeds(adminDb.collection("config").doc("github").set({ token: "changed" }));
+  await assertSucceeds(adminDb.collection("admins").doc(USER_A_EMAIL).set({ approved: true }));
+  await assertFails(bobDb.collection("admins").doc(USER_B_EMAIL).set({ approved: true }));
 });
 
 test("Owner konami123mw@gmail.com: always treated as admin and can read/write config/github and admins", async () => {
@@ -430,3 +432,279 @@ test("submissions, notifications & auditLog: open submissions for normal users, 
   await assertFails(adminDb.collection("auditLog").doc("log1").delete());
 });
 
+test("Club posts, media, reactions, polls, auto-hide reports, follows, bookmarks, and moderation", async () => {
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore().collection("admins").doc(ADMIN_EMAIL).set({ approved: true });
+    await ctx.firestore().collection("users").doc("uid_alice").set({ uid: "uid_alice", blocked: false, muted: false });
+    await ctx.firestore().collection("users").doc("uid_bob").set({ uid: "uid_bob", blocked: false, muted: false });
+    await ctx.firestore().collection("users").doc("uid_muted").set({ uid: "uid_muted", blocked: false, muted: true, mutedUntil: 0 });
+    await ctx.firestore().collection("config").doc("moderation").set({
+      clubEnabled: true,
+      bannedWords: ["كلمة_ممنوعة"],
+      maxDailyPosts: 10
+    });
+  });
+
+  const unauthDb = testEnv.unauthenticatedContext().firestore();
+  const aliceDb = testEnv.authenticatedContext("uid_alice", { email: USER_A_EMAIL, email_verified: true }).firestore();
+  const bobDb = testEnv.authenticatedContext("uid_bob", { email: USER_B_EMAIL, email_verified: true }).firestore();
+  const mutedDb = testEnv.authenticatedContext("uid_muted", { email: "muted@gmail.com", email_verified: true }).firestore();
+  const adminDb = testEnv.authenticatedContext("uid_admin", { email: ADMIN_EMAIL, email_verified: true }).firestore();
+
+  // Guest can read config/moderation & visible posts, cannot write
+  await assertSucceeds(unauthDb.collection("config").doc("moderation").get());
+  await assertFails(aliceDb.collection("config").doc("moderation").set({ clubEnabled: false }));
+  await assertSucceeds(adminDb.collection("config").doc("moderation").set({ clubEnabled: true }, { merge: true }));
+
+  const basePost = {
+    authorUid: "uid_alice",
+    authorName: "Alice",
+    authorUsername: "alice_dev",
+    authorPhoto: "",
+    authorFrame: "",
+    authorBadges: [],
+    authorIsAdmin: false,
+    authorIsPublisher: false,
+    text: "أهلاً بكم في النادي!",
+    category: "عام",
+    themeRef: "",
+    videoUrl: "",
+    videoDurationSec: 0,
+    mediaCount: 1,
+    poll: {
+      question: "أفضل ثيم؟",
+      options: [{ text: "داكن", votes: 0 }, { text: "فاتح", votes: 0 }],
+      totalVotes: 0
+    },
+    likesCount: 0,
+    commentsCount: 0,
+    reportsCount: 0,
+    engagementScore: 0,
+    reactions: { like: 0, love: 0, haha: 0, wow: 0, fire: 0 },
+    mentions: [],
+    status: "visible",
+    pinned: false,
+    isAnnouncement: false,
+    commentsLocked: false,
+    createdAt: 10000,
+    updatedAt: 10000
+  };
+
+  // Muted user cannot create post; regular user cannot create pre-pinned or spoofed authorUid
+  await assertFails(mutedDb.collection("posts").doc("p_muted").set({ ...basePost, authorUid: "uid_muted" }));
+  await assertFails(aliceDb.collection("posts").doc("p_pin").set({ ...basePost, pinned: true }));
+  await assertFails(aliceDb.collection("posts").doc("p_spoof").set({ ...basePost, authorUid: "uid_bob" }));
+
+  // Alice creates post + media subdoc atomically via batch
+  const batch = aliceDb.batch();
+  batch.set(aliceDb.collection("posts").doc("p1"), basePost);
+  batch.set(aliceDb.collection("posts").doc("p1").collection("media").doc("0"), {
+    index: 0,
+    authorUid: "uid_alice",
+    dataUrl: "data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=",
+    createdAt: 10000
+  });
+  await assertSucceeds(batch.commit());
+
+  // Guest can query visible posts; unfiltered list fails
+  await assertSucceeds(unauthDb.collection("posts").where("status", "==", "visible").get());
+  await assertFails(unauthDb.collection("posts").get());
+
+  // Bob likes & reacts (+1 likesCount) and cannot tamper with status or pinned
+  await assertSucceeds(bobDb.collection("posts").doc("p1").collection("likes").doc("uid_bob").set({
+    uid: "uid_bob",
+    reaction: "fire",
+    createdAt: 11000
+  }));
+  await assertSucceeds(bobDb.collection("posts").doc("p1").update({
+    likesCount: 1,
+    reactions: { like: 0, love: 0, haha: 0, wow: 0, fire: 1 },
+    engagementScore: 1,
+    updatedAt: 11000
+  }));
+  await assertFails(bobDb.collection("posts").doc("p1").update({ likesCount: 50, updatedAt: 11001 }));
+  await assertFails(bobDb.collection("posts").doc("p1").update({ status: "hidden", updatedAt: 11002 }));
+
+  // Bob votes once on poll atomically; second vote rejected
+  const voteBatch = bobDb.batch();
+  voteBatch.set(bobDb.collection("posts").doc("p1").collection("pollVotes").doc("uid_bob"), {
+    uid: "uid_bob",
+    optionIndex: 0,
+    createdAt: 11500
+  });
+  voteBatch.update(bobDb.collection("posts").doc("p1"), {
+    poll: {
+      question: "أفضل ثيم؟",
+      options: [{ text: "داكن", votes: 1 }, { text: "فاتح", votes: 0 }],
+      totalVotes: 1
+    },
+    updatedAt: 11500
+  });
+  await assertSucceeds(voteBatch.commit());
+  await assertFails(bobDb.collection("posts").doc("p1").collection("pollVotes").doc("uid_bob").set({
+    uid: "uid_bob",
+    optionIndex: 1,
+    createdAt: 11600
+  }));
+
+  // Bob sends notification to Alice for post_like (valid), cannot forge submission_approved
+  await assertSucceeds(bobDb.collection("notifications").doc("uid_alice").collection("items").doc("notif_like").set({
+    type: "post_like",
+    title: "إعجاب بمنشورك",
+    body: "أعجب Bob بمنشورك",
+    actorUid: "uid_bob",
+    actorName: "Bob",
+    postId: "p1",
+    themeId: "",
+    submissionId: "",
+    read: false,
+    createdAt: 11700
+  }));
+  await assertFails(bobDb.collection("notifications").doc("uid_alice").collection("items").doc("notif_fake").set({
+    type: "submission_approved",
+    title: "fake",
+    body: "fake",
+    actorUid: "uid_bob",
+    actorName: "Bob",
+    postId: "",
+    themeId: "",
+    submissionId: "",
+    read: false,
+    createdAt: 11700
+  }));
+
+  // Follows & Bookmarks isolation
+  await assertSucceeds(bobDb.collection("follows").doc("uid_bob").collection("following").doc("uid_alice").set({ uid: "uid_alice", createdAt: 12000 }));
+  await assertSucceeds(bobDb.collection("follows").doc("uid_alice").collection("followers").doc("uid_bob").set({ uid: "uid_bob", createdAt: 12000 }));
+  await assertFails(bobDb.collection("follows").doc("uid_alice").collection("following").doc("uid_bob").set({ uid: "uid_bob", createdAt: 12000 }));
+  await assertSucceeds(bobDb.collection("bookmarks").doc("uid_bob").collection("posts").doc("p1").set({ postId: "p1", createdAt: 12000 }));
+  await assertFails(aliceDb.collection("bookmarks").doc("uid_bob").collection("posts").doc("p1").get());
+
+  // 5th distinct report auto-hides post
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore().collection("posts").doc("p1").update({ reportsCount: 4 });
+  });
+  const repBatch = bobDb.batch();
+  repBatch.set(bobDb.collection("posts").doc("p1").collection("postReports").doc("uid_bob"), {
+    reporterUid: "uid_bob",
+    reason: "سبام",
+    createdAt: 13000
+  });
+  repBatch.update(bobDb.collection("posts").doc("p1"), {
+    reportsCount: 5,
+    status: "hidden",
+    updatedAt: 13000
+  });
+  await assertSucceeds(repBatch.commit());
+  // Hidden post now denied to guest, visible to admin & author Alice
+  await assertFails(unauthDb.collection("posts").doc("p1").get());
+  await assertSucceeds(adminDb.collection("posts").doc("p1").get());
+  await assertSucceeds(aliceDb.collection("posts").doc("p1").get());
+
+  // Admin personal token isolated to own uid
+  await assertSucceeds(adminDb.collection("adminTokens").doc("uid_admin").set({ token: "ghp_123", updatedAt: 14000, email: ADMIN_EMAIL }));
+  await assertFails(aliceDb.collection("adminTokens").doc("uid_admin").get());
+});
+
+test("frames/{frameId} & verified/badgeType/frameId/nameStyling security rules", async () => {
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore().collection("admins").doc(ADMIN_EMAIL).set({ approved: true });
+    await ctx.firestore().collection("users").doc("uid_alice").set({
+      uid: "uid_alice",
+      displayName: "Alice",
+      blocked: false,
+      verified: false,
+      badgeType: "",
+      frameId: "",
+      frameAssigned: [],
+      title: "",
+      nameColor: "",
+      nameGradient: "",
+      nameFont: ""
+    });
+  });
+
+  const unauthDb = testEnv.unauthenticatedContext().firestore();
+  const aliceDb = testEnv.authenticatedContext("uid_alice", { email: USER_A_EMAIL, email_verified: true }).firestore();
+  const adminDb = testEnv.authenticatedContext("uid_admin", { email: ADMIN_EMAIL, email_verified: true }).firestore();
+  const ownerDb = testEnv.authenticatedContext("uid_owner", { email: OWNER_EMAIL, email_verified: true }).firestore();
+
+  // Admin can write frames, normal user cannot
+  await assertSucceeds(adminDb.collection("frames").doc("public_sunset").set({
+    id: "public_sunset",
+    name: "غروب ذهبي",
+    type: "gradient",
+    colors: ["#F97316", "#EC4899"],
+    access: "everyone"
+  }));
+  await assertSucceeds(adminDb.collection("frames").doc("admin_shield_frame").set({
+    id: "admin_shield_frame",
+    name: "درع المشرف",
+    type: "animated",
+    colors: ["#D4AF37", "#FDE68A"],
+    access: "admins"
+  }));
+  await assertSucceeds(adminDb.collection("frames").doc("owner_crown_frame").set({
+    id: "owner_crown_frame",
+    name: "تاج المالك",
+    type: "animated",
+    colors: ["#D4AF37", "#7C5CFF"],
+    access: "owner"
+  }));
+  await assertSucceeds(adminDb.collection("frames").doc("vip_assigned_frame").set({
+    id: "vip_assigned_frame",
+    name: "إطار كبار الشخصيات",
+    type: "conic",
+    colors: ["#00F5D4", "#FF2E93"],
+    access: "assigned"
+  }));
+  await assertFails(aliceDb.collection("frames").doc("hacked_frame").set({
+    id: "hacked_frame",
+    name: "Hack",
+    type: "solid",
+    colors: ["#FFFFFF"],
+    access: "everyone"
+  }));
+
+  // Public read on frames works even unauthenticated
+  await assertSucceeds(unauthDb.collection("frames").doc("public_sunset").get());
+
+  // Normal user CANNOT spoof verified, badgeType, frameAssigned, title, nameColor, nameGradient, or nameFont
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ verified: true }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ badgeType: "verified" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ frameAssigned: ["vip_assigned_frame"] }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ title: "المالك" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ nameColor: "#D4AF37" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ nameGradient: "linear-gradient(90deg,#D4AF37,#7C5CFF)" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ nameFont: "Playfair Display" }));
+
+  // Normal user CAN equip an 'everyone' frame
+  await assertSucceeds(aliceDb.collection("users").doc("uid_alice").update({ frameId: "public_sunset" }));
+  // Normal user CANNOT equip 'admins', 'owner', non-existent, or unassigned 'assigned' frame
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ frameId: "admin_shield_frame" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ frameId: "owner_crown_frame" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ frameId: "vip_assigned_frame" }));
+  await assertFails(aliceDb.collection("users").doc("uid_alice").update({ frameId: "missing_frame" }));
+
+  // Admin assigns vip_assigned_frame & verified status to Alice
+  await assertSucceeds(adminDb.collection("users").doc("uid_alice").update({
+    verified: true,
+    badgeType: "verified",
+    frameAssigned: ["vip_assigned_frame"],
+    title: "مبدع موثّق",
+    nameColor: "#D4AF37",
+    nameFont: "Cairo"
+  }));
+
+  // Now Alice CAN equip her assigned frame and can also clear frameId
+  await assertSucceeds(aliceDb.collection("users").doc("uid_alice").update({ frameId: "vip_assigned_frame" }));
+  await assertSucceeds(aliceDb.collection("users").doc("uid_alice").update({ frameId: "" }));
+
+  // Owner can create/update profile and select owner_crown_frame
+  await assertSucceeds(ownerDb.collection("users").doc("uid_owner").set({
+    uid: "uid_owner",
+    displayName: "Owner",
+    frameId: "owner_crown_frame",
+    verified: true
+  }));
+});

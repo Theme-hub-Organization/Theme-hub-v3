@@ -43,6 +43,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="themehub" android:host="theme" />
+                <data android:scheme="themehub" android:host="post" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

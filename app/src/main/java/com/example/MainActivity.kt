@@ -94,9 +94,14 @@ class MainActivity : ComponentActivity() {
     internal var currentUserIsAdmin: Boolean = false
     internal var currentUserIsPublisher: Boolean = false
     internal var currentUserBlocked: Boolean = false
+    internal var currentUserMuted: Boolean = false
 
     internal val communityManager: CommunityFirestoreManager by lazy {
         CommunityFirestoreManager(this, lifecycleScope)
+    }
+
+    internal val clubManager: ClubFirestoreManager by lazy {
+        ClubFirestoreManager(this, lifecycleScope, communityManager)
     }
 
     internal val appThemeManager: AppThemeDesignerManager by lazy {
@@ -171,12 +176,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private var initialThemeDeepLink: String? = null
+    private var initialPostDeepLink: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         (application as? ThemeHubApplication)?.ensureFirebaseInitialized()
         initialThemeDeepLink = extractThemeIdFromIntent(intent)
+        initialPostDeepLink = extractPostIdFromIntent(intent)
         setContent {
             ThemeHubApp(
                 onWebViewReady = { wv ->
@@ -186,6 +193,11 @@ class MainActivity : ComponentActivity() {
                         val q = JSONObject.quote(tid)
                         wv.post { wv.evaluateJavascript("window.openThemeById?.($q);", null) }
                         initialThemeDeepLink = null
+                    }
+                    initialPostDeepLink?.let { pid ->
+                        val q = JSONObject.quote(pid)
+                        wv.post { wv.evaluateJavascript("window.openClubPostById?.($q);", null) }
+                        initialPostDeepLink = null
                     }
                 },
                 onExitApp = { finish() }
@@ -201,10 +213,25 @@ class MainActivity : ComponentActivity() {
             val q = JSONObject.quote(tid)
             evaluateJs("window.openThemeById?.($q);")
         }
+        val pid = extractPostIdFromIntent(intent)
+        if (!pid.isNullOrBlank()) {
+            val q = JSONObject.quote(pid)
+            evaluateJs("window.openClubPostById?.($q);")
+        }
     }
 
     private fun extractThemeIdFromIntent(intent: Intent?): String? {
         val raw = intent?.data?.getQueryParameter("theme") ?: intent?.getStringExtra("themeId")
+        return raw?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun extractPostIdFromIntent(intent: Intent?): String? {
+        val data = intent?.data
+        val qParam = data?.getQueryParameter("post")
+        val schemeHostParam = if (data?.scheme == "themehub" && data.host == "post") {
+            data.lastPathSegment ?: data.getQueryParameter("id")
+        } else null
+        val raw = qParam ?: schemeHostParam ?: intent?.getStringExtra("postId")
         return raw?.trim()?.takeIf { it.isNotEmpty() }
     }
 
@@ -226,6 +253,7 @@ class MainActivity : ComponentActivity() {
 
     private fun detachCommunityListeners() {
         communityManager.detachAllListeners()
+        clubManager.detachAllListeners()
         appThemeManager.detachListener()
     }
 
@@ -239,10 +267,19 @@ class MainActivity : ComponentActivity() {
                 wv.post { wv.evaluateJavascript("window.openThemeById?.($q);", null) }
                 initialThemeDeepLink = null
             }
+            val pendingPost = initialPostDeepLink
+            if (!pendingPost.isNullOrBlank()) {
+                val q = JSONObject.quote(pendingPost)
+                wv.post { wv.evaluateJavascript("window.openClubPostById?.($q);", null) }
+                initialPostDeepLink = null
+            }
             appThemeManager.startAppThemeListener()
+            appThemeManager.fetchFrames()
             restoreAdminSessionOnStartup()
         }
     }
+
+    internal fun isOwnerSession(): Boolean = isOwnerEmail(Firebase.auth.currentUser?.email)
 
     private fun flushPendingAuthJs(wv: WebView) {
         val pending = pendingAuthJs ?: return
@@ -288,6 +325,10 @@ class MainActivity : ComponentActivity() {
                         type = "image/*"
                         putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/png", "image/jpeg", "image/webp", "image/gif"))
                     }
+                    wantsVideo -> {
+                        type = "video/*"
+                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/mp4", "video/webm"))
+                    }
                     else -> {
                         type = "*/*"
                         putExtra(
@@ -306,7 +347,12 @@ class MainActivity : ComponentActivity() {
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 }
             }
-            val title = if (wantsImage && wantsVideo) "اختر صور وفيديوهات المعاينة" else if (wantsImage) "اختر صور المعاينة" else "اختر ملف الثيم"
+            val title = when {
+                wantsImage && wantsVideo -> "اختر صور وفيديوهات المعاينة"
+                wantsImage -> "اختر صور المعاينة"
+                wantsVideo -> "اختر فيديو المعاينة"
+                else -> "اختر ملف الثيم"
+            }
             fileChooserLauncher.launch(Intent.createChooser(intent, title))
             true
         } catch (e: Exception) {
@@ -338,6 +384,7 @@ class MainActivity : ComponentActivity() {
             currentUserIsAdmin = false
             currentUserIsPublisher = false
             currentUserBlocked = false
+            currentUserMuted = false
             detachCommunityListeners()
             sendAuthIdleToJs()
             sendUserSessionSignedOutToJs()
@@ -473,6 +520,7 @@ class MainActivity : ComponentActivity() {
         // 2. Load or initialize community user profile in users/{uid} (also auto-claims @username)
         val profile = communityManager.ensureUserProfileInitialized(user, isOwner, isAllowlistedAdmin)
         currentUserBlocked = profile.blocked
+        currentUserMuted = profile.muted
         currentUserIsPublisher = profile.publisher
         currentUserIsAdmin = profile.isAdmin
 
@@ -795,6 +843,7 @@ class MainActivity : ComponentActivity() {
         currentUserIsAdmin = false
         currentUserIsPublisher = false
         currentUserBlocked = false
+        currentUserMuted = false
         detachCommunityListeners()
         lifecycleScope.launch(NonCancellable) {
             try {
@@ -825,9 +874,21 @@ class MainActivity : ComponentActivity() {
             put("hideCommentsCount", profile.hideCommentsCount)
             put("badges", JSONArray(profile.badges))
             put("frame", profile.frame)
+            put("frameId", profile.frameId)
+            put("frameAssigned", JSONArray(profile.frameAssigned))
             put("customTitle", profile.customTitle)
+            put("title", profile.title)
+            put("verified", profile.verified)
+            put("badgeType", profile.badgeType)
+            put("nameColor", profile.nameColor)
+            put("nameGradient", profile.nameGradient)
+            put("nameFont", profile.nameFont)
             put("createdAt", profile.createdAt)
             put("blocked", profile.blocked)
+            put("blockedUntil", profile.blockedUntil)
+            put("muted", profile.muted)
+            put("mutedUntil", profile.mutedUntil)
+            put("clubRulesAccepted", profile.clubRulesAccepted)
             put("publisher", profile.publisher)
             put("isAdmin", profile.isAdmin)
             put("isOwner", profile.isOwner)
@@ -852,8 +913,20 @@ class MainActivity : ComponentActivity() {
             put("hideCommentsCount", false)
             put("badges", JSONArray())
             put("frame", "")
+            put("frameId", "")
+            put("frameAssigned", JSONArray())
             put("customTitle", "")
+            put("title", "")
+            put("verified", false)
+            put("badgeType", "")
+            put("nameColor", "")
+            put("nameGradient", "")
+            put("nameFont", "")
             put("blocked", false)
+            put("blockedUntil", 0L)
+            put("muted", false)
+            put("mutedUntil", 0L)
+            put("clubRulesAccepted", false)
             put("publisher", false)
             put("isAdmin", false)
             put("isOwner", false)
@@ -876,6 +949,8 @@ class MainActivity : ComponentActivity() {
                 val snap = Firebase.firestore.collection("themes").limit(200).get().await()
                 val mapObj = JSONObject()
                 val metaObj = JSONObject()
+                val publisherUids = snap.documents.mapNotNull { it.getString("publisherUid")?.takeIf { u -> u.isNotBlank() } }.distinct()
+                val publisherSummaries = if (publisherUids.isNotEmpty()) communityManager.fetchUserSummaries(publisherUids) else emptyMap()
                 snap.documents.forEach { doc ->
                     val avg = doc.getDouble("ratingAvg")
                     val count = doc.getLong("ratingCount")?.toInt() ?: 0
@@ -892,6 +967,7 @@ class MainActivity : ComponentActivity() {
                     val publisherUid = doc.getString("publisherUid") ?: ""
                     val publisherName = doc.getString("publisherName") ?: ""
                     val publisherUsername = doc.getString("publisherUsername") ?: ""
+                    val pubSummary = publisherSummaries[publisherUid]
                     if (pinned || hidden || titleOverride.isNotEmpty() || categoryOverride.isNotEmpty() || publisherUid.isNotEmpty()) {
                         metaObj.put(doc.id, JSONObject().apply {
                             put("pinned", pinned)
@@ -899,8 +975,19 @@ class MainActivity : ComponentActivity() {
                             put("titleOverride", titleOverride)
                             put("categoryOverride", categoryOverride)
                             put("publisherUid", publisherUid)
-                            put("publisherName", publisherName)
-                            put("publisherUsername", publisherUsername)
+                            put("publisherName", pubSummary?.optString("displayName")?.ifBlank { null } ?: publisherName)
+                            put("publisherUsername", pubSummary?.optString("username")?.ifBlank { null } ?: publisherUsername)
+                            put("publisherPhoto", pubSummary?.optString("photoURL") ?: "")
+                            put("publisherFrameId", pubSummary?.optString("frameId") ?: "")
+                            put("publisherVerified", pubSummary?.optBoolean("verified") ?: false)
+                            put("publisherBadgeType", pubSummary?.optString("badgeType") ?: "")
+                            put("publisherIsAdmin", pubSummary?.optBoolean("isAdmin") ?: false)
+                            put("publisherIsOwner", pubSummary?.optBoolean("isOwner") ?: false)
+                            put("publisherIsPublisher", pubSummary?.optBoolean("publisher") ?: false)
+                            put("publisherTitle", pubSummary?.optString("title") ?: "")
+                            put("publisherNameColor", pubSummary?.optString("nameColor") ?: "")
+                            put("publisherNameGradient", pubSummary?.optString("nameGradient") ?: "")
+                            put("publisherNameFont", pubSummary?.optString("nameFont") ?: "")
                         })
                     }
                 }
@@ -1683,6 +1770,181 @@ class AndroidWebAppInterface(private val activity: MainActivity) {
     @JavascriptInterface
     fun deleteCustomTemplate(templateId: String) {
         activity.runOnUiThread { activity.appThemeManager.deleteCustomTemplate(templateId) }
+    }
+
+    @JavascriptInterface
+    fun fetchFrames() {
+        activity.runOnUiThread { activity.appThemeManager.fetchFrames() }
+    }
+
+    @JavascriptInterface
+    fun seedDefaultFrames(jsonPayload: String) {
+        activity.runOnUiThread { activity.appThemeManager.seedDefaultFrames(jsonPayload) }
+    }
+
+    @JavascriptInterface
+    fun saveCustomFrame(jsonPayload: String) {
+        activity.runOnUiThread { activity.appThemeManager.saveCustomFrame(jsonPayload) }
+    }
+
+    @JavascriptInterface
+    fun deleteCustomFrame(frameId: String) {
+        activity.runOnUiThread { activity.appThemeManager.deleteCustomFrame(frameId) }
+    }
+
+    @JavascriptInterface
+    fun selectMyFrame(frameId: String) {
+        activity.runOnUiThread { activity.communityManager.selectMyFrame(frameId) }
+    }
+
+    // ---------------- CLUB ("النادي") BRIDGE ----------------
+    @JavascriptInterface
+    fun fetchClubConfig() {
+        activity.runOnUiThread { activity.clubManager.fetchClubConfig() }
+    }
+
+    @JavascriptInterface
+    fun fetchClubFeed(tab: String, category: String, cursorVal: Long, filterUid: String) {
+        activity.runOnUiThread { activity.clubManager.fetchClubFeed(tab, category, cursorVal, filterUid) }
+    }
+
+    @JavascriptInterface
+    fun startClubNewPostsListener(sinceCreatedAt: Long) {
+        activity.runOnUiThread { activity.clubManager.startNewPostsListener(sinceCreatedAt) }
+    }
+
+    @JavascriptInterface
+    fun stopClubNewPostsListener() {
+        activity.runOnUiThread { activity.clubManager.stopNewPostsListener() }
+    }
+
+    @JavascriptInterface
+    fun fetchClubPostDetail(postId: String) {
+        activity.runOnUiThread { activity.clubManager.fetchClubPostDetail(postId) }
+    }
+
+    @JavascriptInterface
+    fun acceptClubRules() {
+        activity.runOnUiThread { activity.clubManager.acceptClubRules() }
+    }
+
+    @JavascriptInterface
+    fun createClubPost(jsonPayload: String) {
+        activity.runOnUiThread { activity.clubManager.createClubPost(jsonPayload) }
+    }
+
+    @JavascriptInterface
+    fun editClubPost(postId: String, jsonPayload: String) {
+        activity.runOnUiThread { activity.clubManager.editClubPost(postId, jsonPayload) }
+    }
+
+    @JavascriptInterface
+    fun deleteClubPost(postId: String) {
+        activity.runOnUiThread { activity.clubManager.deleteClubPost(postId) }
+    }
+
+    @JavascriptInterface
+    fun togglePostReaction(postId: String, reaction: String) {
+        activity.runOnUiThread { activity.clubManager.togglePostReaction(postId, reaction) }
+    }
+
+    @JavascriptInterface
+    fun votePoll(postId: String, optionIndex: Int) {
+        activity.runOnUiThread { activity.clubManager.votePoll(postId, optionIndex) }
+    }
+
+    @JavascriptInterface
+    fun fetchPostComments(postId: String, beforeCreatedAt: Long) {
+        activity.runOnUiThread { activity.clubManager.fetchPostComments(postId, beforeCreatedAt) }
+    }
+
+    @JavascriptInterface
+    fun addPostComment(postId: String, text: String) {
+        activity.runOnUiThread { activity.clubManager.addPostComment(postId, text) }
+    }
+
+    @JavascriptInterface
+    fun deletePostComment(postId: String, commentId: String) {
+        activity.runOnUiThread { activity.clubManager.deletePostComment(postId, commentId) }
+    }
+
+    @JavascriptInterface
+    fun togglePostCommentLike(postId: String, commentId: String) {
+        activity.runOnUiThread { activity.clubManager.togglePostCommentLike(postId, commentId) }
+    }
+
+    @JavascriptInterface
+    fun fetchPostCommentReplies(postId: String, commentId: String) {
+        activity.runOnUiThread { activity.clubManager.fetchPostCommentReplies(postId, commentId) }
+    }
+
+    @JavascriptInterface
+    fun addPostCommentReply(postId: String, commentId: String, text: String) {
+        activity.runOnUiThread { activity.clubManager.addPostCommentReply(postId, commentId, text) }
+    }
+
+    @JavascriptInterface
+    fun deletePostCommentReply(postId: String, commentId: String, replyId: String) {
+        activity.runOnUiThread { activity.clubManager.deletePostCommentReply(postId, commentId, replyId) }
+    }
+
+    @JavascriptInterface
+    fun togglePostCommentReplyLike(postId: String, commentId: String, replyId: String) {
+        activity.runOnUiThread { activity.clubManager.togglePostCommentReplyLike(postId, commentId, replyId) }
+    }
+
+    @JavascriptInterface
+    fun toggleFollowUser(targetUid: String, follow: Boolean) {
+        activity.runOnUiThread { activity.clubManager.toggleFollowUser(targetUid, follow) }
+    }
+
+    @JavascriptInterface
+    fun toggleBookmarkPost(postId: String, bookmarked: Boolean) {
+        activity.runOnUiThread { activity.clubManager.toggleBookmarkPost(postId, bookmarked) }
+    }
+
+    @JavascriptInterface
+    fun reportClubTarget(targetType: String, targetId: String, parentId: String, reason: String) {
+        activity.runOnUiThread { activity.clubManager.reportClubTarget(targetType, targetId, parentId, reason) }
+    }
+
+    @JavascriptInterface
+    fun adminFetchClubPosts(statusFilter: String) {
+        activity.runOnUiThread { activity.clubManager.adminFetchClubPosts(statusFilter) }
+    }
+
+    @JavascriptInterface
+    fun adminModerateClubPost(postId: String, action: String, payloadJson: String) {
+        activity.runOnUiThread { activity.clubManager.adminModerateClubPost(postId, action, payloadJson) }
+    }
+
+    @JavascriptInterface
+    fun adminFetchClubReports() {
+        activity.runOnUiThread { activity.clubManager.adminFetchClubReports() }
+    }
+
+    @JavascriptInterface
+    fun adminSaveModerationConfig(jsonPayload: String) {
+        activity.runOnUiThread { activity.clubManager.adminSaveModerationConfig(jsonPayload) }
+    }
+
+    @JavascriptInterface
+    fun shareClubPost(postId: String, snippet: String) {
+        val cleanId = postId.trim()
+        if (cleanId.isEmpty()) return
+        val shareUrl = "https://zaim9002.github.io/theme-hub/?post=${Uri.encode(cleanId)}"
+        val text = if (snippet.isNotBlank()) "${snippet.trim().take(120)}\n\n$shareUrl" else shareUrl
+        activity.runOnUiThread {
+            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+            runCatching {
+                activity.startActivity(Intent.createChooser(sendIntent, "مشاركة المنشور"))
+            }.onFailure {
+                activity.sendToastToJs("تعذر فتح قائمة المشاركة")
+            }
+        }
     }
 }
 

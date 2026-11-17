@@ -18,15 +18,32 @@ service cloud.firestore {
              request.auth.token.get('email_verified', false) == true;
     }
 
-    function isBlocked() {
+    function currentUserExists() {
       return isAuthenticated() &&
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('blocked', false) == true;
+             exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function currentUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isBlocked() {
+      return currentUserExists() &&
+             currentUserData().get('blocked', false) == true &&
+             (currentUserData().get('blockedUntil', 0) == 0 ||
+              currentUserData().get('blockedUntil', 0) > request.time.toMillis());
+    }
+
+    function isMuted() {
+      return currentUserExists() &&
+             currentUserData().get('muted', false) == true &&
+             (currentUserData().get('mutedUntil', 0) == 0 ||
+              currentUserData().get('mutedUntil', 0) > request.time.toMillis());
     }
 
     function isOwnerBootstrap() {
       return isEmailVerified() &&
-             request.auth.token.email.lower() == 'konami123mw@gmail.com';
+             request.auth.token.email.lower() in ['konami123mw@gmail.com', 'zaim9002@gmail.com'];
     }
 
     // Admin privilege verified strictly from admins/{lowercase_email} allowlist (no role field on users)
@@ -57,6 +74,10 @@ service cloud.firestore {
       return val is string && val.size() > 8 && val.size() <= 200 && val[0:8] == 'https://';
     }
 
+    function isValidOptionalHttpsUrl(val, maxLen) {
+      return val is string && val.size() <= maxLen && (val == '' || (val.size() > 8 && val[0:8] == 'https://'));
+    }
+
     function isValidLinksList(links) {
       return links is list &&
              links.size() <= 3 &&
@@ -73,20 +94,42 @@ service cloud.firestore {
       return val is string && (val == '' || val.matches('^[a-z0-9_]{3,20}$'));
     }
 
-    // Admins allowlist (strictly owner-managed writes)
+    function nonAdminCanUseFrameData(fid, frameData, userData) {
+      return frameData.get('access', 'everyone') == 'everyone' ||
+             (frameData.get('access', 'everyone') == 'assigned' && fid in userData.get('frameAssigned', []));
+    }
+
+    function canUseFrame(fid, userData) {
+      return fid is string && (
+        fid == '' ||
+        (
+          fid.matches('^[a-zA-Z0-9_-]{2,48}$') &&
+          exists(/databases/$(database)/documents/frames/$(fid)) &&
+          nonAdminCanUseFrameData(fid, get(/databases/$(database)/documents/frames/$(fid)).data, userData)
+        )
+      );
+    }
+
+    // Admins allowlist (strictly owner/admin-managed writes)
     match /admins/{email} {
       allow get: if isAdmin() || (
         hasEmail() &&
         request.auth.token.email.lower() == email.lower()
       );
       allow list: if isAdmin();
-      allow write: if isOwnerBootstrap();
+      allow write: if isOwnerBootstrap() || isAdmin();
     }
 
-    // Shared GitHub token (admins read-only, owner read/write)
+    // Personal GitHub token per approved admin (strictly private to owner uid)
+    match /adminTokens/{uid} {
+      allow get, create, update, delete: if isAdmin() && request.auth.uid == uid;
+      allow list: if false;
+    }
+
+    // Shared GitHub token (admins read-only, owner/admin write)
     match /config/github {
       allow read: if isAdmin();
-      allow write: if isOwnerBootstrap();
+      allow write: if isOwnerBootstrap() || isAdmin();
     }
 
     // Public support / admin UIDs directory (no emails or tokens)
@@ -97,6 +140,27 @@ service cloud.firestore {
 
     // App Designer Live Global Theme Config (public read, admins write)
     match /config/appTheme {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Avatar Frames Catalog (public read, admins write)
+    match /frames/{frameId} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+                            frameId.matches('^[a-zA-Z0-9_-]{2,48}$') &&
+                            request.resource.data.name is string &&
+                            request.resource.data.name.size() > 0 &&
+                            request.resource.data.name.size() <= 48 &&
+                            request.resource.data.type in ['solid', 'gradient', 'conic', 'animated', 'pattern'] &&
+                            request.resource.data.access in ['everyone', 'admins', 'owner', 'assigned'] &&
+                            request.resource.data.get('colors', []) is list &&
+                            request.resource.data.get('colors', []).size() <= 6;
+      allow delete: if isAdmin();
+    }
+
+    // Club Moderation Config (categories, banned words, limits, allowed domains, maintenance mode)
+    match /config/moderation {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -138,7 +202,7 @@ service cloud.firestore {
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
     }
 
-    // User Profiles (no role, no public email; admins manage badges/frames/titles/blocking)
+    // User Profiles (no role, no public email; admins manage verified badges, assigned frames, titles, name styling, blocking/muting)
     match /users/{userId} {
       allow read: if true;
       allow create: if isAdmin() || (
@@ -148,12 +212,24 @@ service cloud.firestore {
                     !('role' in request.resource.data) &&
                     !('email' in request.resource.data) &&
                     request.resource.data.get('blocked', false) == false &&
+                    request.resource.data.get('blockedUntil', 0) == 0 &&
+                    request.resource.data.get('muted', false) == false &&
+                    request.resource.data.get('mutedUntil', 0) == 0 &&
                     request.resource.data.get('publisher', false) == false &&
+                    request.resource.data.get('verified', false) == false &&
+                    request.resource.data.get('badgeType', '') == '' &&
                     request.resource.data.get('badges', []) is list &&
                     request.resource.data.get('badges', []).size() == 0 &&
                     request.resource.data.get('frame', '') == '' &&
+                    request.resource.data.get('frameId', '') == '' &&
+                    request.resource.data.get('frameAssigned', []) is list &&
+                    request.resource.data.get('frameAssigned', []).size() == 0 &&
                     request.resource.data.get('customTitle', '') == '' &&
+                    request.resource.data.get('title', '') == '' &&
                     request.resource.data.get('profileGradient', '') == '' &&
+                    request.resource.data.get('nameColor', '') == '' &&
+                    request.resource.data.get('nameGradient', '') == '' &&
+                    request.resource.data.get('nameFont', '') == '' &&
                     isValidUsernameValue(request.resource.data.get('username', '')) &&
                     isValidUsernameValue(request.resource.data.get('usernameLower', '')) &&
                     request.resource.data.get('displayName', '') is string &&
@@ -163,6 +239,7 @@ service cloud.firestore {
                     isValidLinksList(request.resource.data.get('links', [])) &&
                     isValidAccent(request.resource.data.get('profileAccent', '')) &&
                     request.resource.data.get('hideCommentsCount', false) is bool &&
+                    request.resource.data.get('clubRulesAccepted', false) is bool &&
                     isValidMediaUrl(request.resource.data.get('photoURL', ''), false) &&
                     isValidMediaUrl(request.resource.data.get('bannerURL', ''), false));
       allow update: if isAdmin() || (
@@ -170,9 +247,13 @@ service cloud.firestore {
         request.auth.uid == userId &&
         !isBlocked() &&
         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'role', 'email', 'blocked', 'publisher', 'badges', 'frame', 'customTitle', 'profileGradient', 'createdAt'
+          'role', 'email', 'blocked', 'blockedUntil', 'muted', 'mutedUntil',
+          'publisher', 'verified', 'badgeType', 'badges', 'frame', 'frameAssigned',
+          'customTitle', 'title', 'profileGradient', 'nameColor', 'nameGradient',
+          'nameFont', 'createdAt'
         ]) &&
         request.resource.data.get('uid', userId) == userId &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['frameId']) || canUseFrame(request.resource.data.frameId, resource.data)) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['displayName']) || (
           request.resource.data.displayName is string &&
           request.resource.data.displayName.size() <= 60
@@ -184,6 +265,7 @@ service cloud.firestore {
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['links']) || isValidLinksList(request.resource.data.links)) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['profileAccent']) || isValidAccent(request.resource.data.profileAccent)) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['hideCommentsCount']) || request.resource.data.hideCommentsCount is bool) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['clubRulesAccepted']) || request.resource.data.clubRulesAccepted is bool) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['photoURL']) || isValidMediaUrl(request.resource.data.photoURL, false)) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['bannerURL']) || isValidMediaUrl(request.resource.data.bannerURL, false)) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['username']) || isValidUsernameValue(request.resource.data.username)) &&
@@ -191,7 +273,7 @@ service cloud.firestore {
       );
       allow delete: if isAdmin();
 
-      // Personal chat block list managed strictly by account owner
+      // Personal chat & club block list managed strictly by account owner
       match /blockedUsers/{targetUid} {
         allow read, write: if isAuthenticated() && request.auth.uid == userId;
       }
@@ -333,6 +415,7 @@ service cloud.firestore {
         allow read: if true;
         allow create: if isAuthenticated() &&
                       !isBlocked() &&
+                      !isMuted() &&
                       request.resource.data.uid == request.auth.uid &&
                       request.resource.data.text is string &&
                       request.resource.data.text.size() > 0 &&
@@ -342,6 +425,7 @@ service cloud.firestore {
           !isBlocked() &&
           (
             (resource.data.uid == request.auth.uid &&
+             !isMuted() &&
              request.resource.data.uid == resource.data.uid &&
              request.resource.data.text is string &&
              request.resource.data.text.size() > 0 &&
@@ -360,6 +444,7 @@ service cloud.firestore {
           allow read: if true;
           allow create: if isAuthenticated() &&
                         !isBlocked() &&
+                        !isMuted() &&
                         request.resource.data.uid == request.auth.uid &&
                         request.resource.data.text is string &&
                         request.resource.data.text.size() > 0 &&
@@ -369,6 +454,7 @@ service cloud.firestore {
             !isBlocked() &&
             (
               (resource.data.uid == request.auth.uid &&
+               !isMuted() &&
                request.resource.data.uid == resource.data.uid &&
                request.resource.data.text is string &&
                request.resource.data.text.size() > 0 &&
@@ -389,6 +475,303 @@ service cloud.firestore {
     // Collection group index support for counting & moderating user comments
     match /{path=**}/comments/{commentId} {
       allow read: if true;
+    }
+
+    // ==================== CLUB ("النادي") SOCIAL COMMUNITY ====================
+    match /posts/{postId} {
+      function isValidPostPoll(p) {
+        return p == null || (
+          p is map &&
+          p.get('question', '') is string &&
+          p.get('question', '').size() > 0 &&
+          p.get('question', '').size() <= 200 &&
+          p.get('options', []) is list &&
+          p.get('options', []).size() >= 2 &&
+          p.get('options', []).size() <= 4 &&
+          p.get('totalVotes', 0) is int &&
+          p.get('totalVotes', 0) >= 0
+        );
+      }
+
+      allow read: if resource.data.status == 'visible' ||
+                     isAdmin() ||
+                     (isAuthenticated() && resource.data.authorUid == request.auth.uid);
+
+      allow create: if isAuthenticated() &&
+                    !isBlocked() &&
+                    !isMuted() &&
+                    request.resource.data.authorUid == request.auth.uid &&
+                    request.resource.data.get('authorName', '') is string &&
+                    request.resource.data.get('authorName', '').size() <= 60 &&
+                    request.resource.data.get('text', '') is string &&
+                    request.resource.data.get('text', '').size() <= 2000 &&
+                    request.resource.data.get('category', '') is string &&
+                    request.resource.data.get('category', '').size() > 0 &&
+                    request.resource.data.get('category', '').size() <= 50 &&
+                    isValidOptionalHttpsUrl(request.resource.data.get('videoUrl', ''), 500) &&
+                    request.resource.data.get('videoDurationSec', 0) is int &&
+                    request.resource.data.get('videoDurationSec', 0) >= 0 &&
+                    request.resource.data.get('videoDurationSec', 0) <= 120 &&
+                    request.resource.data.get('mediaCount', 0) is int &&
+                    request.resource.data.get('mediaCount', 0) >= 0 &&
+                    request.resource.data.get('mediaCount', 0) <= 4 &&
+                    isValidPostPoll(request.resource.data.get('poll', null)) &&
+                    request.resource.data.status == 'visible' &&
+                    request.resource.data.likesCount == 0 &&
+                    request.resource.data.commentsCount == 0 &&
+                    request.resource.data.reportsCount == 0 &&
+                    request.resource.data.engagementScore == 0 &&
+                    request.resource.data.createdAt is int &&
+                    request.resource.data.updatedAt is int &&
+                    (isAdmin() || (
+                      request.resource.data.get('pinned', false) == false &&
+                      request.resource.data.get('isAnnouncement', false) == false &&
+                      request.resource.data.get('commentsLocked', false) == false
+                    ));
+
+      allow update: if isAdmin() || (
+        isAuthenticated() &&
+        !isBlocked() &&
+        request.resource.data.authorUid == resource.data.authorUid &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        (
+          // 1) Author editing their own post content (protected counters/status untouched)
+          (
+            !isMuted() &&
+            resource.data.authorUid == request.auth.uid &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'text', 'category', 'themeRef', 'themeSnapshot', 'videoUrl',
+              'videoDurationSec', 'mediaCount', 'mentions', 'updatedAt'
+            ]) &&
+            request.resource.data.get('text', '') is string &&
+            request.resource.data.get('text', '').size() <= 2000 &&
+            request.resource.data.get('category', '') is string &&
+            request.resource.data.get('category', '').size() > 0 &&
+            request.resource.data.get('category', '').size() <= 50 &&
+            isValidOptionalHttpsUrl(request.resource.data.get('videoUrl', ''), 500) &&
+            request.resource.data.get('videoDurationSec', 0) is int &&
+            request.resource.data.get('videoDurationSec', 0) <= 120 &&
+            request.resource.data.get('mediaCount', 0) is int &&
+            request.resource.data.get('mediaCount', 0) <= 4
+          ) ||
+          // 2) Likes / reactions counter update (+/-1 likesCount, +/-2 engagementScore)
+          (
+            resource.data.status == 'visible' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'likesCount', 'reactions', 'engagementScore', 'updatedAt'
+            ]) &&
+            request.resource.data.likesCount is int &&
+            request.resource.data.likesCount >= 0 &&
+            request.resource.data.likesCount <= resource.data.likesCount + 1 &&
+            request.resource.data.likesCount >= resource.data.likesCount - 1 &&
+            request.resource.data.engagementScore is int &&
+            request.resource.data.engagementScore >= 0 &&
+            request.resource.data.engagementScore <= resource.data.engagementScore + 2 &&
+            request.resource.data.engagementScore >= resource.data.engagementScore - 2
+          ) ||
+          // 3) Comments counter update (+/-1 commentsCount) when comments not locked
+          (
+            !isMuted() &&
+            resource.data.status == 'visible' &&
+            resource.data.get('commentsLocked', false) == false &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'commentsCount', 'engagementScore', 'updatedAt'
+            ]) &&
+            request.resource.data.commentsCount is int &&
+            request.resource.data.commentsCount >= 0 &&
+            request.resource.data.commentsCount <= resource.data.commentsCount + 1 &&
+            request.resource.data.commentsCount >= resource.data.commentsCount - 1 &&
+            request.resource.data.engagementScore is int &&
+            request.resource.data.engagementScore >= 0 &&
+            request.resource.data.engagementScore <= resource.data.engagementScore + 3 &&
+            request.resource.data.engagementScore >= resource.data.engagementScore - 3
+          ) ||
+          // 4) Single-vote Poll transaction bound to posts/{postId}/pollVotes/{uid}
+          (
+            resource.data.status == 'visible' &&
+            resource.data.get('poll', null) != null &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['poll', 'updatedAt']) &&
+            !exists(/databases/$(database)/documents/posts/$(postId)/pollVotes/$(request.auth.uid)) &&
+            existsAfter(/databases/$(database)/documents/posts/$(postId)/pollVotes/$(request.auth.uid)) &&
+            request.resource.data.poll.totalVotes == resource.data.poll.totalVotes + 1
+          ) ||
+          // 5) Distinct-UID report increment with automatic hide at >= 5 reports
+          (
+            resource.data.status == 'visible' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'reportsCount', 'status', 'updatedAt'
+            ]) &&
+            !exists(/databases/$(database)/documents/posts/$(postId)/postReports/$(request.auth.uid)) &&
+            existsAfter(/databases/$(database)/documents/posts/$(postId)/postReports/$(request.auth.uid)) &&
+            request.resource.data.reportsCount == resource.data.reportsCount + 1 &&
+            request.resource.data.status == (request.resource.data.reportsCount >= 5 ? 'hidden' : 'visible')
+          )
+        )
+      );
+
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorUid == request.auth.uid);
+
+      function parentPostExists() {
+        return exists(/databases/$(database)/documents/posts/$(postId));
+      }
+      function parentPostData() {
+        return get(/databases/$(database)/documents/posts/$(postId)).data;
+      }
+      function parentPostExistsAfter() {
+        return existsAfter(/databases/$(database)/documents/posts/$(postId));
+      }
+      function parentPostDataAfter() {
+        return getAfter(/databases/$(database)/documents/posts/$(postId)).data;
+      }
+
+      // Compressed WebP image subdocuments (keeps parent post < 1MB)
+      match /media/{mediaIdx} {
+        allow read: if true;
+        allow create, update: if isAdmin() || (
+          isAuthenticated() &&
+          !isBlocked() &&
+          !isMuted() &&
+          mediaIdx in ['0', '1', '2', '3'] &&
+          request.resource.data.authorUid == request.auth.uid &&
+          isValidMediaUrl(request.resource.data.dataUrl, false) &&
+          parentPostExistsAfter() &&
+          parentPostDataAfter().authorUid == request.auth.uid
+        );
+        allow delete: if isAdmin() || (
+          isAuthenticated() && (
+            resource.data.get('authorUid', '') == request.auth.uid ||
+            (parentPostExists() && parentPostData().authorUid == request.auth.uid)
+          )
+        );
+      }
+
+      // Reactions / Likes per user
+      match /likes/{uid} {
+        allow read: if true;
+        allow create, update: if isAuthenticated() &&
+                              !isBlocked() &&
+                              request.auth.uid == uid &&
+                              request.resource.data.uid == uid &&
+                              request.resource.data.reaction in ['like', 'love', 'haha', 'wow', 'fire'];
+        allow delete: if isAdmin() ||
+                      (isAuthenticated() && request.auth.uid == uid) ||
+                      (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+      }
+
+      // 1-vote-per-user Poll guard
+      match /pollVotes/{uid} {
+        allow read: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+        allow create: if isAuthenticated() &&
+                      !isBlocked() &&
+                      request.auth.uid == uid &&
+                      request.resource.data.uid == uid &&
+                      request.resource.data.optionIndex is int &&
+                      request.resource.data.optionIndex >= 0 &&
+                      request.resource.data.optionIndex < 4;
+        allow update: if false;
+        allow delete: if isAdmin() ||
+                      (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+      }
+
+      // Distinct-UID Report guard for auto-hide threshold (5)
+      match /postReports/{uid} {
+        allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == uid);
+        allow create: if isAuthenticated() &&
+                      !isBlocked() &&
+                      request.auth.uid == uid &&
+                      request.resource.data.reporterUid == uid;
+        allow update: if false;
+        allow delete: if isAdmin() ||
+                      (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+      }
+
+      // Post comments + likes + 1-level replies
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated() &&
+                      !isBlocked() &&
+                      !isMuted() &&
+                      request.resource.data.uid == request.auth.uid &&
+                      request.resource.data.text is string &&
+                      request.resource.data.text.size() > 0 &&
+                      request.resource.data.text.size() <= 800 &&
+                      (!parentPostExists() || parentPostData().get('commentsLocked', false) == false || isAdmin());
+        allow update: if isAdmin() || (
+          isAuthenticated() &&
+          !isBlocked() &&
+          (
+            (resource.data.uid == request.auth.uid &&
+             !isMuted() &&
+             request.resource.data.uid == resource.data.uid &&
+             request.resource.data.text is string &&
+             request.resource.data.text.size() > 0 &&
+             request.resource.data.text.size() <= 800) ||
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'replyCount'])
+          )
+        );
+        allow delete: if isAdmin() ||
+                      (isAuthenticated() && resource.data.uid == request.auth.uid) ||
+                      (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+
+        match /likes/{uid} {
+          allow read: if true;
+          allow create, delete: if isAdmin() ||
+                                (isAuthenticated() && !isBlocked() && request.auth.uid == uid) ||
+                                (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+        }
+
+        match /replies/{replyId} {
+          allow read: if true;
+          allow create: if isAuthenticated() &&
+                        !isBlocked() &&
+                        !isMuted() &&
+                        request.resource.data.uid == request.auth.uid &&
+                        request.resource.data.text is string &&
+                        request.resource.data.text.size() > 0 &&
+                        request.resource.data.text.size() <= 800 &&
+                        (!parentPostExists() || parentPostData().get('commentsLocked', false) == false || isAdmin());
+          allow update: if isAdmin() || (
+            isAuthenticated() &&
+            !isBlocked() &&
+            (
+              (resource.data.uid == request.auth.uid &&
+               !isMuted() &&
+               request.resource.data.uid == resource.data.uid &&
+               request.resource.data.text is string &&
+               request.resource.data.text.size() > 0 &&
+               request.resource.data.text.size() <= 800) ||
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+            )
+          );
+          allow delete: if isAdmin() ||
+                        (isAuthenticated() && resource.data.uid == request.auth.uid) ||
+                        (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+
+          match /likes/{uid} {
+            allow read: if true;
+            allow create, delete: if isAdmin() ||
+                                  (isAuthenticated() && !isBlocked() && request.auth.uid == uid) ||
+                                  (isAuthenticated() && parentPostExists() && parentPostData().authorUid == request.auth.uid);
+          }
+        }
+      }
+    }
+
+    // Follows Graph
+    match /follows/{uid} {
+      match /following/{targetUid} {
+        allow read: if true;
+        allow create, delete: if isAuthenticated() && !isBlocked() && request.auth.uid == uid && uid != targetUid;
+      }
+      match /followers/{followerUid} {
+        allow read: if true;
+        allow create, delete: if isAuthenticated() && !isBlocked() && request.auth.uid == followerUid && uid != followerUid;
+      }
+    }
+
+    // Saved Bookmarks per User
+    match /bookmarks/{uid}/posts/{postId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == uid && !isBlocked();
     }
 
     // Open Theme Submissions (any non-blocked authenticated user; admin approves/rejects)
@@ -426,7 +809,24 @@ service cloud.firestore {
                     request.auth.uid == uid &&
                     request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']) &&
                     request.resource.data.read == true;
-      allow create, delete: if isAdmin();
+      allow create: if isAdmin() || (
+        isAuthenticated() &&
+        !isBlocked() &&
+        request.resource.data.actorUid == request.auth.uid &&
+        request.auth.uid != uid &&
+        request.resource.data.type in ['post_like', 'post_comment', 'post_reply', 'post_mention', 'follow'] &&
+        request.resource.data.read == false &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 100 &&
+        request.resource.data.body is string &&
+        request.resource.data.body.size() <= 350 &&
+        request.resource.data.keys().hasOnly([
+          'type', 'title', 'body', 'actorUid', 'actorName',
+          'postId', 'themeId', 'submissionId', 'read', 'createdAt'
+        ])
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && request.auth.uid == uid);
     }
 
     // Admin Moderation Audit Log
