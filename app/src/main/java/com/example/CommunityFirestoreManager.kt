@@ -178,7 +178,7 @@ class CommunityFirestoreManager(
     ): ProfileInitResult {
         val rawEmail = user.email?.trim().orEmpty()
         val userEmail = rawEmail.lowercase()
-        val fallbackName = if (isOwner) "المالك (zaim9002)" else (userEmail.substringBefore("@").ifBlank { "مستخدم Theme Hub" })
+        val fallbackName = if (isOwner) "المالك (${userEmail.substringBefore("@")})" else (userEmail.substringBefore("@").ifBlank { "مستخدم Theme Hub" })
         val name = user.displayName?.takeIf { it.isNotBlank() } ?: fallbackName
         val photo = user.photoUrl?.toString().orEmpty()
 

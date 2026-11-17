@@ -77,6 +77,11 @@ import kotlinx.coroutines.tasks.await
 import org.json.JSONArray
 import org.json.JSONObject
 
+/** Core owner accounts (cannot be removed by other admins). Every approved admin also gets owner tools. Keep in sync with firestore.rules and index.html (OWNER_EMAILS). */
+private val OWNER_EMAILS: Set<String> = setOf("konami123mw@gmail.com", "zaim9002@gmail.com")
+private fun isOwnerEmail(email: String?): Boolean =
+    email != null && OWNER_EMAILS.contains(email.trim().lowercase())
+
 class MainActivity : ComponentActivity() {
 
     private var inMemoryGithubToken: String? = null
@@ -442,8 +447,8 @@ class MainActivity : ComponentActivity() {
     ) {
         val rawEmail = user.email?.trim() ?: ""
         val userEmail = rawEmail.lowercase()
-        val isOwner = userEmail == "zaim9002@gmail.com"
-        val fallbackName = if (isOwner) "المالك (zaim9002)" else (userEmail.ifBlank { "مستخدم Theme Hub" })
+        val isOwner = isOwnerEmail(userEmail)
+        val fallbackName = if (isOwner) "المالك (${userEmail.substringBefore("@")})" else (userEmail.ifBlank { "مستخدم Theme Hub" })
         val name = user.displayName?.takeIf { it.isNotBlank() } ?: fallbackName
         val photo = user.photoUrl?.toString() ?: ""
 
@@ -522,7 +527,7 @@ class MainActivity : ComponentActivity() {
                 name = profile.displayName,
                 email = userEmail,
                 photo = profile.photoURL,
-                isOwner = isOwner,
+                isOwner = isOwner || isAllowlistedAdmin,
                 hasToken = githubToken.isNotBlank()
             )
         } catch (e: CancellationException) {
@@ -542,8 +547,8 @@ class MainActivity : ComponentActivity() {
     fun saveGithubTokenToFirestore(token: String) {
         val user = Firebase.auth.currentUser
         val userEmail = user?.email?.trim()?.lowercase() ?: ""
-        if (userEmail != "zaim9002@gmail.com") {
-            sendToastToJs("غير مصرح: حفظ التوكن متاح للمالك فقط (zaim9002@gmail.com)")
+        if (!(isOwnerEmail(userEmail) || currentUserIsAdmin)) {
+            sendToastToJs("غير مصرح: حفظ التوكن متاح للمشرفين المعتمدين فقط")
             return
         }
 
@@ -577,10 +582,10 @@ class MainActivity : ComponentActivity() {
 
     fun fetchApprovedAdminsList() {
         val currentEmail = Firebase.auth.currentUser?.email?.trim()?.lowercase() ?: ""
-        if (currentEmail != "zaim9002@gmail.com") {
+        if (!(isOwnerEmail(currentEmail) || currentUserIsAdmin)) {
             val errJson = JSONObject().apply {
                 put("ok", false)
-                put("error", "غير مصرح [owner-only]: إدارة المشرفين متاحة للمالك zaim9002@gmail.com فقط")
+                put("error", "غير مصرح [owner-only]: إدارة المشرفين متاحة للمشرفين المعتمدين فقط")
             }.toString()
             evaluateJs("window.onAdminsListLoaded?.($errJson);")
             return
@@ -620,11 +625,11 @@ class MainActivity : ComponentActivity() {
 
     fun addApprovedAdmin(rawEmail: String) {
         val ownerEmail = Firebase.auth.currentUser?.email?.trim()?.lowercase() ?: ""
-        if (ownerEmail != "zaim9002@gmail.com") {
+        if (!(isOwnerEmail(ownerEmail) || currentUserIsAdmin)) {
             val errJson = JSONObject().apply {
                 put("ok", false)
                 put("action", "add")
-                put("error", "غير مصرح [owner-only]: إضافة المشرفين متاحة للمالك zaim9002@gmail.com فقط")
+                put("error", "غير مصرح [owner-only]: إضافة المشرفين متاحة للمشرفين المعتمدين فقط")
             }.toString()
             evaluateJs("window.onAdminMemberMutation?.($errJson);")
             return
@@ -672,18 +677,18 @@ class MainActivity : ComponentActivity() {
 
     fun removeApprovedAdmin(rawEmail: String) {
         val ownerEmail = Firebase.auth.currentUser?.email?.trim()?.lowercase() ?: ""
-        if (ownerEmail != "zaim9002@gmail.com") {
+        if (!(isOwnerEmail(ownerEmail) || currentUserIsAdmin)) {
             val errJson = JSONObject().apply {
                 put("ok", false)
                 put("action", "remove")
-                put("error", "غير مصرح [owner-only]: حذف المشرفين متاح للمالك zaim9002@gmail.com فقط")
+                put("error", "غير مصرح [owner-only]: حذف المشرفين متاح للمشرفين المعتمدين فقط")
             }.toString()
             evaluateJs("window.onAdminMemberMutation?.($errJson);")
             return
         }
 
         val cleanEmail = rawEmail.replace("\\s+".toRegex(), "").lowercase()
-        if (cleanEmail == "zaim9002@gmail.com") {
+        if (isOwnerEmail(cleanEmail)) {
             val errJson = JSONObject().apply {
                 put("ok", false)
                 put("action", "remove")
