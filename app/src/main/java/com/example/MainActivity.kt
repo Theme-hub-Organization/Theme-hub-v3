@@ -519,9 +519,22 @@ class MainActivity : ComponentActivity() {
         }
 
         try {
-            val configDoc = firestore.collection("config").document("github").get().await()
-            val githubToken = if (configDoc.exists()) (configDoc.getString("token")?.trim() ?: "") else ""
+            // Personal token (per admin) overrides the shared one when present
+            var personalToken = ""
+            try {
+                val personalDoc = firestore.collection("adminTokens").document(user.uid).get().await()
+                if (personalDoc.exists()) personalToken = personalDoc.getString("token")?.trim() ?: ""
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                personalToken = ""
+            }
+            val githubToken = if (personalToken.isNotBlank()) personalToken else {
+                val configDoc = firestore.collection("config").document("github").get().await()
+                if (configDoc.exists()) (configDoc.getString("token")?.trim() ?: "") else ""
+            }
             inMemoryGithubToken = githubToken
+            evaluateJs("window.__personalTokenActive = ${personalToken.isNotBlank()};")
             sendAuthSuccessToJs(
                 token = githubToken,
                 name = profile.displayName,
@@ -577,6 +590,59 @@ class MainActivity : ComponentActivity() {
                 sendToastToJs("فشل حفظ التوكن: $detailed")
                 val jsErr = JSONObject.quote(detailed)
                 evaluateJs("window.onGithubTokenSaved?.(false, $jsErr);")
+            }
+    }
+
+    fun savePersonalGithubToken(token: String) {
+        val user = Firebase.auth.currentUser
+        if (user == null || !currentUserIsAdmin) {
+            sendToastToJs("غير مصرح: التوكن الشخصي متاح للمشرفين المعتمدين فقط")
+            return
+        }
+        val cleanToken = token.trim()
+        if (cleanToken.isEmpty()) {
+            sendToastToJs("يرجى إدخال رمز توكن صالح")
+            return
+        }
+        val data = hashMapOf<String, Any>(
+            "token" to cleanToken,
+            "updatedAt" to System.currentTimeMillis(),
+            "email" to (user.email?.trim()?.lowercase() ?: "")
+        )
+        Firebase.firestore.collection("adminTokens").document(user.uid)
+            .set(data)
+            .addOnSuccessListener {
+                inMemoryGithubToken = cleanToken
+                sendToastToJs("تم حفظ توكنك الشخصي")
+                val jsToken = JSONObject.quote(cleanToken)
+                evaluateJs("window.onPersonalTokenSaved?.(true, $jsToken);")
+            }
+            .addOnFailureListener { e ->
+                val detailed = AuthErrorFormatter.format(e)
+                sendToastToJs("فشل حفظ التوكن الشخصي: $detailed")
+                val jsErr = JSONObject.quote(detailed)
+                evaluateJs("window.onPersonalTokenSaved?.(false, $jsErr);")
+            }
+    }
+
+    fun clearPersonalGithubToken() {
+        val user = Firebase.auth.currentUser
+        if (user == null || !currentUserIsAdmin) {
+            sendToastToJs("غير مصرح: التوكن الشخصي متاح للمشرفين المعتمدين فقط")
+            return
+        }
+        Firebase.firestore.collection("adminTokens").document(user.uid)
+            .delete()
+            .addOnSuccessListener {
+                inMemoryGithubToken = null
+                sendToastToJs("تم حذف توكنك الشخصي. سجّل الخروج ثم ادخل من جديد ليُستخدم التوكن المشترك")
+                evaluateJs("window.onPersonalTokenCleared?.(true, \"\");")
+            }
+            .addOnFailureListener { e ->
+                val detailed = AuthErrorFormatter.format(e)
+                sendToastToJs("فشل حذف التوكن الشخصي: $detailed")
+                val jsErr = JSONObject.quote(detailed)
+                evaluateJs("window.onPersonalTokenCleared?.(false, $jsErr);")
             }
     }
 
@@ -1184,6 +1250,16 @@ class AndroidWebAppInterface(private val activity: MainActivity) {
     @JavascriptInterface
     fun saveGithubToken(token: String) {
         activity.runOnUiThread { activity.saveGithubTokenToFirestore(token) }
+    }
+
+    @JavascriptInterface
+    fun savePersonalGithubToken(token: String) {
+        activity.runOnUiThread { activity.savePersonalGithubToken(token) }
+    }
+
+    @JavascriptInterface
+    fun clearPersonalGithubToken() {
+        activity.runOnUiThread { activity.clearPersonalGithubToken() }
     }
 
     @JavascriptInterface
