@@ -12,7 +12,7 @@ const PROJECT_ID = process.env.GCP_PROJECT || "demo-no-project";
 const [emulatorHost, emulatorPortStr] = (process.env.FIRESTORE_EMULATOR_HOST || "127.0.0.1:8085").split(":");
 const emulatorPort = parseInt(emulatorPortStr, 10);
 
-const OWNER_EMAIL = "zaim9002@gmail.com";
+const OWNER_EMAIL = "konami123mw@gmail.com";
 const ADMIN_EMAIL = "admin1@gmail.com";
 const USER_A_EMAIL = "alice@gmail.com";
 const USER_B_EMAIL = "bob@gmail.com";
@@ -94,7 +94,7 @@ test("Approved admin: can read config/github, cannot write config/github or admi
   await assertFails(adminDb.collection("admins").doc(USER_A_EMAIL).set({ approved: true }));
 });
 
-test("Owner zaim9002@gmail.com: always treated as admin and can read/write config/github and admins", async () => {
+test("Owner konami123mw@gmail.com: always treated as admin and can read/write config/github and admins", async () => {
   const ownerDb = testEnv.authenticatedContext("uid_owner", { email: OWNER_EMAIL, email_verified: true }).firestore();
   await assertSucceeds(ownerDb.collection("admins").doc(ADMIN_EMAIL).set({ approved: true }));
   await assertSucceeds(ownerDb.collection("config").doc("github").set({ token: "ghp_owner_token" }));

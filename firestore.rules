@@ -26,7 +26,7 @@ service cloud.firestore {
 
     function isOwnerBootstrap() {
       return isEmailVerified() &&
-             request.auth.token.email.lower() == 'zaim9002@gmail.com';
+             request.auth.token.email.lower() == 'konami123mw@gmail.com';
     }
 
     // Admin privilege verified strictly from admins/{lowercase_email} allowlist (no role field on users)
