@@ -4614,6 +4614,26 @@ a[href] {
       </button>
     </div>
 
+    <!-- PERSONAL GITHUB TOKEN (EACH ADMIN: PUBLISH UNDER THEIR OWN GITHUB ACCOUNT) -->
+    <div id="admin-personal-token-box" style="display:none; background:rgba(16, 185, 129, 0.07); border:1px solid rgba(16, 185, 129, 0.28); border-radius:var(--radius-sm); padding:12px; margin-bottom:var(--space-sm);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:var(--fs-xs); font-weight:800; color:#6EE7B7;">توكني الشخصي (النشر بحسابي في GitHub)</span>
+        <span class="token-status empty" id="personal-token-status-badge">غير مضبوط</span>
+      </div>
+      <div style="font-size:11px; color:var(--muted); line-height:1.4; margin-bottom:8px;">
+        إن حفظت توكنك هنا فسيُستخدم بدل التوكن المشترك عند النشر، وتظهر عمليات الرفع باسم حسابك في GitHub. يُحفظ في <code style="color:#6EE7B7">adminTokens</code> ولا يقرؤه غيرك. يلزم أن يملك حسابك صلاحية الكتابة على المستودع (متعاون Collaborator) وأن يكون التوكن من نوع Classic بصلاحية repo.
+      </div>
+      <div class="form-group" style="margin-bottom:8px;">
+        <input type="password" id="input-personal-github-token" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn" style="flex:1; min-height:36px; height:36px; font-size:11.5px; background:var(--grad); color:#fff; font-weight:700;" onclick="savePersonalGithubToken()">💾 حفظ توكني</button>
+        <button type="button" class="btn" style="flex:1; min-height:36px; height:36px; font-size:11.5px; background:var(--surface2); color:var(--text); font-weight:700;" onclick="testOwnerGithubConnection('input-personal-github-token','personal-token-test-result')">⚡ اختبار الاتصال</button>
+        <button type="button" class="btn danger" style="min-height:36px; height:36px; font-size:11.5px; font-weight:700;" onclick="clearPersonalGithubToken()">🗑 حذف</button>
+      </div>
+      <div id="personal-token-test-result" style="display:none; margin-top:8px; font-size:11px; padding:8px 10px; border-radius:var(--radius-xs); line-height:1.5; white-space:pre-line;"></div>
+    </div>
+
     <!-- OWNER ONLY GITHUB TOKEN MANAGEMENT (VISIBLE ONLY TO konami123mw@gmail.com) -->
     <div id="admin-owner-token-box" style="display:none; background:rgba(124, 92, 255, 0.08); border:1px solid rgba(124, 92, 255, 0.28); border-radius:var(--radius-sm); padding:12px; margin-bottom:var(--space-sm);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -8782,6 +8802,9 @@ function logoutAdmin() {
     window.AndroidBridge.adminSignOut();
   }
 
+  window.__personalTokenActive = false;
+  const personalInputEl = document.getElementById("input-personal-github-token");
+  if (personalInputEl) personalInputEl.value = "";
   const ownerInput = document.getElementById("input-owner-github-token");
   if (ownerInput) ownerInput.value = "";
   const testRes = document.getElementById("owner-token-test-result");
@@ -8924,6 +8947,15 @@ window.onAndroidAuthResult = function(rawPayload) {
     if (googleGate) googleGate.style.display = "none";
     if (ws) ws.style.display = "block";
 
+    const personalBox = document.getElementById("admin-personal-token-box");
+    const personalBadge = document.getElementById("personal-token-status-badge");
+    const personalInput = document.getElementById("input-personal-github-token");
+    if (personalBox) personalBox.style.display = "block";
+    if (personalInput) personalInput.value = window.__personalTokenActive ? adminToken : "";
+    if (personalBadge) {
+      personalBadge.className = window.__personalTokenActive ? "token-status saved" : "token-status empty";
+      personalBadge.textContent = window.__personalTokenActive ? "محفوظ (يُستخدم عند النشر)" : "غير مضبوط";
+    }
     const ownerBox = document.getElementById("admin-owner-token-box");
     const noTokenWarn = document.getElementById("admin-no-token-warning");
     const ownerInput = document.getElementById("input-owner-github-token");
@@ -8935,10 +8967,15 @@ window.onAndroidAuthResult = function(rawPayload) {
       if (ownerBox) ownerBox.style.display = "block";
       if (adminsTab) adminsTab.style.display = "inline-flex";
       if (noTokenWarn) noTokenWarn.style.display = "none";
-      if (ownerInput) ownerInput.value = adminToken;
+      if (ownerInput) ownerInput.value = window.__personalTokenActive ? "" : adminToken;
       if (ownerBadge) {
-        ownerBadge.className = adminToken ? "token-status saved" : "token-status empty";
-        ownerBadge.textContent = adminToken ? "محفوظ في Firebase" : "غير مضبوط";
+        if (window.__personalTokenActive) {
+          ownerBadge.className = "token-status saved";
+          ownerBadge.textContent = "تستخدم توكنك الشخصي";
+        } else {
+          ownerBadge.className = adminToken ? "token-status saved" : "token-status empty";
+          ownerBadge.textContent = adminToken ? "محفوظ في Firebase" : "غير مضبوط";
+        }
       }
       if (submitBtn) submitBtn.disabled = !adminToken;
       fetchAdminMembersList();
@@ -8999,6 +9036,59 @@ window.onAdminAuthSuccess = function(token, name, email, photo, isOwner, hasToke
   });
 };
 
+function savePersonalGithubToken() {
+  const input = document.getElementById("input-personal-github-token");
+  const val = input ? input.value.trim() : "";
+  if (!val) {
+    alert("يرجى إدخال رمز توكن GitHub الخاص بك");
+    return;
+  }
+  showToast("جاري حفظ توكنك الشخصي…");
+  if (window.AndroidBridge && window.AndroidBridge.savePersonalGithubToken) {
+    window.AndroidBridge.savePersonalGithubToken(val);
+  } else {
+    adminToken = val;
+    currentUserHasToken = true;
+    window.__personalTokenActive = true;
+    showToast("تم حفظ توكنك في الجلسة الحالية");
+  }
+}
+
+function clearPersonalGithubToken() {
+  if (!confirm("حذف توكنك الشخصي؟ سيُستخدم التوكن المشترك بعد إعادة تسجيل الدخول.")) return;
+  if (window.AndroidBridge && window.AndroidBridge.clearPersonalGithubToken) {
+    window.AndroidBridge.clearPersonalGithubToken();
+  }
+}
+
+window.onPersonalTokenSaved = function(success, tokenOrMsg) {
+  const badge = document.getElementById("personal-token-status-badge");
+  const submitBtn = document.getElementById("btn-publish-submit");
+  if (success) {
+    adminToken = tokenOrMsg || adminToken;
+    currentUserHasToken = true;
+    window.__personalTokenActive = true;
+    if (badge) { badge.className = "token-status saved"; badge.textContent = "محفوظ (يُستخدم عند النشر)"; }
+    if (submitBtn) submitBtn.disabled = false;
+    showToast("✓ تم حفظ توكنك الشخصي، وسيُستخدم عند النشر");
+  } else {
+    showToast("✕ فشل حفظ التوكن الشخصي: " + tokenOrMsg);
+  }
+};
+
+window.onPersonalTokenCleared = function(success, msg) {
+  const badge = document.getElementById("personal-token-status-badge");
+  const input = document.getElementById("input-personal-github-token");
+  if (success) {
+    window.__personalTokenActive = false;
+    if (input) input.value = "";
+    if (badge) { badge.className = "token-status empty"; badge.textContent = "غير مضبوط"; }
+    showToast("تم حذف توكنك الشخصي");
+  } else {
+    showToast("✕ فشل حذف التوكن الشخصي: " + msg);
+  }
+};
+
 function saveOwnerGithubToken() {
   const input = document.getElementById("input-owner-github-token");
   const val = input ? input.value.trim() : "";
@@ -9025,7 +9115,9 @@ window.onGithubTokenSaved = function(success, tokenOrMsg) {
   const badge = document.getElementById("owner-token-status-badge");
   const submitBtn = document.getElementById("btn-publish-submit");
   if (success) {
-    adminToken = tokenOrMsg || document.getElementById("input-owner-github-token").value.trim();
+    if (!window.__personalTokenActive) {
+      adminToken = tokenOrMsg || document.getElementById("input-owner-github-token").value.trim();
+    }
     currentUserHasToken = true;
     if (badge) {
       badge.className = "token-status saved";
@@ -9038,10 +9130,10 @@ window.onGithubTokenSaved = function(success, tokenOrMsg) {
   }
 };
 
-async function testOwnerGithubConnection() {
-  const input = document.getElementById("input-owner-github-token");
+async function testOwnerGithubConnection(inputId = "input-owner-github-token", resultId = "owner-token-test-result") {
+  const input = document.getElementById(inputId);
   const testToken = input ? input.value.trim() : adminToken;
-  const resEl = document.getElementById("owner-token-test-result");
+  const resEl = document.getElementById(resultId);
   if (!testToken) {
     alert("يرجى إدخال التوكن لاختبار الاتصال");
     return;
