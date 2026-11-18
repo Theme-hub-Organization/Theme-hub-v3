@@ -31,7 +31,7 @@ class AppThemeDesignerManager(
         private val SAFE_ID_REGEX = Regex("^[a-zA-Z0-9_-]{2,48}$")
 
         private val ALLOWED_FONTS = setOf(
-            "Cairo", "Tajawal", "Almarai", "IBM Plex Sans Arabic",
+            "Cairo", "Tajawal", "Almarai", "IBM Plex Sans Arabic", "Amiri", "Changa", "Readex Pro",
             "Nunito", "Quicksand", "Inter", "Space Grotesk", "Playfair Display"
         )
         private val ALLOWED_CARD_STYLES = setOf("glass", "flat", "outlined", "neon", "soft")

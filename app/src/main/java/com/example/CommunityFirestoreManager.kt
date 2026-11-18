@@ -79,9 +79,12 @@ class CommunityFirestoreManager(
         private val HEX_COLOR_REGEX = Regex("^#[0-9A-Fa-f]{6}$")
         private val ALLOWED_FRAMES = setOf("", "gold-admin", "neon", "aurora")
         private val SAFE_FRAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{2,48}$")
-        private val ALLOWED_BADGES = setOf("موثّق", "ناشر موثوق", "داعم", "مبدع")
-        private val ALLOWED_BADGE_TYPES = setOf("", "verified", "trusted_publisher")
-        private val ALLOWED_NAME_FONTS = setOf("", "Cairo", "Tajawal", "Amiri", "Readex Pro", "Space Grotesk", "Changa")
+        private val ALLOWED_BADGES = setOf("موثّق", "ناشر موثوق", "داعم", "مبدع", "vip", "designer", "helper", "pioneer", "founder")
+        private val ALLOWED_BADGE_TYPES = setOf("", "owner", "admin", "verified", "trusted_publisher")
+        private val ALLOWED_NAME_FONTS = setOf(
+            "", "Cairo", "Tajawal", "Almarai", "IBM Plex Sans Arabic", "Amiri", "Changa", "Readex Pro",
+            "Nunito", "Quicksand", "Inter", "Space Grotesk", "Playfair Display"
+        )
         private val SAFE_LINEAR_GRADIENT_REGEX = Regex("^linear-gradient\\([0-9a-zA-Zdeg,\\s#%()-]+\\)$")
     }
 
@@ -2823,6 +2826,15 @@ class CommunityFirestoreManager(
                         updates["hidden"] = hidden
                         ref.set(updates, SetOptions.merge()).await()
                         writeAuditLog(if (hidden) "hide_theme" else "unhide_theme", "theme", themeId, "hidden=$hidden")
+                        val themeName = data.optString("themeName", themeId).trim().ifEmpty { themeId }
+                        writePublishLogInternal(
+                            themeId = themeId,
+                            themeName = themeName,
+                            mode = if (hidden) "hide" else "show",
+                            status = "success",
+                            version = data.optString("version", ""),
+                            details = if (hidden) "تم إخفاء الثيم من المتجر" else "تم إظهار الثيم في المتجر"
+                        )
                     }
                     "set_override" -> {
                         val titleOverride = data.optString("titleOverride", "").trim().take(100)
@@ -2985,6 +2997,104 @@ class CommunityFirestoreManager(
                     put("error", AuthErrorFormatter.format(e))
                 }.toString()
                 activity.evaluateJs("window.onAdminStatsLoaded?.($payload);")
+            }
+        }
+    }
+
+    private suspend fun writePublishLogInternal(
+        themeId: String,
+        themeName: String,
+        mode: String,
+        status: String,
+        version: String,
+        details: String
+    ) {
+        val user = Firebase.auth.currentUser ?: return
+        val uid = user.uid
+        if (uid.isBlank() || !activity.currentUserIsAdmin) return
+        val safeMode = when (mode.trim().lowercase()) {
+            "new", "update", "variant", "delete", "version_bump", "hide", "show" -> mode.trim().lowercase()
+            else -> "update"
+        }
+        val safeStatus = when (status.trim().lowercase()) {
+            "success", "failed", "cancelled" -> status.trim().lowercase()
+            else -> "success"
+        }
+        val label = user.displayName?.takeIf { it.isNotBlank() } ?: user.email?.substringBefore("@") ?: "مشرف"
+        val doc = hashMapOf<String, Any>(
+            "actorUid" to uid,
+            "actorLabel" to label.take(60),
+            "themeId" to themeId.take(120),
+            "themeName" to themeName.take(120),
+            "mode" to safeMode,
+            "status" to safeStatus,
+            "version" to version.take(30),
+            "details" to ThemeUploadService.sanitizeNoTokens(details).take(240),
+            "createdAt" to System.currentTimeMillis()
+        )
+        runCatching {
+            db.collection("publishLogs").add(doc).await()
+        }
+    }
+
+    fun recordPublishLog(logJson: String) {
+        if (!activity.currentUserIsAdmin) return
+        scope.launch {
+            val obj = runCatching { JSONObject(logJson) }.getOrNull() ?: return@launch
+            writePublishLogInternal(
+                themeId = obj.optString("themeId", ""),
+                themeName = obj.optString("themeName", ""),
+                mode = obj.optString("mode", "update"),
+                status = obj.optString("status", "success"),
+                version = obj.optString("version", ""),
+                details = obj.optString("details", "")
+            )
+        }
+    }
+
+    fun fetchPublishLogs() {
+        if (!activity.currentUserIsAdmin) {
+            val payload = JSONObject().apply {
+                put("ok", false)
+                put("error", "مخصص للمشرفين المعتمدين فقط")
+            }.toString()
+            activity.evaluateJs("window.onPublishLogsLoaded?.($payload);")
+            return
+        }
+        scope.launch {
+            try {
+                val snap = db.collection("publishLogs")
+                    .orderBy("createdAt", Query.Direction.DESCENDING)
+                    .limit(50)
+                    .get().await()
+                val arr = JSONArray()
+                snap.documents.forEach { d ->
+                    arr.put(JSONObject().apply {
+                        put("id", d.id)
+                        put("actorUid", d.getString("actorUid") ?: "")
+                        put("actorLabel", d.getString("actorLabel") ?: "مشرف")
+                        put("themeId", d.getString("themeId") ?: "")
+                        put("themeName", d.getString("themeName") ?: "")
+                        put("mode", d.getString("mode") ?: "new")
+                        put("status", d.getString("status") ?: "success")
+                        put("version", d.getString("version") ?: "")
+                        put("details", ThemeUploadService.sanitizeNoTokens(d.getString("details") ?: ""))
+                        put("createdAt", d.getLong("createdAt") ?: 0L)
+                    })
+                }
+                val payload = JSONObject().apply {
+                    put("ok", true)
+                    put("logs", arr)
+                }.toString()
+                activity.evaluateJs("window.onPublishLogsLoaded?.($payload);")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val payload = JSONObject().apply {
+                    put("ok", false)
+                    put("error", AuthErrorFormatter.format(e))
+                }.toString()
+                activity.evaluateJs("window.onPublishLogsLoaded?.($payload);")
             }
         }
     }

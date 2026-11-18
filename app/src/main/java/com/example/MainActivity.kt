@@ -16,8 +16,11 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.ViewGroup
+import java.io.File
+import java.io.FileOutputStream
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.RenderProcessGoneDetail
@@ -71,11 +74,16 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
 /** Core owner accounts (cannot be removed by other admins). Every approved admin also gets owner tools. Keep in sync with firestore.rules and index.html (OWNER_EMAILS). */
 private val OWNER_EMAILS: Set<String> = setOf("konami123mw@gmail.com", "zaim9002@gmail.com")
@@ -120,6 +128,7 @@ class MainActivity : ComponentActivity() {
         if (user == null) {
             lastVerifiedUid = null
             inMemoryGithubToken = null
+            ThemeUploadService.setGithubToken(null)
             sendAuthIdleToJs()
         } else if (lastVerifiedUid != user.uid) {
             verifyAndRestoreUserSession(user)
@@ -203,6 +212,23 @@ class MainActivity : ComponentActivity() {
                 onExitApp = { finish() }
             )
         }
+        observeBackgroundPublishStatus()
+    }
+
+    private fun observeBackgroundPublishStatus() {
+        lifecycleScope.launch {
+            var lastEmitted = ""
+            ThemeUploadService.statusFlow.collect { rawJson ->
+                if (rawJson.isBlank() || rawJson == lastEmitted) return@collect
+                lastEmitted = rawJson
+                val obj = runCatching { JSONObject(rawJson) }.getOrNull() ?: return@collect
+                val status = obj.optString("status")
+                evaluateJs("window.onBackgroundPublishProgress?.($rawJson);")
+                if (status == "success" || status == "error" || status == "cancelled") {
+                    evaluateJs("window.onBackgroundPublishFinished?.($rawJson);")
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -248,6 +274,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         inMemoryGithubToken = null
+        ThemeUploadService.setGithubToken(null)
         detachCommunityListeners()
     }
 
@@ -582,6 +609,7 @@ class MainActivity : ComponentActivity() {
                 if (configDoc.exists()) (configDoc.getString("token")?.trim() ?: "") else ""
             }
             inMemoryGithubToken = githubToken
+            ThemeUploadService.setGithubToken(githubToken)
             evaluateJs("window.__personalTokenActive = ${personalToken.isNotBlank()};")
             sendAuthSuccessToJs(
                 token = githubToken,
@@ -629,6 +657,7 @@ class MainActivity : ComponentActivity() {
             .set(data)
             .addOnSuccessListener {
                 inMemoryGithubToken = cleanToken
+                ThemeUploadService.setGithubToken(cleanToken)
                 sendToastToJs("تم حفظ توكن GitHub بنجاح في Firebase")
                 val jsToken = JSONObject.quote(cleanToken)
                 evaluateJs("window.onGithubTokenSaved?.(true, $jsToken);")
@@ -661,6 +690,7 @@ class MainActivity : ComponentActivity() {
             .set(data)
             .addOnSuccessListener {
                 inMemoryGithubToken = cleanToken
+                ThemeUploadService.setGithubToken(cleanToken)
                 sendToastToJs("تم حفظ توكنك الشخصي")
                 val jsToken = JSONObject.quote(cleanToken)
                 evaluateJs("window.onPersonalTokenSaved?.(true, $jsToken);")
@@ -683,6 +713,7 @@ class MainActivity : ComponentActivity() {
             .delete()
             .addOnSuccessListener {
                 inMemoryGithubToken = null
+                ThemeUploadService.setGithubToken(null)
                 sendToastToJs("تم حذف توكنك الشخصي. سجّل الخروج ثم ادخل من جديد ليُستخدم التوكن المشترك")
                 evaluateJs("window.onPersonalTokenCleared?.(true, \"\");")
             }
@@ -839,6 +870,7 @@ class MainActivity : ComponentActivity() {
     // ONLY place where Firebase.auth.signOut() is ever called
     fun signOutAdmin() {
         inMemoryGithubToken = null
+        ThemeUploadService.setGithubToken(null)
         lastVerifiedUid = null
         currentUserIsAdmin = false
         currentUserIsPublisher = false
@@ -1258,6 +1290,118 @@ class MainActivity : ComponentActivity() {
             webViewReference?.evaluateJavascript("window.showToast?.($jsMsg);", null)
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    internal fun beginUploadTempFile(uploadId: String, fileKey: String): Boolean {
+        val file = ThemeUploadService.safeStageFile(this, uploadId, fileKey) ?: return false
+        return runCatching {
+            if (file.exists()) file.delete()
+            file.createNewFile()
+            true
+        }.getOrDefault(false)
+    }
+
+    internal fun appendUploadTempChunk(uploadId: String, fileKey: String, base64Chunk: String): Boolean {
+        val file = ThemeUploadService.safeStageFile(this, uploadId, fileKey) ?: return false
+        return runCatching {
+            val bytes = Base64.decode(base64Chunk, Base64.DEFAULT)
+            FileOutputStream(file, true).use { it.write(bytes) }
+            true
+        }.getOrDefault(false)
+    }
+
+    internal fun startBackgroundThemePublish(jobJson: String): Boolean {
+        if (!currentUserIsAdmin || inMemoryGithubToken.isNullOrBlank()) {
+            sendToastToJs("يجب تسجيل الدخول كمشرف معتمد مع توفر توكن GitHub أولاً")
+            return false
+        }
+        val parsed = runCatching { JSONObject(jobJson) }.getOrNull() ?: return false
+        val uploadId = parsed.optString("uploadId", "").trim()
+        val stageDir = ThemeUploadService.stageDirFor(this, uploadId) ?: return false
+        val jobFile = File(stageDir, "job.json")
+        runCatching { jobFile.writeText(jobJson, Charsets.UTF_8) }.getOrElse { return false }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        ThemeUploadService.setGithubToken(inMemoryGithubToken)
+        val serviceIntent = Intent(this, ThemeUploadService::class.java).apply {
+            action = ThemeUploadService.ACTION_START_UPLOAD
+            putExtra(ThemeUploadService.EXTRA_JOB_JSON_PATH, jobFile.absolutePath)
+        }
+        ContextCompat.startForegroundService(this, serviceIntent)
+        return true
+    }
+
+    internal fun cancelBackgroundThemePublish() {
+        val cancelIntent = Intent(this, ThemeUploadService::class.java).apply {
+            action = ThemeUploadService.ACTION_CANCEL_UPLOAD
+        }
+        startService(cancelIntent)
+    }
+
+    private val studioTranslateHttpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(8, TimeUnit.SECONDS)
+            .readTimeout(8, TimeUnit.SECONDS)
+            .build()
+    }
+
+    internal fun translateStudioText(text: String, fromLang: String, toLang: String, requestId: String) {
+        val trimmed = text.trim().take(1200)
+        val src = if (fromLang == "en") "en" else "ar"
+        val dst = if (toLang == "ar") "ar" else "en"
+        if (trimmed.isEmpty()) {
+            val emptyRes = JSONObject().apply {
+                put("ok", false)
+                put("requestId", requestId)
+                put("error", "النص فارغ")
+            }.toString()
+            evaluateJs("window.onStudioTranslationResult?.($emptyRes);")
+            return
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val q = URLEncoder.encode(trimmed.take(500), "UTF-8")
+                val url = "https://api.mymemory.translated.net/get?q=$q&langpair=$src%7C$dst"
+                val req = Request.Builder().url(url).get().build()
+                studioTranslateHttpClient.newCall(req).execute().use { resp ->
+                    val raw = resp.body?.string().orEmpty()
+                    if (!resp.isSuccessful || raw.isBlank()) {
+                        throw IllegalStateException("HTTP ${resp.code}")
+                    }
+                    val obj = JSONObject(raw)
+                    val translated = obj.optJSONObject("responseData")?.optString("translatedText", "").orEmpty().trim()
+                    if (translated.isBlank() || translated.startsWith("MYMEMORY WARNING", ignoreCase = true)) {
+                        throw IllegalStateException("خدمة الترجمة مشغولة")
+                    }
+                    val payload = JSONObject().apply {
+                        put("ok", true)
+                        put("requestId", requestId)
+                        put("fromLang", src)
+                        put("toLang", dst)
+                        put("translatedText", translated)
+                    }.toString()
+                    evaluateJs("window.onStudioTranslationResult?.($payload);")
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                val payload = JSONObject().apply {
+                    put("ok", false)
+                    put("requestId", requestId)
+                    put("fromLang", src)
+                    put("toLang", dst)
+                    put("error", e.message ?: "تعذرت الترجمة عبر الشبكة")
+                }.toString()
+                evaluateJs("window.onStudioTranslationResult?.($payload);")
+            }
+        }
     }
 }
 
@@ -1945,6 +2089,46 @@ class AndroidWebAppInterface(private val activity: MainActivity) {
                 activity.sendToastToJs("تعذر فتح قائمة المشاركة")
             }
         }
+    }
+
+    @JavascriptInterface
+    fun beginUploadTempFile(uploadId: String, fileKey: String): Boolean {
+        return activity.beginUploadTempFile(uploadId, fileKey)
+    }
+
+    @JavascriptInterface
+    fun appendUploadTempChunk(uploadId: String, fileKey: String, base64Chunk: String): Boolean {
+        return activity.appendUploadTempChunk(uploadId, fileKey, base64Chunk)
+    }
+
+    @JavascriptInterface
+    fun startBackgroundThemePublish(jobJson: String): Boolean {
+        return activity.startBackgroundThemePublish(jobJson)
+    }
+
+    @JavascriptInterface
+    fun cancelBackgroundThemePublish() {
+        activity.runOnUiThread { activity.cancelBackgroundThemePublish() }
+    }
+
+    @JavascriptInterface
+    fun getBackgroundPublishStatus(): String {
+        return ThemeUploadService.getLatestStatusJson()
+    }
+
+    @JavascriptInterface
+    fun recordPublishLog(logJson: String) {
+        activity.runOnUiThread { activity.communityManager.recordPublishLog(logJson) }
+    }
+
+    @JavascriptInterface
+    fun fetchPublishLogs() {
+        activity.runOnUiThread { activity.communityManager.fetchPublishLogs() }
+    }
+
+    @JavascriptInterface
+    fun translateStudioText(text: String, fromLang: String, toLang: String, requestId: String) {
+        activity.runOnUiThread { activity.translateStudioText(text, fromLang, toLang, requestId) }
     }
 }
 

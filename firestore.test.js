@@ -708,3 +708,49 @@ test("frames/{frameId} & verified/badgeType/frameId/nameStyling security rules",
     verified: true
   }));
 });
+
+test("publishLogs/{logId}: admin append-only create & read, non-admin denied, update/delete denied", async () => {
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore().collection("admins").doc(ADMIN_EMAIL).set({ approved: true });
+  });
+
+  const unauthDb = testEnv.unauthenticatedContext().firestore();
+  const aliceDb = testEnv.authenticatedContext("uid_alice", { email: USER_A_EMAIL, email_verified: true }).firestore();
+  const adminDb = testEnv.authenticatedContext("uid_admin", { email: ADMIN_EMAIL, email_verified: true }).firestore();
+
+  await assertSucceeds(adminDb.collection("publishLogs").doc("plog_1").set({
+    actorUid: "uid_admin",
+    actorLabel: "Admin",
+    themeId: "cyber-101",
+    themeName: "Cyber Glow",
+    mode: "new",
+    status: "success",
+    version: "v1.0",
+    details: "1 variant",
+    createdAt: 20000
+  }));
+
+  await assertSucceeds(adminDb.collection("publishLogs").doc("plog_1").get());
+  await assertFails(unauthDb.collection("publishLogs").doc("plog_1").get());
+  await assertFails(aliceDb.collection("publishLogs").doc("plog_1").get());
+  await assertFails(aliceDb.collection("publishLogs").doc("plog_2").set({
+    actorUid: "uid_alice",
+    themeId: "fake",
+    themeName: "Fake",
+    mode: "new",
+    status: "success",
+    createdAt: 20001
+  }));
+  // Spoofed actorUid rejected
+  await assertFails(adminDb.collection("publishLogs").doc("plog_3").set({
+    actorUid: "someone_else",
+    themeId: "x",
+    themeName: "X",
+    mode: "new",
+    status: "success",
+    createdAt: 20002
+  }));
+  // Append-only: update and delete forbidden even for admin
+  await assertFails(adminDb.collection("publishLogs").doc("plog_1").update({ status: "failed" }));
+  await assertFails(adminDb.collection("publishLogs").doc("plog_1").delete());
+});
