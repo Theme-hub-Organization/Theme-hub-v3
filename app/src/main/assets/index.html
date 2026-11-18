@@ -1584,37 +1584,46 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 .admin-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  direction: rtl;
+  gap: 8px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin-bottom: var(--space-md);
   background: var(--surface2);
-  padding: 6px;
+  padding: 8px;
   border-radius: var(--radius-md);
   border: 1px solid var(--line);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar {
+  display: none;
 }
 .admin-tab {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  scroll-snap-align: center;
   min-width: fit-content;
   white-space: nowrap;
   text-align: center;
-  padding: 8px 10px;
-  min-height: 38px;
+  padding: 8px 14px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   border-radius: var(--radius-sm);
   font-size: var(--fs-xs);
   font-weight: 700;
-  color: var(--muted);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
 .admin-tab.active {
-  background: var(--grad);
+  background: var(--primary);
   color: #fff;
   box-shadow: 0 4px 12px rgba(124, 92, 255, 0.35);
 }
@@ -4775,14 +4784,21 @@ a[href] {
 }
 
 .studio-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding-bottom: 10px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 .studio-top-brand {
   display: flex;
@@ -12313,50 +12329,56 @@ function switchAdminTab(tab) {
   [addTab, manageTab, logTab, subTab, repTab, usersTab, contentTab, clubTab, statsTab, designerTab, adminsTab].forEach(el => { if (el) el.classList.remove("active"); });
   [addPane, managePane, logPane, subPane, repPane, usersPane, contentPane, clubPane, statsPane, designerPane, adminsPane].forEach(el => { if (el) el.style.display = "none"; });
 
+  let activeBtn = null;
   if (tab === "manage") {
-    if (manageTab) manageTab.classList.add("active");
+    activeBtn = manageTab;
     if (managePane) managePane.style.display = "block";
     renderAdminManageList();
   } else if (tab === "publish-log") {
-    if (logTab) logTab.classList.add("active");
+    activeBtn = logTab;
     if (logPane) logPane.style.display = "block";
     if (typeof loadPublishLogs === "function") loadPublishLogs();
   } else if (tab === "submissions") {
-    if (subTab) subTab.classList.add("active");
+    activeBtn = subTab;
     if (subPane) subPane.style.display = "block";
     loadAdminSubmissions();
   } else if (tab === "reports") {
-    if (repTab) repTab.classList.add("active");
+    activeBtn = repTab;
     if (repPane) repPane.style.display = "block";
     loadAdminReports();
   } else if (tab === "users") {
-    if (usersTab) usersTab.classList.add("active");
+    activeBtn = usersTab;
     if (usersPane) usersPane.style.display = "block";
     if (typeof loadAdminUsersList === "function") loadAdminUsersList();
   } else if (tab === "content") {
-    if (contentTab) contentTab.classList.add("active");
+    activeBtn = contentTab;
     if (contentPane) contentPane.style.display = "block";
     if (typeof loadAdminContentTab === "function") loadAdminContentTab();
   } else if (tab === "club") {
-    if (clubTab) clubTab.classList.add("active");
+    activeBtn = clubTab;
     if (clubPane) clubPane.style.display = "block";
     if (typeof initAdminClubTab === "function") initAdminClubTab();
   } else if (tab === "stats") {
-    if (statsTab) statsTab.classList.add("active");
+    activeBtn = statsTab;
     if (statsPane) statsPane.style.display = "block";
     if (typeof loadAdminStatsAndLog === "function") loadAdminStatsAndLog();
   } else if (tab === "designer") {
-    if (designerTab) designerTab.classList.add("active");
+    activeBtn = designerTab;
     if (designerPane) designerPane.style.display = "block";
     if (typeof initDesignerStudioTab === "function") initDesignerStudioTab();
   } else if (tab === "admins" && currentUserIsOwner) {
-    if (adminsTab) adminsTab.classList.add("active");
+    activeBtn = adminsTab;
     if (adminsPane) adminsPane.style.display = "block";
     fetchAdminMembersList();
   } else {
-    if (addTab) addTab.classList.add("active");
+    activeBtn = addTab;
     if (addPane) addPane.style.display = "block";
     if (typeof syncStudioUiState === "function") syncStudioUiState();
+  }
+
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 }
 
