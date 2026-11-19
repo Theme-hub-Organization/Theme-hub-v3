@@ -27,6 +27,8 @@ class ClubFirestoreManager(
     private val auth get() = Firebase.auth
 
     private var newPostsListener: ListenerRegistration? = null
+    @Volatile private var lastNotifiedPostId: String? = null
+    @Volatile private var lastNotifiedPostTs: Long = 0L
     private var cachedConfig: ClubModerationConfig = defaultModerationConfig()
 
     data class ClubModerationConfig(
@@ -80,9 +82,13 @@ class ClubFirestoreManager(
         stopNewPostsListener()
     }
 
+    fun isNewPostsListening(): Boolean = newPostsListener != null
+
     fun stopNewPostsListener() {
         runCatching { newPostsListener?.remove() }
         newPostsListener = null
+        lastNotifiedPostId = null
+        lastNotifiedPostTs = 0L
     }
 
     fun startNewPostsListener(sinceCreatedAt: Long) {
@@ -102,6 +108,9 @@ class ClubFirestoreManager(
                 val authorUid = top.getString("authorUid") ?: ""
                 val myUid = auth.currentUser?.uid ?: ""
                 if (ts > threshold && authorUid != myUid) {
+                    if (top.id == lastNotifiedPostId && ts <= lastNotifiedPostTs) return@addSnapshotListener
+                    lastNotifiedPostId = top.id
+                    lastNotifiedPostTs = ts
                     activity.evaluateJs("window.onClubNewPostAvailable?.($ts);")
                 }
             }

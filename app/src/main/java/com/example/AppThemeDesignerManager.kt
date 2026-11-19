@@ -81,6 +81,8 @@ class AppThemeDesignerManager(
         private val ALLOWED_FRAME_ACCESS = setOf("everyone", "admins", "owner", "assigned")
     }
 
+    fun isListening(): Boolean = appThemeListener != null
+
     fun startAppThemeListener() {
         replayLastThemeToWebView()
         if (appThemeListener != null) return
@@ -92,6 +94,7 @@ class AppThemeDesignerManager(
                     return@addSnapshotListener
                 }
                 if (snapshot == null || !snapshot.exists()) {
+                    if (lastCloudThemePayloadJson == "") return@addSnapshotListener
                     lastCloudThemePayloadJson = ""
                     activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
                     return@addSnapshotListener
@@ -105,6 +108,7 @@ class AppThemeDesignerManager(
                 }
 
                 if (candidate == null) {
+                    if (lastCloudThemePayloadJson == "") return@addSnapshotListener
                     lastCloudThemePayloadJson = ""
                     activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
                     return@addSnapshotListener
@@ -112,6 +116,9 @@ class AppThemeDesignerManager(
 
                 val sanitized = sanitizeThemeConfig(candidate)
                 val cleanStr = sanitized.toString()
+                if (cleanStr == lastCloudThemePayloadJson) {
+                    return@addSnapshotListener
+                }
                 lastCloudThemePayloadJson = cleanStr
                 activity.evaluateJs("window.onCloudAppThemeUpdated?.(${JSONObject.quote(cleanStr)});")
             }
@@ -131,8 +138,10 @@ class AppThemeDesignerManager(
             try {
                 val snap = db.collection("config").document("appTheme").get().await()
                 if (!snap.exists()) {
-                    lastCloudThemePayloadJson = ""
-                    activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
+                    if (lastCloudThemePayloadJson != "") {
+                        lastCloudThemePayloadJson = ""
+                        activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
+                    }
                     return@launch
                 }
                 val rawJson = snap.getString("themeJson")
@@ -142,10 +151,14 @@ class AppThemeDesignerManager(
                     runCatching { JSONObject(snap.data ?: emptyMap<String, Any>()) }.getOrNull()
                 }
                 if (candidate == null) {
-                    activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
+                    if (lastCloudThemePayloadJson != "") {
+                        lastCloudThemePayloadJson = ""
+                        activity.evaluateJs("window.onCloudAppThemeUpdated?.(null);")
+                    }
                     return@launch
                 }
                 val cleanStr = sanitizeThemeConfig(candidate).toString()
+                if (cleanStr == lastCloudThemePayloadJson) return@launch
                 lastCloudThemePayloadJson = cleanStr
                 activity.evaluateJs("window.onCloudAppThemeUpdated?.(${JSONObject.quote(cleanStr)});")
             } catch (e: CancellationException) {

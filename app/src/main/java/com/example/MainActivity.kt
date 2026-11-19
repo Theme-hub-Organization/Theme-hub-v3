@@ -3,6 +3,7 @@ package com.example
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -16,6 +17,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.util.Base64
 import android.util.Log
 import android.view.ViewGroup
@@ -99,6 +101,7 @@ class MainActivity : ComponentActivity() {
     private var isInteractiveSignInRunning = false
     private var activeSignInMode = "restore" // "restore" | "user" | "admin"
     private var lastVerifiedUid: String? = null
+    @Volatile private var activeRestoreUid: String? = null
     internal var currentUserIsAdmin: Boolean = false
     internal var currentUserIsPublisher: Boolean = false
     internal var currentUserBlocked: Boolean = false
@@ -422,6 +425,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun verifyAndRestoreUserSession(user: FirebaseUser) {
+        if (activeRestoreUid == user.uid) return
+        activeRestoreUid = user.uid
         val email = user.email?.trim()?.lowercase().orEmpty()
         sendAuthRestoringToJs(email)
 
@@ -436,6 +441,10 @@ class MainActivity : ComponentActivity() {
                 Log.e("ThemeHubAuth", "Restore session failed", e)
                 // Do NOT call signOut() on error; keep session and surface real reason
                 sendAuthErrorToJs(AuthErrorFormatter.format(e))
+            } finally {
+                if (activeRestoreUid == user.uid) {
+                    activeRestoreUid = null
+                }
             }
         }
     }
@@ -1403,6 +1412,40 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    internal fun getDevicePerformanceFlagsJson(): String {
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val isLowRam = am?.isLowRamDevice == true
+        val memInfo = ActivityManager.MemoryInfo().also { info -> am?.getMemoryInfo(info) }
+        val totalMemMb = (memInfo.totalMem / (1024L * 1024L)).toInt()
+        val isPowerSave = pm?.isPowerSaveMode == true
+        val cores = Runtime.getRuntime().availableProcessors()
+        return JSONObject().apply {
+            put("isLowRam", isLowRam || (totalMemMb in 1..3072))
+            put("isPowerSaveMode", isPowerSave)
+            put("totalMemMb", totalMemMb)
+            put("cores", cores)
+        }.toString()
+    }
+
+    internal fun getDiagnosticsInfoJson(): String {
+        val activeListeners = mutableListOf<String>()
+        if (appThemeManager.isListening()) activeListeners.add("config:appTheme")
+        if (clubManager.isNewPostsListening()) activeListeners.add("club:new_posts")
+        activeListeners.addAll(communityManager.getActiveListenerNames())
+        val perf = JSONObject(getDevicePerformanceFlagsJson())
+        return JSONObject().apply {
+            put("ok", true)
+            put("activeListenerCount", activeListeners.size)
+            put("activeListeners", JSONArray(activeListeners))
+            put("isLowRam", perf.optBoolean("isLowRam", false))
+            put("isPowerSaveMode", perf.optBoolean("isPowerSaveMode", false))
+            put("totalMemMb", perf.optInt("totalMemMb", 0))
+            put("cores", perf.optInt("cores", 0))
+            put("sdkInt", Build.VERSION.SDK_INT)
+        }.toString()
+    }
 }
 
 class AndroidWebAppInterface(private val activity: MainActivity) {
@@ -2129,6 +2172,16 @@ class AndroidWebAppInterface(private val activity: MainActivity) {
     @JavascriptInterface
     fun translateStudioText(text: String, fromLang: String, toLang: String, requestId: String) {
         activity.runOnUiThread { activity.translateStudioText(text, fromLang, toLang, requestId) }
+    }
+
+    @JavascriptInterface
+    fun getDevicePerformanceFlags(): String {
+        return activity.getDevicePerformanceFlagsJson()
+    }
+
+    @JavascriptInterface
+    fun getDiagnosticsInfo(): String {
+        return activity.getDiagnosticsInfoJson()
     }
 }
 

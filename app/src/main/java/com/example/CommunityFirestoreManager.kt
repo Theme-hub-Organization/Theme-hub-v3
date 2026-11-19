@@ -68,6 +68,12 @@ class CommunityFirestoreManager(
     private var chatConvListener: ListenerRegistration? = null
     private var chatMessagesListener: ListenerRegistration? = null
 
+    @Volatile private var lastUnreadCountEmitted: Int? = null
+    @Volatile private var lastPendingCountEmitted: Int? = null
+    @Volatile private var lastNotificationsPayloadEmitted: String? = null
+    @Volatile private var lastInboxPayloadEmitted: String? = null
+    @Volatile private var lastChatPayloadEmitted: String? = null
+
     private var lastMessageSentAtMs: Long = 0L
     private val cachedAdminUids = mutableSetOf<String>()
     private var cachedOwnerUid: String = ""
@@ -103,6 +109,17 @@ class CommunityFirestoreManager(
         return if (v in ALLOWED_NAME_FONTS) v else ""
     }
 
+    fun getActiveListenerNames(): List<String> {
+        val active = mutableListOf<String>()
+        if (unreadBadgeListener != null) active.add("community:unread_messages")
+        if (pendingSubmissionsBadgeListener != null) active.add("community:pending_submissions")
+        if (notificationsListener != null) active.add("community:notifications")
+        if (inboxListener != null) active.add("community:inbox")
+        if (chatConvListener != null) active.add("community:chat_conversation")
+        if (chatMessagesListener != null) active.add("community:chat_messages")
+        return active
+    }
+
     fun detachAllListeners() {
         runCatching { unreadBadgeListener?.remove() }
         runCatching { pendingSubmissionsBadgeListener?.remove() }
@@ -113,6 +130,10 @@ class CommunityFirestoreManager(
         pendingSubmissionsBadgeListener = null
         notificationsListener = null
         inboxListener = null
+        lastUnreadCountEmitted = null
+        lastPendingCountEmitted = null
+        lastNotificationsPayloadEmitted = null
+        lastInboxPayloadEmitted = null
     }
 
     private fun sha256LowerHex(input: String): String {
@@ -1160,6 +1181,8 @@ class CommunityFirestoreManager(
     fun startUnreadMessagesListener(uid: String) {
         if (uid.isBlank()) return
         runCatching { unreadBadgeListener?.remove() }
+        unreadBadgeListener = null
+        lastUnreadCountEmitted = null
         unreadBadgeListener = db.collection("conversations")
             .whereArrayContains("participants", uid)
             .addSnapshotListener { snap, err ->
@@ -1174,12 +1197,17 @@ class CommunityFirestoreManager(
                         unreadCount++
                     }
                 }
+                if (unreadCount == lastUnreadCountEmitted) return@addSnapshotListener
+                lastUnreadCountEmitted = unreadCount
                 activity.evaluateJs("window.onUnreadMessagesCount?.($unreadCount);")
             }
     }
 
     fun startNotificationsListener(uid: String) {
+        if (uid.isBlank()) return
         runCatching { notificationsListener?.remove() }
+        notificationsListener = null
+        lastNotificationsPayloadEmitted = null
         notificationsListener = db.collection("notifications").document(uid)
             .collection("items")
             .orderBy("createdAt", Query.Direction.DESCENDING)
@@ -1217,6 +1245,8 @@ class CommunityFirestoreManager(
                     put("unreadCount", unread)
                     put("items", arr)
                 }.toString()
+                if (payload == lastNotificationsPayloadEmitted) return@addSnapshotListener
+                lastNotificationsPayloadEmitted = payload
                 activity.evaluateJs("window.onNotificationsUpdated?.($payload);")
             }
     }
@@ -1253,7 +1283,10 @@ class CommunityFirestoreManager(
 
     fun startPendingSubmissionsBadgeListener(isAdmin: Boolean) {
         runCatching { pendingSubmissionsBadgeListener?.remove() }
+        pendingSubmissionsBadgeListener = null
+        lastPendingCountEmitted = null
         if (!isAdmin) {
+            lastPendingCountEmitted = 0
             activity.evaluateJs("window.onPendingSubmissionsCount?.(0);")
             return
         }
@@ -1265,6 +1298,8 @@ class CommunityFirestoreManager(
                     return@addSnapshotListener
                 }
                 val count = snap?.size() ?: 0
+                if (count == lastPendingCountEmitted) return@addSnapshotListener
+                lastPendingCountEmitted = count
                 activity.evaluateJs("window.onPendingSubmissionsCount?.($count);")
             }
     }
@@ -1279,6 +1314,8 @@ class CommunityFirestoreManager(
         val myUid = auth.currentUser?.uid
         if (myUid.isNullOrBlank()) return
         runCatching { inboxListener?.remove() }
+        inboxListener = null
+        lastInboxPayloadEmitted = null
         inboxListener = db.collection("conversations")
             .whereArrayContains("participants", myUid)
             .limit(100)
@@ -1337,6 +1374,8 @@ class CommunityFirestoreManager(
                         put("ok", true)
                         put("conversations", arr)
                     }.toString()
+                    if (payload == lastInboxPayloadEmitted) return@launch
+                    lastInboxPayloadEmitted = payload
                     activity.evaluateJs("window.onInboxConversationsUpdated?.($payload);")
                 }
             }
@@ -1345,6 +1384,7 @@ class CommunityFirestoreManager(
     fun stopMemberInboxListener() {
         runCatching { inboxListener?.remove() }
         inboxListener = null
+        lastInboxPayloadEmitted = null
     }
 
     fun startConversationChatListener(rawPeerUid: String) {
@@ -1415,6 +1455,8 @@ class CommunityFirestoreManager(
                         put("personalBlockedByMe", personalBlockedByMe)
                         put("messages", JSONArray())
                     }.toString()
+                    if (payload == lastChatPayloadEmitted) return@addSnapshotListener
+                    lastChatPayloadEmitted = payload
                     activity.evaluateJs("window.onChatMessagesUpdated?.($payload);")
                     return@addSnapshotListener
                 }
@@ -1484,6 +1526,8 @@ class CommunityFirestoreManager(
                                 put("personalBlockedByMe", personalBlockedByMe)
                                 put("messages", arr)
                             }.toString()
+                            if (payload == lastChatPayloadEmitted) return@addSnapshotListener
+                            lastChatPayloadEmitted = payload
                             activity.evaluateJs("window.onChatMessagesUpdated?.($payload);")
                         }
                 }
@@ -1496,6 +1540,7 @@ class CommunityFirestoreManager(
         runCatching { chatConvListener?.remove() }
         chatMessagesListener = null
         chatConvListener = null
+        lastChatPayloadEmitted = null
     }
 
     fun sendMessage(rawPeerUid: String, text: String) {
