@@ -6015,6 +6015,101 @@ body.th-low-perf .studio-preview-stage {
   .studio-step-txt { font-size: 8.5px; }
   .studio-manage-filters-row { grid-template-columns: 1fr 1fr; }
 }
+
+/* ==========================================================================
+   UNIFIED MENUS & TABS — layout consistency fixes (appended last on purpose)
+   ========================================================================== */
+
+/* 1) Admin panel tabs: ONE horizontal scrollable row, equal size, nothing clipped */
+html body #admin-workspace .admin-tabs {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 8px !important;
+  scroll-snap-type: x proximity !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+html body #admin-workspace .admin-tabs::-webkit-scrollbar { display: none; }
+html body #admin-workspace .admin-tab {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  border-radius: var(--radius-sm, 12px) !important;
+  scroll-snap-align: center;
+}
+
+/* 2) Club tabs and category chips: same height, spacing and snapping */
+html body .club-subtabs,
+html body .club-cat-strip {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+html body .club-subtab-pill {
+  flex: 0 0 auto !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+  scroll-snap-align: center;
+}
+html body .club-cat-chip {
+  flex: 0 0 auto !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  scroll-snap-align: center;
+}
+
+/* 3) Bottom navigation: equal items, labels fully readable (no "..." cut) */
+html body .nav {
+  width: calc(100% - 16px) !important;
+  max-width: 560px !important;
+  padding: 0 3px !important;
+  gap: 0 !important;
+}
+html body .nav-item {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  padding: 2px 0 !important;
+}
+html body .nav-item svg { flex: 0 0 auto; }
+html body .nav-label {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 1px !important;
+  text-align: center !important;
+  font-size: clamp(7.5px, 2.2vw, 9.5px) !important;
+  letter-spacing: -0.2px !important;
+  text-overflow: clip !important;
+  overflow: hidden !important;
+}
 </style>
 </head>
 <body class="th-scope" data-theme="dark" data-accent="purple">
@@ -26403,6 +26498,25 @@ window.onAdminClubReportsLoaded = function(payload) {
 
   listEl.innerHTML = blocks.length ? blocks.join("") : `<div style="font-size:12px; color:var(--muted); padding:8px 0;">لا توجد بلاغات أو منشورات مخفية في النادي حالياً.</div>`;
 };
+</script>
+
+<script>
+/* Keep the active club tab centered, like the admin tabs */
+(function () {
+  try {
+    var orig = window.setClubFeedTab;
+    if (typeof orig === "function") {
+      window.setClubFeedTab = function () {
+        var r = orig.apply(this, arguments);
+        requestAnimationFrame(function () {
+          var a = document.querySelector("#club-subtabs-bar .club-subtab-pill.active");
+          if (a && a.scrollIntoView) a.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        });
+        return r;
+      };
+    }
+  } catch (e) { /* layout helper only */ }
+})();
 </script>
 </body>
 </html>
