@@ -1596,6 +1596,17 @@ class AndroidWebAppInterface(private val activity: MainActivity) {
     }
 
     @JavascriptInterface
+    fun getDeviceInfo(): String {
+        return JSONObject().apply {
+            put("model", Build.MODEL ?: "")
+            put("manufacturer", Build.MANUFACTURER ?: "")
+            put("brand", Build.BRAND ?: "")
+            put("osVersion", Build.VERSION.RELEASE ?: "")
+            put("sdkInt", Build.VERSION.SDK_INT)
+        }.toString()
+    }
+
+    @JavascriptInterface
     fun downloadAppUpdateApk(url: String, filename: String, releaseTitle: String) {
         activity.runOnUiThread {
             activity.startResumableDownload(

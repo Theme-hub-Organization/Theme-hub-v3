@@ -44,6 +44,11 @@
   --radius-xl: 28px;
   --radius-full: 9999px;
 
+  /* Unified Card & Button Tokens */
+  --ui-card-radius: var(--radius-md);
+  --ui-card-pad: 14px;
+  --ui-btn-radius: var(--radius-sm);
+
   /* Safe Area Insets & Dynamic Viewport */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -251,6 +256,12 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 .badge-samsung { background: rgba(77, 163, 255, 0.18); color: #78BDFF; border: 1px solid rgba(77, 163, 255, 0.35); }
 .badge-oppo { background: rgba(16, 185, 129, 0.18); color: #52E0B0; border: 1px solid rgba(16, 185, 129, 0.35); }
 .badge-universal { background: rgba(255, 255, 255, 0.1); color: #DDDDE5; border: 1px solid var(--line); }
+[data-theme="light"] .badge-honor { background: rgba(124, 92, 255, 0.14); color: #5B21B6; }
+[data-theme="light"] .badge-huawei { background: rgba(220, 38, 38, 0.12); color: #B91C1C; }
+[data-theme="light"] .badge-xiaomi { background: rgba(234, 88, 12, 0.12); color: #C2410C; }
+[data-theme="light"] .badge-samsung { background: rgba(37, 99, 235, 0.12); color: #1D4ED8; }
+[data-theme="light"] .badge-oppo { background: rgba(5, 150, 105, 0.12); color: #047857; }
+[data-theme="light"] .badge-universal { background: rgba(0, 0, 0, 0.06); color: #3F3F46; }
 
 /* User avatar button (44px) */
 .avatar {
@@ -304,8 +315,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   gap: var(--space-sm);
   background: linear-gradient(135deg, rgba(124, 92, 255, 0.12), rgba(77, 163, 255, 0.08));
   border: 1px solid rgba(124, 92, 255, 0.28);
-  border-radius: var(--radius-md);
-  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: var(--space-sm);
   min-height: 56px;
 }
@@ -331,11 +342,13 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   text-overflow: ellipsis;
 }
 .device-btn {
+  font-family: inherit;
   font-size: var(--fs-xs);
   font-weight: 800;
   padding: 0 var(--space-sm);
   height: 36px;
-  border-radius: var(--radius-full);
+  min-height: 36px;
+  border-radius: var(--ui-btn-radius);
   background: var(--grad);
   border: none;
   color: #fff;
@@ -407,9 +420,11 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   border: 1px solid rgba(255, 255, 255, 0.35);
   padding: 0 var(--space-md);
   height: 36px;
+  min-height: 36px;
   display: inline-flex;
   align-items: center;
-  border-radius: var(--radius-sm);
+  border-radius: var(--ui-btn-radius);
+  font-family: inherit;
   font-size: var(--fs-xs);
   font-weight: 700;
   color: #fff;
@@ -710,7 +725,7 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 .group {
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--ui-card-radius);
   overflow: hidden;
   margin-bottom: var(--space-sm);
   border: 1px solid var(--line);
@@ -806,7 +821,7 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   height: 62px;
   border-radius: 24px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   background: rgba(26, 26, 35, 0.86);
   backdrop-filter: blur(24px);
@@ -815,7 +830,7 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
   z-index: 30;
   padding: 0 4px;
-  gap: 2px;
+  gap: 1px;
 }
 [data-theme="light"] .nav {
   background: rgba(255, 255, 255, 0.88);
@@ -824,17 +839,22 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 
 .nav-item {
-  flex: 1;
-  height: 46px;
-  border-radius: 15px;
-  display: grid;
-  place-items: center;
+  flex: 1 1 0%;
+  width: 0;
+  height: 48px;
+  border-radius: var(--ui-btn-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   min-width: 0;
-  padding: 2px;
+  padding: 4px 1px;
+  border: 1px solid transparent;
 }
 .nav-item svg {
   width: 20px;
@@ -844,20 +864,23 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  transition: stroke 0.2s;
 }
 .nav-item.on {
-  background: var(--grad);
+  background: var(--a1);
   color: #fff;
-  box-shadow: 0 6px 18px rgba(124, 92, 255, 0.45);
-  transform: translateY(-2px);
+  border-color: transparent;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--a1) 38%, transparent);
+  transform: none;
 }
 .nav-item.on svg { stroke: #fff; }
+.nav-item.on .nav-label { color: #fff; }
 
 .badge-dot {
   position: absolute;
-  top: 7px;
-  inset-inline-end: 10px;
+  top: 5px;
+  inset-inline-end: calc(50% - 14px);
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -909,6 +932,11 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   flex-shrink: 0;
 }
 .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; }
+[dir="rtl"] .detail-top > .icon-btn:first-child svg,
+[dir="rtl"] #detail-hero-gallery-header > .hero-glass-circle:first-child svg,
+[dir="rtl"] #btn-chat-back-inbox svg {
+  transform: scaleX(-1);
+}
 
 /* Realistic 9:19 Flagship Metallic Phone Mockup & Animated Gallery */
 .hero {
@@ -1353,7 +1381,7 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 .stat {
   background: var(--surface);
-  border-radius: var(--radius-sm);
+  border-radius: var(--ui-card-radius);
   padding: 10px 6px;
   text-align: center;
   border: 1px solid var(--line);
@@ -1422,12 +1450,13 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 
 .btn {
   flex: 1;
-  min-height: 48px;
-  border-radius: var(--radius-md);
+  min-height: 46px;
+  border-radius: var(--ui-btn-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
+  font-family: inherit;
   font-weight: 800;
   font-size: var(--fs-base);
   background: var(--surface2);
@@ -1449,6 +1478,11 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   background: rgba(255, 77, 109, 0.16);
   color: #FF7A92;
   border-color: rgba(255, 77, 109, 0.3);
+}
+[data-theme="light"] .btn.danger {
+  background: rgba(220, 38, 38, 0.12);
+  color: #B91C1C;
+  border-color: rgba(220, 38, 38, 0.3);
 }
 .btn svg { width: 18px; height: 18px; stroke: currentColor; }
 
@@ -1532,6 +1566,7 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 .lang-item:hover, .lang-item:active { background: var(--surface2); }
 .lang-item.on { background: rgba(124, 92, 255, 0.16); color: #B9A8FF; }
+[data-theme="light"] .lang-item.on { background: rgba(124, 92, 255, 0.12); color: var(--a1); }
 
 .check {
   width: 22px;
@@ -1548,8 +1583,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-xs);
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
+  padding: var(--ui-card-pad);
+  border-radius: var(--ui-card-radius);
   background: var(--surface2);
   border: 1px solid var(--line);
 }
@@ -1583,12 +1618,14 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   color: #78BDFF;
   word-break: break-all;
 }
+[data-theme="light"] .path-box { color: #1D4ED8; }
 
 /* ==========================================================================
    11. ADMIN PANEL FORM STYLING
    ========================================================================== */
 #admin-workspace,
-#admin-workspace > div,
+#admin-workspace > div:not(.admin-tabs):not(.studio-scroll-body),
+#admin-workspace-scroll > div:not(.admin-tabs),
 [id^="admin-subtab-"] {
   width: 100%;
   max-width: 100%;
@@ -1599,17 +1636,19 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 .admin-tabs {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  align-items: center;
+  overflow-x: auto !important;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  direction: rtl;
+  scroll-padding-inline: 12px;
   gap: 8px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin-bottom: var(--space-md);
   background: var(--surface2);
-  padding: 8px;
-  border-radius: var(--radius-md);
+  padding: 6px;
+  border-radius: var(--ui-card-radius);
   border: 1px solid var(--line);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -1620,33 +1659,39 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 .admin-tab {
   flex: 0 0 auto;
   scroll-snap-align: center;
-  min-width: fit-content;
+  min-width: max-content;
   white-space: nowrap;
   text-align: center;
-  padding: 8px 14px;
+  padding: 0 14px;
+  height: 40px;
   min-height: 40px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--ui-btn-radius);
+  font-family: inherit;
   font-size: var(--fs-xs);
-  font-weight: 700;
-  color: var(--text-muted);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 .admin-tab.active {
-  background: var(--primary);
+  background: var(--a1);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(124, 92, 255, 0.35);
+  border-color: transparent;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--a1) 34%, transparent);
 }
 
 .token-card {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm);
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: var(--space-sm);
   max-width: 100%;
   box-sizing: border-box;
@@ -1667,6 +1712,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 }
 .token-status.saved { background: rgba(52, 199, 89, 0.18); color: #52E0B0; }
 .token-status.empty { background: rgba(255, 159, 10, 0.18); color: #FFA14A; }
+[data-theme="light"] .token-status.saved { background: rgba(16, 185, 129, 0.14); color: #047857; }
+[data-theme="light"] .token-status.empty { background: rgba(245, 158, 11, 0.14); color: #B45309; }
 
 .form-group { margin-bottom: var(--space-sm); }
 .form-label {
@@ -1838,13 +1885,14 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   color: #B9A8FF;
   margin-bottom: 6px;
 }
+[data-theme="light"] .progress-label { color: var(--a1); }
 
 .adm-theme-item {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  padding: var(--ui-card-pad);
+  border-radius: var(--ui-card-radius);
   background: var(--surface2);
   border: 1px solid var(--line);
   margin-bottom: 8px;
@@ -1989,8 +2037,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 .community-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  padding: 14px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-top: var(--space-sm);
 }
 .gold-accent-btn {
@@ -2029,8 +2077,8 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
 .comment-item {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-top: 8px;
 }
 .comment-head {
@@ -2074,19 +2122,24 @@ button, .btn, .icon-btn, .nav-item, .chip, .item, .heart, .form-input, .form-sel
   margin-top: 6px;
 }
 .mini-action-btn {
-  min-height: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font-size: 10.5px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--ui-btn-radius);
+  font-family: inherit;
+  font-size: var(--fs-xs);
   font-weight: 700;
-  background: rgba(255,255,255,0.06);
-  color: var(--muted);
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  color: var(--text);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
 }
-[data-theme="light"] .mini-action-btn { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .mini-action-btn { background: var(--surface2); color: var(--text); }
 
 /* ==========================================================================
    CHAT & INBOX (Clean Template-Aware, Zero Heavy Glass, Keyboard-Safe)
@@ -2330,11 +2383,11 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
+  padding: var(--ui-card-pad);
   min-height: 64px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--tpl-radius, var(--radius-md));
+  border-radius: var(--ui-card-radius);
   margin-bottom: 8px;
   cursor: pointer;
   backdrop-filter: none !important;
@@ -2354,7 +2407,7 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
   position: relative;
   width: 100%;
   height: 112px;
-  border-radius: var(--radius-md);
+  border-radius: var(--ui-card-radius);
   overflow: hidden;
   background: linear-gradient(135deg, rgba(124, 92, 255, 0.4), rgba(212, 175, 55, 0.35));
   border: 1px solid var(--line);
@@ -2382,6 +2435,7 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
   direction: ltr;
   unicode-bidi: isolate;
 }
+[data-theme="light"] .user-handle-chip { color: #5B21B6; }
 .badge-publisher-verified {
   background: linear-gradient(135deg, #2563EB, #7C5CFF);
   color: #fff;
@@ -2396,7 +2450,7 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
 .profile-stat-pill {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--ui-card-radius);
   padding: 8px 10px;
   text-align: center;
 }
@@ -2408,6 +2462,11 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
   background: rgba(255, 77, 109, 0.16);
   color: #FF7A92;
   border: 1px solid rgba(255, 77, 109, 0.35);
+}
+[data-theme="light"] .mini-action-btn.liked {
+  background: rgba(225, 29, 72, 0.1);
+  color: #BE123C;
+  border-color: rgba(225, 29, 72, 0.3);
 }
 .replies-drawer {
   margin-top: 8px;
@@ -2447,8 +2506,8 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
 .sub-card, .report-card {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 10px;
 }
 .sub-status-pill {
@@ -2460,6 +2519,9 @@ body.keyboard-open #view-messages.active.chat-thread-open #messages-top-title-ba
 .sub-status-pill.pending { background: rgba(245, 158, 11, 0.18); color: #FBBF24; }
 .sub-status-pill.approved { background: rgba(16, 185, 129, 0.18); color: #34D399; }
 .sub-status-pill.rejected { background: rgba(239, 68, 68, 0.18); color: #FCA5A5; }
+[data-theme="light"] .sub-status-pill.pending { color: #B45309; }
+[data-theme="light"] .sub-status-pill.approved { color: #047857; }
+[data-theme="light"] .sub-status-pill.rejected { color: #B91C1C; }
 .report-audit-box {
   background: var(--bg);
   border: 1px dashed var(--line);
@@ -2508,7 +2570,7 @@ h1, h2, h3, h4, .title, .sec h3, .detail-hero-title {
   transform: scale(0.95) translateY(-2px);
 }
 .th-scope[data-anim="playful"] .nav-item.on {
-  transform: translateY(-4px) scale(1.04);
+  transform: none;
 }
 .th-scope[data-anim="snappy"] .card,
 .th-scope[data-anim="snappy"] .btn,
@@ -3045,38 +3107,43 @@ h1, h2, h3, h4, .title, .sec h3, .detail-hero-title {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
 }
 .nav-label {
   display: none;
-  font-size: 9.5px;
+  font-family: inherit;
+  font-size: clamp(7px, 2.05vw, 9px);
+  letter-spacing: -0.25px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
   max-width: 100%;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
 }
 .th-scope[data-nav-labels="true"] .nav-label { display: block; }
-.th-scope[data-nav-labels="true"] .nav { height: 66px; }
-.th-scope[data-nav-labels="true"] .nav-item { height: 52px; }
+.th-scope[data-nav-labels="true"] .nav { height: 68px; }
+.th-scope[data-nav-labels="true"] .nav-item { height: 54px; }
 
 .th-scope[data-nav-active="glass-capsule"] .nav {
   border-radius: 9999px;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 .th-scope[data-nav-active="glass-capsule"] .nav-item.on {
-  background: var(--gl-capsule-bg, rgba(255, 255, 255, 0.16));
-  color: var(--text);
-  border: var(--gl-capsule-border, 1px solid rgba(255,255,255,0.18));
-  box-shadow: var(--gl-capsule-hl, inset 0 1px 0 rgba(255,255,255,0.2)), var(--gl-capsule-shadow, none);
+  background: var(--a1);
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--a1) 38%, transparent);
   transform: none;
-  border-radius: 9999px;
+  border-radius: var(--ui-btn-radius);
 }
 [data-theme="light"] .th-scope[data-nav-active="glass-capsule"] .nav-item.on {
-  color: var(--a1);
+  background: var(--a1);
+  color: #fff;
 }
-.th-scope[data-nav-active="glass-capsule"] .nav-item.on svg { stroke: currentColor; }
+.th-scope[data-nav-active="glass-capsule"] .nav-item.on svg { stroke: #fff; }
+.th-scope[data-nav-active="glass-capsule"] .nav-item.on .nav-label { color: #fff; }
 
 .th-scope[data-nav-type="bottom-bar"] .nav {
   bottom: 0;
@@ -3087,6 +3154,9 @@ h1, h2, h3, h4, .title, .sec h3, .detail-hero-title {
   padding-bottom: var(--safe-bottom);
   border-inline: none;
   border-bottom: none;
+}
+.th-scope[data-nav-type="bottom-bar"][data-nav-labels="true"] .nav {
+  height: calc(68px + var(--safe-bottom));
 }
 
 /* Rail Left Navigation */
@@ -3341,8 +3411,8 @@ h1, h2, h3, h4, .title, .sec h3, .detail-hero-title {
 .settings-summary-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--tpl-radius, var(--radius-lg));
-  padding: 14px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: var(--space-sm);
 }
 .settings-search-box {
@@ -3428,10 +3498,11 @@ body.th-low-perf #view-settings.settings-in-subpage .settings-subpage.active {
   gap: 12px;
   width: 100%;
   min-height: 64px;
-  padding: 12px 14px;
+  padding: var(--ui-card-pad);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--tpl-radius, var(--radius-lg));
+  border-radius: var(--ui-card-radius);
+  font-family: inherit;
   text-align: start;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
@@ -4159,8 +4230,8 @@ body.th-preview-banner-active #rail-left-nav {
 .preset-card {
   background: var(--surface2);
   border: 1.5px solid var(--line);
-  border-radius: 16px;
-  padding: 10px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -4193,8 +4264,8 @@ body.th-preview-banner-active #rail-left-nav {
 .designer-section-box {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 12px;
 }
 .designer-section-title {
@@ -4240,6 +4311,8 @@ body.th-preview-banner-active #rail-left-nav {
 }
 .wcag-badge.ok { background: rgba(16,185,129,0.18); color: #34D399; }
 .wcag-badge.warn { background: rgba(245,158,11,0.2); color: #FBBF24; }
+[data-theme="light"] .wcag-badge.ok { color: #047857; }
+[data-theme="light"] .wcag-badge.warn { color: #B45309; }
 .section-order-row {
   display: flex;
   align-items: center;
@@ -4314,6 +4387,9 @@ body.th-preview-banner-active #rail-left-nav {
   color: #FCD34D;
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
+[data-theme="light"] .user-badge-chip { color: #5B21B6; background: rgba(124, 92, 255, 0.12); }
+[data-theme="light"] .user-badge-chip.custom-title { color: #92400E; background: rgba(245, 158, 11, 0.16); }
+[data-theme="light"] .pin-badge-pill { color: #B45309; background: rgba(245, 158, 11, 0.16); }
 .comment-item.pinned-comment {
   border-color: rgba(245, 158, 11, 0.48);
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), var(--surface2));
@@ -4509,8 +4585,8 @@ a[href] {
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
   color: #FCA5A5;
-  border-radius: var(--radius-sm);
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   font-size: 11.5px;
   line-height: 1.55;
   word-break: break-word;
@@ -4551,12 +4627,13 @@ a[href] {
   gap: 4px;
   min-height: 36px;
   height: auto;
-  padding: 5px 11px;
-  border-radius: var(--radius-xs);
+  padding: 5px 12px;
+  border-radius: var(--ui-btn-radius);
   border: 1px solid rgba(248, 113, 113, 0.45);
   background: rgba(239, 68, 68, 0.18);
   color: inherit;
-  font-size: 11px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
   font-weight: 800;
   cursor: pointer;
   user-select: none;
@@ -4595,8 +4672,8 @@ a[href] {
 .stat-mini-box {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
 }
 .stat-mini-box b {
   display: block;
@@ -4620,8 +4697,8 @@ a[href] {
 .notif-item-row {
   background: var(--surface2);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 8px;
   cursor: pointer;
 }
@@ -4648,32 +4725,53 @@ a[href] {
 }
 .club-subtabs {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 12px;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 6px;
-  margin-bottom: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: var(--ui-card-radius);
+  padding: 6px;
+  margin-bottom: 10px;
 }
 .club-subtabs::-webkit-scrollbar { display: none; }
 .club-subtab-pill {
-  flex: none;
-  min-height: 36px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface2);
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-width: max-content;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--ui-btn-radius);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
   font-weight: 800;
+  line-height: 1.2;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .club-subtab-pill.active {
-  background: var(--grad);
+  background: var(--a1);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 6px 16px rgba(124, 92, 255, 0.35);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--a1) 34%, transparent);
 }
 .club-cat-strip {
   display: flex;
@@ -4706,13 +4804,14 @@ a[href] {
   background: rgba(245, 158, 11, 0.14);
   border: 1px solid rgba(245, 158, 11, 0.4);
   color: #FCD34D;
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
   margin-bottom: 10px;
 }
+[data-theme="light"] .club-maintenance-banner { color: #92400E; }
 .club-new-posts-pill {
   display: none;
   width: 100%;
@@ -4732,8 +4831,8 @@ a[href] {
 .club-post-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 13px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 12px;
   position: relative;
   transition: transform 0.15s ease, border-color 0.2s ease;
@@ -4928,10 +5027,11 @@ a[href] {
 .club-action-btn {
   flex: 1;
   min-height: 40px;
-  border-radius: 10px;
+  border-radius: var(--ui-btn-radius);
   border: none;
   background: transparent;
   color: var(--muted);
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -5027,8 +5127,8 @@ a[href] {
 .club-skeleton-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 12px;
 }
 .club-skel-line {
@@ -5051,8 +5151,8 @@ a[href] {
 .profile-mod-bar {
   background: rgba(255, 77, 109, 0.08);
   border: 1px solid rgba(255, 77, 109, 0.25);
-  border-radius: var(--radius-sm);
-  padding: 10px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-top: 4px;
 }
 
@@ -5061,29 +5161,50 @@ a[href] {
    ========================================================================== */
 .designer-subtabs-bar {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 12px;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: var(--ui-card-radius);
+  padding: 6px;
+  margin-bottom: 10px;
 }
 .designer-subtabs-bar::-webkit-scrollbar { display: none; }
 .designer-subtab-pill {
-  flex: none;
-  min-height: 36px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface2);
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-width: max-content;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--ui-btn-radius);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--muted);
-  font-size: 11.5px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
   font-weight: 800;
+  line-height: 1.2;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 .designer-subtab-pill.active {
-  background: var(--grad);
+  background: var(--a1);
   color: #fff;
   border-color: transparent;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--a1) 34%, transparent);
 }
 
 /* Live Scoped Mini-Previews inside Preset Cards */
@@ -5334,7 +5455,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .frame-pick-card {
   background: var(--surface2);
   border: 1.5px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--ui-card-radius);
   padding: 10px 6px;
   display: flex;
   flex-direction: column;
@@ -5364,7 +5485,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   max-height: 100dvh !important;
   border-radius: 0 !important;
   border-top: none !important;
-  padding: calc(var(--safe-top) + 10px) max(14px, var(--safe-right)) calc(var(--safe-bottom) + 12px) max(14px, var(--safe-left)) !important;
+  padding: 0 !important;
   background: var(--bg) !important;
   display: flex;
   flex-direction: column;
@@ -5378,24 +5499,31 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden !important;
+  padding: 0;
+}
+.studio-scroll-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px max(14px, var(--safe-right)) calc(var(--safe-bottom) + 20px) max(14px, var(--safe-left));
+  box-sizing: border-box;
 }
 
 .studio-top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
+  position: relative;
+  z-index: 20;
   background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 12px 16px;
+  padding: calc(var(--safe-top) + 10px) max(14px, var(--safe-right)) 10px max(14px, var(--safe-left));
   border-bottom: 1px solid var(--line);
-  margin-bottom: 12px;
-  flex-shrink: 0;
+  margin-bottom: 0;
+  flex: 0 0 auto;
   box-sizing: border-box;
 }
 .studio-top-brand {
@@ -5441,11 +5569,23 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   color: #FCA5A5;
   background: rgba(239, 68, 68, 0.12);
 }
+[data-theme="light"] .studio-token-pill.ok {
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+[data-theme="light"] .studio-token-pill.warn {
+  color: #B91C1C;
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+}
+[data-theme="light"] #studio-mode-badge {
+  color: #5B21B6 !important;
+}
 .studio-account-drawer {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 10px;
   animation: studioFadeSlideDown 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -5463,7 +5603,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   z-index: 12;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--ui-card-radius);
   padding: 10px 10px 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
 }
@@ -5543,6 +5683,10 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   color: #34D399;
   border-color: rgba(16, 185, 129, 0.45);
 }
+[data-theme="light"] .studio-step-pill.done,
+[data-theme="light"] .studio-step-pill.done .studio-step-num {
+  color: #047857;
+}
 
 /* Step Pane Transitions */
 .studio-stage-wrap {
@@ -5596,6 +5740,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   margin-top: 4px;
   animation: studioFadeSlideDown 0.2s ease-out;
 }
+[data-theme="light"] .studio-inline-err { color: #B91C1C; }
 
 /* Mode Cards */
 .studio-mode-grid {
@@ -5606,8 +5751,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .studio-mode-card {
   background: var(--gl-card-bg, var(--surface2));
   border: 1.5px solid var(--line);
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -5647,8 +5792,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .studio-section-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 10px;
 }
 .studio-field {
@@ -5789,8 +5934,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .studio-upload-hud {
   background: var(--surface);
   border: 1.5px solid color-mix(in srgb, var(--a1) 42%, transparent);
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-top: 10px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
 }
@@ -5820,6 +5965,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   border-color: rgba(16, 185, 129, 0.45);
   background: rgba(16, 185, 129, 0.12);
 }
+[data-theme="light"] .studio-stage-chip.done { color: #047857; }
 @keyframes studioShimmerBar {
   0%, 100% { opacity: 0.85; }
   50% { opacity: 1; }
@@ -5850,7 +5996,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   backdrop-filter: blur(var(--gl-nav-blur, 14px)) saturate(var(--gl-nav-sat, 130%));
   -webkit-backdrop-filter: blur(var(--gl-nav-blur, 14px)) saturate(var(--gl-nav-sat, 130%));
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--ui-card-radius);
   padding: 10px;
   display: flex;
   align-items: center;
@@ -5859,7 +6005,7 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
 }
 .studio-footer-sticky .btn {
-  min-height: 48px;
+  min-height: 46px;
   font-weight: 800;
 }
 
@@ -5869,8 +6015,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   overflow: hidden;
   background: var(--surface);
   border: 1.5px solid rgba(16, 185, 129, 0.45);
-  border-radius: 20px;
-  padding: 20px 14px;
+  border-radius: var(--ui-card-radius);
+  padding: 20px var(--ui-card-pad);
   text-align: center;
   animation: studioCardStagger 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -5920,8 +6066,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
   margin-bottom: 10px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 10px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
 }
 .studio-manage-filters-row {
   display: grid;
@@ -5931,8 +6077,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .studio-manage-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 10px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
@@ -5954,8 +6100,9 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 }
 .studio-manage-actions .mini-action-btn {
   min-height: 36px;
-  padding: 4px 10px;
-  font-size: 11px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 
@@ -5963,8 +6110,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .studio-preview-stage {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5976,8 +6123,8 @@ body.th-low-perf .phone-screen-layer.fx-kenburns img.loaded {
 .publish-log-row {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-pad);
   margin-bottom: 8px;
   font-size: 11.5px;
   line-height: 1.5;
@@ -7271,6 +7418,32 @@ html body .nav-label {
     متوافق تماماً مع Honor MagicOS 7/8 وHuawei EMUI 12/13
   </div>
 
+  <!-- COMPATIBILITY FEEDBACK SECTION -->
+  <div class="community-card" id="detail-compat-section" style="margin-top:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="font-size:var(--fs-sm); font-weight:800; color:var(--text);">هل اشتغل على جهازك؟</div>
+      <select id="compat-brand-filter" class="form-input" style="width:auto; min-height:30px; font-size:11px; padding:2px 8px;" onchange="loadThemeCompatData(currentDetailTheme.id)">
+        <option value="all">كل الأجهزة</option>
+        <option value="Honor">Honor</option>
+        <option value="Samsung">Samsung</option>
+        <option value="Xiaomi">Xiaomi</option>
+        <option value="Huawei">Huawei</option>
+        <option value="Oppo">Oppo</option>
+        <option value="Vivo">Vivo</option>
+        <option value="Realme">Realme</option>
+      </select>
+    </div>
+    <div id="compat-summary-display" style="font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px;">جاري تحميل تقارير التوافق...</div>
+    <div class="progress-bar-bg" style="margin-bottom:10px; display:none;" id="compat-progress-wrap">
+      <div class="progress-bar-fill" id="compat-progress-fill" style="width:0%; background:linear-gradient(90deg, #10B981, #34D399);"></div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <button type="button" class="btn main" style="flex:1; min-height:40px; background:rgba(16,185,129,0.18); color:#34D399; border:1px solid rgba(16,185,129,0.4);" onclick="openCompatModal('ok')">✅ اشتغل</button>
+      <button type="button" class="btn main" style="flex:1; min-height:40px; background:rgba(239,68,68,0.18); color:#F87171; border:1px solid rgba(239,68,68,0.4);" onclick="openCompatModal('fail')">❌ ما اشتغل</button>
+    </div>
+    <div id="compat-user-status" style="font-size:11px; color:var(--muted);"></div>
+  </div>
+
   <div id="detail-hero-cards-wrap">
     <div class="detail-hero-cards-track" id="detail-hero-cards-track"></div>
   </div>
@@ -7362,6 +7535,49 @@ html body .nav-label {
     <button type="button" id="btn-detail-float-fav" onclick="toggleFavoriteFromDetail()" aria-label="المفضلة">
       <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
+  </div>
+
+  <!-- COMPATIBILITY REPORT MODAL -->
+  <div class="dim" id="compat-modal-dim" style="display:none;" onclick="closeCompatModal()"></div>
+  <div class="sheet" id="compat-report-modal" style="display:none; max-height:85vh; overflow-y:auto; z-index:10005;">
+    <div class="grab" onclick="closeCompatModal()"></div>
+    <h4 style="margin-bottom:12px;"><span id="compat-modal-title">تقرير التوافق مع جهازك</span></h4>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <label style="font-size:11.5px; color:var(--muted); display:block; margin-bottom:4px;">نوع / شركة الهاتف (Brand)</label>
+        <input type="text" id="compat-input-brand" class="form-input" maxlength="50" placeholder="Honor / Samsung / Xiaomi...">
+      </div>
+      <div>
+        <label style="font-size:11.5px; color:var(--muted); display:block; margin-bottom:4px;">موديل الجهاز (Model)</label>
+        <input type="text" id="compat-input-model" class="form-input" maxlength="80" placeholder="Magic 5 Pro / S23 Ultra...">
+      </div>
+      <div>
+        <label style="font-size:11.5px; color:var(--muted); display:block; margin-bottom:4px;">إصدار النظام (OS Version)</label>
+        <input type="text" id="compat-input-os" class="form-input" maxlength="50" placeholder="MagicOS 8.0 / Android 14...">
+      </div>
+
+      <div id="compat-fail-reasons-wrap" style="display:none;">
+        <label style="font-size:11.5px; color:var(--muted); display:block; margin-bottom:6px;">سبب عدم الاشتغال (اختر سبباً رئيسياً):</label>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;" id="compat-reasons-pills">
+          <button type="button" class="badge compat-reason-pill" data-reason="لم يتثبت" onclick="selectCompatReason('لم يتثبت')">لم يتثبت</button>
+          <button type="button" class="badge compat-reason-pill" data-reason="تطبيق جزئي" onclick="selectCompatReason('تطبيق جزئي')">تطبيق جزئي</button>
+          <button type="button" class="badge compat-reason-pill" data-reason="الخلفية فقط" onclick="selectCompatReason('الخلفية فقط')">الخلفية فقط</button>
+          <button type="button" class="badge compat-reason-pill" data-reason="الخطوط" onclick="selectCompatReason('الخطوط')">الخطوط</button>
+          <button type="button" class="badge compat-reason-pill" data-reason="تعطل الجهاز" onclick="selectCompatReason('تعطل الجهاز')">تعطل الجهاز</button>
+          <button type="button" class="badge compat-reason-pill" data-reason="أخرى" onclick="selectCompatReason('أخرى')">أخرى</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:11.5px; color:var(--muted); display:block; margin-bottom:4px;">ملاحظة إضافية (اختياري، بحد أقصى 200 حرف)</label>
+        <textarea id="compat-input-note" class="form-textarea" maxlength="200" rows="2" placeholder="اكتب ملاحظة قصيرة..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button type="button" class="btn" style="flex:1;" onclick="closeCompatModal()">إلغاء</button>
+        <button type="button" class="btn main" style="flex:1;" onclick="submitCompatReportAction()">إرسال التقرير</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -7609,6 +7825,7 @@ html body .nav-label {
       </div>
     </div>
 
+    <div id="admin-workspace-scroll" class="studio-scroll-body">
     <!-- COLLAPSIBLE ACCOUNT & TOKEN DRAWER (ZERO TOKEN EXPOSURE) -->
     <div id="studio-account-drawer" class="studio-account-drawer" style="display:none;">
       <div class="token-card" style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); margin-bottom:var(--space-sm);">
@@ -7693,8 +7910,10 @@ html body .nav-label {
       <div class="admin-tab" id="atab-reports" onclick="switchAdminTab('reports')">🚩 البلاغات</div>
       <div class="admin-tab" id="atab-stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
       <div class="admin-tab" id="atab-designer" onclick="switchAdminTab('designer')">🎨 مصمم التطبيق</div>
+      <div class="admin-tab" id="atab-compat" onclick="switchAdminTab('compat')">📊 تقارير التوافق</div>
       <div class="admin-tab" id="atab-admins" style="display:none;" onclick="switchAdminTab('admins')">🛡️ المشرفون</div>
     </div>
+    <div id="admin-subtab-compat" style="display:none;"></div>
 
     <!-- TAB 1: PUBLISH STUDIO 6-STEP WIZARD -->
     <div id="admin-subtab-add">
@@ -8263,17 +8482,17 @@ html body .nav-label {
 
       <!-- Designer Studio Subtabs -->
       <div class="designer-subtabs-bar" id="designer-subtabs-bar">
-        <button type="button" class="designer-subtab-pill active" data-dsg-tab="presets" onclick="switchDesignerSubtab('presets')">✨ القوالب (14)</button>
+        <button type="button" class="designer-subtab-pill active" data-dsg-tab="presets" onclick="switchDesignerSubtab('presets')">✨ القوالب (3)</button>
         <button type="button" class="designer-subtab-pill" data-dsg-tab="glass" onclick="switchDesignerSubtab('glass')">🫧 ستوديو الزجاج</button>
         <button type="button" class="designer-subtab-pill" data-dsg-tab="layout" onclick="switchDesignerSubtab('layout')">📐 الهيكل والألوان</button>
         <button type="button" class="designer-subtab-pill" data-dsg-tab="frames" onclick="switchDesignerSubtab('frames')">🖼 الإطارات والتوثيق</button>
       </div>
 
-      <!-- SUBTAB 1: 14 PRESETS WITH LIVE MINI PREVIEWS + SAVED CUSTOM + JSON -->
+      <!-- SUBTAB 1: 3 PRESETS WITH LIVE MINI PREVIEWS + SAVED CUSTOM + JSON -->
       <div class="designer-subtab-pane active" id="designer-pane-presets">
         <div class="designer-section-box">
           <div class="designer-section-title">
-            <span>✨ القوالب الهيكلية الجاهزة (14 قالباً بمعاينة حية)</span>
+            <span>✨ القوالب الهيكلية الجاهزة (3 قوالب مختلفة بمعاينة حية)</span>
           </div>
           <div class="designer-presets-grid" id="designer-presets-grid"></div>
         </div>
@@ -8747,6 +8966,7 @@ html body .nav-label {
       </div>
     </div>
 
+    </div> <!-- /admin-workspace-scroll -->
   </div>
 </div>
 
@@ -11586,6 +11806,7 @@ function openDetailScreen(theme) {
     try { renderHeroCardsTrack(); } catch (_) {}
   }
   try { initDetailCommunitySection(currentDetailTheme); } catch (_) {}
+  try { loadThemeCompatData(currentDetailTheme.id); } catch (_) {}
   document.body.classList.add("th-detail-open");
   document.getElementById("detail-screen").classList.add("open");
   startPreviewAutoPlay();
@@ -12465,6 +12686,8 @@ function openAdminModal() {
     if (typeof checkStudioDraftBanner === "function") checkStudioDraftBanner();
     if (typeof restoreBackgroundPublishUiIfAny === "function") restoreBackgroundPublishUiIfAny();
     renderAdminManageList();
+    const activeAdminTab = document.querySelector(".admin-tabs .admin-tab.active");
+    if (activeAdminTab) centerTabInScrollRow(activeAdminTab, false);
   } else if (isRestoringAuthSession) {
     if (restoringBox) restoringBox.style.display = "block";
     if (googleGateBox) googleGateBox.style.display = "none";
@@ -13553,6 +13776,27 @@ function displayAdminUserInfo(name, email, photo) {
   }
 }
 
+function centerTabInScrollRow(tabEl, smooth = true) {
+  if (!tabEl) return;
+  const row = tabEl.parentElement;
+  if (!row || row.scrollWidth <= row.clientWidth + 2) return;
+  const runCenter = () => {
+    const rowRect = row.getBoundingClientRect();
+    const tabRect = tabEl.getBoundingClientRect();
+    if (!rowRect.width || !tabRect.width) return;
+    const rowCenter = rowRect.left + rowRect.width / 2;
+    const tabCenter = tabRect.left + tabRect.width / 2;
+    const delta = tabCenter - rowCenter;
+    if (Math.abs(delta) < 1) return;
+    try {
+      row.scrollBy({ left: delta, behavior: smooth ? "smooth" : "auto" });
+    } catch (_) {
+      row.scrollLeft += delta;
+    }
+  };
+  requestAnimationFrame(() => requestAnimationFrame(runCenter));
+}
+
 function switchAdminTab(tab) {
   if (tab !== "designer" && typeof destroyDesignerMiniPreviews === "function") {
     destroyDesignerMiniPreviews();
@@ -13567,6 +13811,7 @@ function switchAdminTab(tab) {
   const clubTab = document.getElementById("atab-club");
   const statsTab = document.getElementById("atab-stats");
   const designerTab = document.getElementById("atab-designer");
+  const compatTab = document.getElementById("atab-compat");
   const adminsTab = document.getElementById("atab-admins");
 
   const addPane = document.getElementById("admin-subtab-add");
@@ -13579,10 +13824,11 @@ function switchAdminTab(tab) {
   const clubPane = document.getElementById("admin-subtab-club");
   const statsPane = document.getElementById("admin-subtab-stats");
   const designerPane = document.getElementById("admin-subtab-designer");
+  const compatPane = document.getElementById("admin-subtab-compat");
   const adminsPane = document.getElementById("admin-subtab-admins");
 
-  [addTab, manageTab, logTab, subTab, repTab, usersTab, contentTab, clubTab, statsTab, designerTab, adminsTab].forEach(el => { if (el) el.classList.remove("active"); });
-  [addPane, managePane, logPane, subPane, repPane, usersPane, contentPane, clubPane, statsPane, designerPane, adminsPane].forEach(el => { if (el) el.style.display = "none"; });
+  [addTab, manageTab, logTab, subTab, repTab, usersTab, contentTab, clubTab, statsTab, designerTab, compatTab, adminsTab].forEach(el => { if (el) el.classList.remove("active"); });
+  [addPane, managePane, logPane, subPane, repPane, usersPane, contentPane, clubPane, statsPane, designerPane, compatPane, adminsPane].forEach(el => { if (el) el.style.display = "none"; });
 
   let activeBtn = null;
   if (tab === "manage") {
@@ -13621,6 +13867,10 @@ function switchAdminTab(tab) {
     activeBtn = designerTab;
     if (designerPane) designerPane.style.display = "block";
     if (typeof initDesignerStudioTab === "function") initDesignerStudioTab();
+  } else if (tab === "compat") {
+    activeBtn = compatTab;
+    if (compatPane) compatPane.style.display = "block";
+    if (typeof loadAdminCompatReports === "function") loadAdminCompatReports();
   } else if (tab === "admins" && currentUserIsOwner) {
     activeBtn = adminsTab;
     if (adminsPane) adminsPane.style.display = "block";
@@ -13633,7 +13883,7 @@ function switchAdminTab(tab) {
 
   if (activeBtn) {
     activeBtn.classList.add("active");
-    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    centerTabInScrollRow(activeBtn, true);
   }
 }
 
@@ -13863,6 +14113,8 @@ window.onAndroidAuthResult = function(rawPayload) {
     if (typeof checkStudioDraftBanner === "function") checkStudioDraftBanner();
 
     renderAdminManageList();
+    const activeAdminTab = document.querySelector(".admin-tabs .admin-tab.active");
+    if (activeAdminTab) centerTabInScrollRow(activeAdminTab, false);
     if (sheet && sheet.classList.contains("open")) {
       showToast(`مرحباً بك يا ${name || (isOwner ? "المالك" : "المشرف")}! تم فتح استوديو النشر`);
     }
@@ -15707,7 +15959,7 @@ function goToStudioStep(targetStep, skipValidation = false) {
     renderStudioStep6Review();
     runStudioPreflightChecks(false);
   }
-  const ws = document.getElementById("admin-workspace");
+  const ws = document.getElementById("admin-workspace-scroll") || document.getElementById("admin-workspace");
   if (ws) ws.scrollTop = 0;
   return true;
 }
@@ -22368,99 +22620,6 @@ const BUILT_IN_APP_TEMPLATES = [
     mode: "dark"
   },
   {
-    id: "editorial",
-    name: "مجلة تحريرية",
-    badge: "مجلة",
-    version: 2,
-    colors: { bg: "#FFFBF5", surface: "#FFFFFF", surface2: "#F6EFE4", text: "#1F1B16", textMuted: "#786E62", primary: "#B45309", primary2: "#D97706", accent: "#B45309", border: "#E8DDD0", success: "#15803D", danger: "#B91C1C" },
-    fonts: { heading: "Playfair Display", body: "Tajawal", scale: 1.05 },
-    shape: { radius: 12, spacing: "airy", cardStyle: "soft", shadow: "soft", pillButtons: false },
-    icons: { style: "outline" },
-    header: "large-title",
-    nav: { type: "top-tabs", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: ["themes", "font", "live_wallpaper"] },
-    search: { style: "card" },
-    home: { sections: ["banner", "search", "categories", "featured", "topDownloads", "newReleases"], sectionLayout: "magazine", sectionSubtitles: true, heroStyle: "big-card" },
-    themeGrid: { layout: "masonry", cardInfo: "below-title" },
-    details: { layout: "hero-gallery", badges: true, stats: "three-cards", actionBar: "top-inline", descriptionStyle: "card" },
-    club: { feedStyle: "magazine" },
-    profile: { layout: "cover-overlap" },
-    settings: { layout: "accordion" },
-    phoneFrame: { defaultFrame: "none" },
-    glass: buildDefaultGlassConfig("#FFFFFF", "#B45309", {
-      nav: { opacity: 90, blur: 14, saturation: 120, borderColor: "#B45309", borderOpacity: 16 },
-      card: { opacity: 96, blur: 0, saturation: 100, borderColor: "#E8DDD0", borderOpacity: 80 }
-    }),
-    texts: {
-      ar: { appName: "مجلة الثيمات", tagline: "اختيارات التصميم والتحرير الأسبوعية", bannerTitle: "عدد التصميم الخاص", bannerSubtitle: "ثيمات مختارة بعناية من أفضل المصممين", ctaDownload: "اقتناء الثيم", ctaApply: "تثبيت" },
-      en: { appName: "Theme Journal", tagline: "Editorial Design Curations", bannerTitle: "Design Issue Picks", bannerSubtitle: "Hand-picked themes & typography", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "fade",
-    animation: "smooth",
-    mode: "light"
-  },
-  {
-    id: "pharaoh",
-    name: "الفرعوني الملكي",
-    badge: "ملكي 🏺",
-    version: 2,
-    colors: { bg: "#0B0907", surface: "#17120C", surface2: "#241B11", text: "#FDF4D7", textMuted: "#B79F71", primary: "#D4AF37", primary2: "#1E5AA8", accent: "#F5D061", border: "#4A3A1E", success: "#22C55E", danger: "#EF4444" },
-    fonts: { heading: "Amiri", body: "Cairo", scale: 1.05 },
-    shape: { radius: 18, spacing: "cozy", cardStyle: "outlined", shadow: "glow", pillButtons: false },
-    icons: { style: "duotone" },
-    header: "hero-profile",
-    nav: { type: "dock-center-fab", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "card" },
-    home: { sections: ["banner", "deviceDetector", "brandChips", "featured", "topDownloads", "newReleases"], sectionLayout: "magazine", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid2", cardInfo: "overlay-title" },
-    details: { layout: "fullscreen-phone", badges: true, stats: "three-cards", actionBar: "floating-wide", descriptionStyle: "card" },
-    club: { feedStyle: "cards" },
-    profile: { layout: "cover-overlap" },
-    settings: { layout: "grid-cards" },
-    phoneFrame: { defaultFrame: "pharaoh" },
-    glass: buildDefaultGlassConfig("#17120C", "#D4AF37", {
-      nav: { opacity: 86, blur: 20, saturation: 150, tint: "#D4AF37", tintOpacity: 16, borderColor: "#D4AF37", borderOpacity: 35, shadow: "glow" },
-      card: { opacity: 88, blur: 10, borderColor: "#D4AF37", borderOpacity: 28, shadow: "glow" }
-    }),
-    texts: {
-      ar: { appName: "Theme Hub Pharaoh", tagline: "الذهب الفرعوني الملكي و اللازورد", bannerTitle: "تشكيلة حورس الذهبية", bannerSubtitle: "فخامة فرعونية بإطار ملكي خاص", ctaDownload: "تنزيل الثيم", ctaApply: "تثبيت ملكي" },
-      en: { appName: "Pharaoh Hub", tagline: "Royal Gold & Lapis Edition", bannerTitle: "Horus Gold Collection", bannerSubtitle: "Signature Egyptian royal dark styling", ctaDownload: "Download", ctaApply: "Apply Royal" }
-    },
-    transition: "zoom",
-    animation: "smooth",
-    mode: "dark"
-  },
-  {
-    id: "neon-cyber",
-    name: "نيون سايبر",
-    badge: "ألعاب ⚡",
-    version: 2,
-    colors: { bg: "#060714", surface: "#0E1026", surface2: "#171A38", text: "#EAF4FF", textMuted: "#8694C2", primary: "#00F5D4", primary2: "#FF2E93", accent: "#00F5D4", border: "#252A59", success: "#00E676", danger: "#FF2E93" },
-    fonts: { heading: "Space Grotesk", body: "Cairo", scale: 1 },
-    shape: { radius: 14, spacing: "compact", cardStyle: "neon", shadow: "glow", pillButtons: true },
-    icons: { style: "duotone" },
-    header: "compact",
-    nav: { type: "rail-left", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "full-width-top" },
-    home: { sections: ["search", "banner", "brandChips", "topDownloads", "newReleases", "featured"], sectionLayout: "masonry", sectionSubtitles: false, heroStyle: "carousel" },
-    themeGrid: { layout: "grid3", cardInfo: "tall-9-16" },
-    details: { layout: "split-sheet", badges: true, stats: "three-cards", actionBar: "side-fab", descriptionStyle: "plain" },
-    club: { feedStyle: "timeline" },
-    profile: { layout: "side-card" },
-    settings: { layout: "sidebar-tabs" },
-    phoneFrame: { defaultFrame: "black" },
-    glass: buildDefaultGlassConfig("#0E1026", "#00F5D4", {
-      nav: { opacity: 78, blur: 18, saturation: 180, tint: "#00F5D4", tintOpacity: 14, borderColor: "#00F5D4", borderOpacity: 36, shadow: "glow" },
-      card: { opacity: 80, blur: 12, borderColor: "#00F5D4", borderOpacity: 28, shadow: "glow", crack: "light" }
-    }),
-    texts: {
-      ar: { appName: "CYBER HUB", tagline: "ثيمات نيون وأجواء المستقبل", bannerTitle: "مجموعة السايبر نيون", bannerSubtitle: "إضاءة AMOLED حية وتصميم ألعاب", ctaDownload: "تحميل الآن", ctaApply: "تفعيل الثيم" },
-      en: { appName: "CYBER HUB", tagline: "Futuristic Neon Themes", bannerTitle: "Neon Cyber Drops", bannerSubtitle: "High-contrast AMOLED cyber packs", ctaDownload: "Get Pack", ctaApply: "Apply" }
-    },
-    transition: "zoom",
-    animation: "snappy",
-    mode: "dark"
-  },
-  {
     id: "luxury-glass",
     name: "الزجاج السائل الفاخر",
     badge: "Liquid Glass 🫧",
@@ -22494,248 +22653,6 @@ const BUILT_IN_APP_TEMPLATES = [
     },
     transition: "shared-element",
     animation: "playful",
-    mode: "dark"
-  },
-  {
-    id: "clean-light",
-    name: "نقي فاتح",
-    badge: "نهاري ☀️",
-    version: 2,
-    colors: { bg: "#F7F8FC", surface: "#FFFFFF", surface2: "#ECEFF7", text: "#121521", textMuted: "#687089", primary: "#2563EB", primary2: "#3B82F6", accent: "#2563EB", border: "#DDE2EE", success: "#16A34A", danger: "#DC2626" },
-    fonts: { heading: "Inter", body: "Cairo", scale: 1 },
-    shape: { radius: 16, spacing: "cozy", cardStyle: "flat", shadow: "none", pillButtons: false },
-    icons: { style: "filled" },
-    header: "large-title",
-    nav: { type: "bottom-bar", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "full-width-top" },
-    home: { sections: ["search", "deviceDetector", "brandChips", "categories", "topDownloads", "newReleases"], sectionLayout: "vertical-grid", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid2", cardInfo: "below-title" },
-    details: { layout: "tabs", badges: true, stats: "three-cards", actionBar: "classic-bottom", descriptionStyle: "card" },
-    club: { feedStyle: "flat-list" },
-    profile: { layout: "banner-top" },
-    settings: { layout: "list-sections" },
-    phoneFrame: { defaultFrame: "titanium" },
-    glass: buildDefaultGlassConfig("#FFFFFF", "#2563EB", {
-      nav: { opacity: 96, blur: 10, saturation: 110, borderColor: "#DDE2EE", borderOpacity: 100, highlight: false, shadow: "none" },
-      card: { opacity: 100, blur: 0, saturation: 100, borderColor: "#DDE2EE", borderOpacity: 100, highlight: false, shadow: "none" },
-      sheet: { opacity: 98, blur: 12, saturation: 110, borderColor: "#DDE2EE", borderOpacity: 100 }
-    }),
-    texts: {
-      ar: { appName: "Theme Hub", tagline: "واجهة نهارية صافية وسريعة", bannerTitle: "تصاميم مينيمال نهارية", bannerSubtitle: "وضوح عالٍ وبساطة مريحة للعين", ctaDownload: "تحميل", ctaApply: "تطبيق الثيم" },
-      en: { appName: "Theme Hub", tagline: "Crisp Daylight Theme Store", bannerTitle: "Clean Daylight Themes", bannerSubtitle: "Minimal aesthetics built for clarity", ctaDownload: "Download", ctaApply: "Apply Theme" }
-    },
-    transition: "slide",
-    animation: "smooth",
-    mode: "light"
-  },
-  {
-    id: "calm-forest",
-    name: "غابة هادئة",
-    badge: "هادئ 🌿",
-    version: 2,
-    colors: { bg: "#08120E", surface: "#102019", surface2: "#182D24", text: "#ECF7F1", textMuted: "#8BB09F", primary: "#10B981", primary2: "#34D399", accent: "#6EE7B7", border: "#223D31", success: "#22C55E", danger: "#F87171" },
-    fonts: { heading: "Almarai", body: "Cairo", scale: 1 },
-    shape: { radius: 22, spacing: "airy", cardStyle: "soft", shadow: "soft", pillButtons: true },
-    icons: { style: "rounded" },
-    header: "compact",
-    nav: { type: "side-drawer", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "card" },
-    home: { sections: ["search", "categories", "topDownloads", "featured", "newReleases"], sectionLayout: "horizontal-rows", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid2", cardInfo: "below-title" },
-    details: { layout: "classic", badges: true, stats: "three-cards", actionBar: "floating-wide", descriptionStyle: "card" },
-    club: { feedStyle: "flat-list" },
-    profile: { layout: "side-card" },
-    settings: { layout: "accordion" },
-    phoneFrame: { defaultFrame: "titanium" },
-    glass: buildDefaultGlassConfig("#102019", "#10B981"),
-    texts: {
-      ar: { appName: "Forest Themes", tagline: "تخصيص هادئ مستوحى من الطبيعة", bannerTitle: "سكون الغابة الخضراء", bannerSubtitle: "ألوان مريحة للعين وتجربة ناعمة", ctaDownload: "تحميل", ctaApply: "تطبيق الثيم" },
-      en: { appName: "Forest Themes", tagline: "Nature-Inspired Calm Store", bannerTitle: "Emerald Sanctuary", bannerSubtitle: "Balanced organic palettes & soothing icons", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "fade",
-    animation: "smooth",
-    mode: "dark"
-  },
-  {
-    id: "oled-black",
-    name: "أسود OLED العميق",
-    badge: "AMOLED 🖤",
-    version: 2,
-    colors: { bg: "#000000", surface: "#09090B", surface2: "#141418", text: "#FAFAFA", textMuted: "#71717A", primary: "#E4E4E7", primary2: "#A1A1AA", accent: "#FFFFFF", border: "#27272A", success: "#22C55E", danger: "#EF4444" },
-    fonts: { heading: "Changa", body: "Cairo", scale: 0.95 },
-    shape: { radius: 14, spacing: "compact", cardStyle: "flat", shadow: "none", pillButtons: false },
-    icons: { style: "outline" },
-    header: "none",
-    nav: { type: "bottom-bar", labels: false, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "icon-only" },
-    home: { sections: ["brandChips", "topDownloads", "featured", "newReleases"], sectionLayout: "list", sectionSubtitles: false, heroStyle: "none" },
-    themeGrid: { layout: "list", cardInfo: "list-row" },
-    details: { layout: "fullscreen-phone", badges: false, stats: "inline", actionBar: "side-fab", descriptionStyle: "plain" },
-    club: { feedStyle: "compact" },
-    profile: { layout: "centered" },
-    settings: { layout: "list-sections" },
-    phoneFrame: { defaultFrame: "black" },
-    glass: buildDefaultGlassConfig("#09090B", "#E4E4E7", {
-      nav: { opacity: 96, blur: 4, saturation: 100, borderColor: "#27272A", borderOpacity: 90, highlight: false, shadow: "none" },
-      card: { opacity: 98, blur: 0, borderColor: "#27272A", borderOpacity: 90, highlight: false, shadow: "none" }
-    }),
-    texts: {
-      ar: { appName: "OLED HUB", tagline: "سواد تام موفر للبطارية", bannerTitle: "ثيمات OLED", bannerSubtitle: "تباين مطلق لشاشات AMOLED", ctaDownload: "تنزيل", ctaApply: "تطبيق" },
-      en: { appName: "OLED HUB", tagline: "True Pitch-Black Edition", bannerTitle: "OLED Pure Pack", bannerSubtitle: "Battery-saving zero-glare interface", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "slide",
-    animation: "snappy",
-    mode: "dark"
-  },
-  {
-    id: "stories",
-    name: "الستوريز والتفاعل",
-    badge: "ستوريز 📸",
-    version: 2,
-    colors: { bg: "#120D1D", surface: "#1E1630", surface2: "#2A1F42", text: "#FAF5FF", textMuted: "#B7A6D4", primary: "#EC4899", primary2: "#8B5CF6", accent: "#F472B6", border: "#3B2D5C", success: "#34D399", danger: "#FB7185" },
-    fonts: { heading: "Readex Pro", body: "Cairo", scale: 1 },
-    shape: { radius: 24, spacing: "cozy", cardStyle: "glass", shadow: "soft", pillButtons: true },
-    icons: { style: "filled" },
-    header: "hero-profile",
-    nav: { type: "dock-center-fab", labels: true, activeStyle: "glass-capsule", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: ["themes", "live_wallpaper", "ringtone"] },
-    search: { style: "pill-bar" },
-    home: { sections: ["search", "banner", "topDownloads", "featured", "newReleases"], sectionLayout: "stories-top", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid2", cardInfo: "tall-9-16" },
-    details: { layout: "hero-gallery", badges: true, stats: "three-cards", actionBar: "top-inline", descriptionStyle: "card" },
-    club: { feedStyle: "cards" },
-    profile: { layout: "centered" },
-    settings: { layout: "grid-cards" },
-    phoneFrame: { defaultFrame: "titanium" },
-    glass: buildDefaultGlassConfig("#1E1630", "#EC4899", {
-      capsule: { opacity: 70, blur: 18, tint: "#EC4899", tintOpacity: 24 }
-    }),
-    texts: {
-      ar: { appName: "Theme Stories", tagline: "استكشف أبرز الثيمات كقصص يومية", bannerTitle: "قصص اليوم المختارة", bannerSubtitle: "تصفح الثيمات الجديدة بلمسة واحدة", ctaDownload: "تحميل", ctaApply: "تطبيق" },
-      en: { appName: "Theme Stories", tagline: "Interactive Visual Stories Store", bannerTitle: "Today's Stories", bannerSubtitle: "Swipe through highlighted setups", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "shared-element",
-    animation: "playful",
-    mode: "dark"
-  },
-  {
-    id: "polaroid",
-    name: "ألبوم بولارويد",
-    badge: "فوتو 📷",
-    version: 2,
-    colors: { bg: "#F3EFEA", surface: "#FFFFFF", surface2: "#E7E0D6", text: "#231F20", textMuted: "#736B63", primary: "#E11D48", primary2: "#F97316", accent: "#E11D48", border: "#D9CFC3", success: "#16A34A", danger: "#DC2626" },
-    fonts: { heading: "Quicksand", body: "Tajawal", scale: 1 },
-    shape: { radius: 10, spacing: "airy", cardStyle: "outlined", shadow: "soft", pillButtons: false },
-    icons: { style: "outline" },
-    header: "compact",
-    nav: { type: "top-tabs", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "icon-only" },
-    home: { sections: ["banner", "brandChips", "featured", "topDownloads", "newReleases"], sectionLayout: "masonry", sectionSubtitles: true, heroStyle: "big-card" },
-    themeGrid: { layout: "masonry", cardInfo: "polaroid" },
-    details: { layout: "split-sheet", badges: true, stats: "three-cards", actionBar: "classic-bottom", descriptionStyle: "card" },
-    club: { feedStyle: "magazine" },
-    profile: { layout: "side-card" },
-    settings: { layout: "grid-cards" },
-    phoneFrame: { defaultFrame: "none" },
-    glass: buildDefaultGlassConfig("#FFFFFF", "#E11D48", {
-      nav: { opacity: 92, blur: 12, borderColor: "#D9CFC3", borderOpacity: 90 },
-      card: { opacity: 100, blur: 0, borderColor: "#D9CFC3", borderOpacity: 100 }
-    }),
-    texts: {
-      ar: { appName: "Polaroid Themes", tagline: "معرض بطاقات فوتوغرافي كلاسيكي", bannerTitle: "لقطات الألبوم المختارة", bannerSubtitle: "عرض البطاقات بأسلوب بولارويد الأصيل", ctaDownload: "حفظ الثيم", ctaApply: "تطبيق" },
-      en: { appName: "Polaroid Themes", tagline: "Classic Photo Card Gallery", bannerTitle: "Curated Album Prints", bannerSubtitle: "Crisp framed previews & gallery feel", ctaDownload: "Save", ctaApply: "Apply" }
-    },
-    transition: "fade",
-    animation: "smooth",
-    mode: "light"
-  },
-  {
-    id: "sunset",
-    name: "شفق الغروب الدافئ",
-    badge: "غروب 🌅",
-    version: 2,
-    colors: { bg: "#170C14", surface: "#261421", surface2: "#361D2F", text: "#FFF1F5", textMuted: "#CFA1B8", primary: "#FB7185", primary2: "#F59E0B", accent: "#FDBA74", border: "#4E2A44", success: "#34D399", danger: "#F43F5E" },
-    fonts: { heading: "Tajawal", body: "Cairo", scale: 1 },
-    shape: { radius: 22, spacing: "cozy", cardStyle: "glass", shadow: "glow", pillButtons: true },
-    icons: { style: "duotone" },
-    header: "large-title",
-    nav: { type: "side-drawer", labels: true, activeStyle: "glass-capsule", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "pill-bar" },
-    home: { sections: ["search", "banner", "brandChips", "featured", "topDownloads"], sectionLayout: "horizontal-rows", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid2", cardInfo: "wide-banner" },
-    details: { layout: "tabs", badges: true, stats: "three-cards", actionBar: "floating-wide", descriptionStyle: "card" },
-    club: { feedStyle: "timeline" },
-    profile: { layout: "cover-overlap" },
-    settings: { layout: "accordion" },
-    phoneFrame: { defaultFrame: "gold" },
-    glass: buildDefaultGlassConfig("#261421", "#FB7185", {
-      nav: { opacity: 76, blur: 22, saturation: 170, tint: "#FB7185", tintOpacity: 16, borderColor: "#FDBA74", borderOpacity: 24, shadow: "glow" }
-    }),
-    texts: {
-      ar: { appName: "Sunset Hub", tagline: "تدرجات الشفق الذهبي والمرجاني", bannerTitle: "تشكيلة غروب الشمس", bannerSubtitle: "ألوان دافئة وزجاج متوهج", ctaDownload: "تحميل", ctaApply: "تطبيق الثيم" },
-      en: { appName: "Sunset Hub", tagline: "Warm Coral & Amber Dusk", bannerTitle: "Golden Hour Drops", bannerSubtitle: "Glowing dusk gradients & frosted layers", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "fade",
-    animation: "smooth",
-    mode: "dark"
-  },
-  {
-    id: "cherry",
-    name: "زهر الكرز الباستيل",
-    badge: "باستيل 🌸",
-    version: 2,
-    colors: { bg: "#FFF5F8", surface: "#FFFFFF", surface2: "#FCE7F0", text: "#2A1220", textMuted: "#8C5E74", primary: "#DB2777", primary2: "#F472B6", accent: "#DB2777", border: "#F4CFE0", success: "#16A34A", danger: "#E11D48" },
-    fonts: { heading: "Nunito", body: "Tajawal", scale: 1.05 },
-    shape: { radius: 26, spacing: "airy", cardStyle: "soft", shadow: "soft", pillButtons: true },
-    icons: { style: "rounded" },
-    header: "large-title",
-    nav: { type: "bottom-floating", labels: true, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "icon-only" },
-    home: { sections: ["banner", "brandChips", "categories", "topDownloads", "featured"], sectionLayout: "stories-top", sectionSubtitles: true, heroStyle: "carousel" },
-    themeGrid: { layout: "grid3", cardInfo: "minimal" },
-    details: { layout: "hero-gallery", badges: true, stats: "three-cards", actionBar: "top-inline", descriptionStyle: "card" },
-    club: { feedStyle: "compact" },
-    profile: { layout: "centered" },
-    settings: { layout: "grid-cards" },
-    phoneFrame: { defaultFrame: "none" },
-    glass: buildDefaultGlassConfig("#FFFFFF", "#DB2777", {
-      nav: { opacity: 86, blur: 20, saturation: 150, tint: "#FBCFE8", tintOpacity: 24, borderColor: "#DB2777", borderOpacity: 22 }
-    }),
-    texts: {
-      ar: { appName: "Cherry Hub", tagline: "نعومة أزهار الكرز والباستيل", bannerTitle: "ربيع زهر الكرز", bannerSubtitle: "تصميم وردي ناعم بزوايا دائرية", ctaDownload: "تنزيل", ctaApply: "تثبيت الثيم" },
-      en: { appName: "Cherry Hub", tagline: "Soft Sakura Pastel UI", bannerTitle: "Cherry Blossom Picks", bannerSubtitle: "Airy pastel curves & minimal previews", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "shared-element",
-    animation: "playful",
-    mode: "light"
-  },
-  {
-    id: "slate-pro",
-    name: "سليت برو المكتبي",
-    badge: "احترافي 💼",
-    version: 2,
-    colors: { bg: "#0F172A", surface: "#1E293B", surface2: "#283548", text: "#F1F5F9", textMuted: "#94A3B8", primary: "#38BDF8", primary2: "#818CF8", accent: "#38BDF8", border: "#334155", success: "#22C55E", danger: "#F43F5E" },
-    fonts: { heading: "IBM Plex Sans Arabic", body: "Inter", scale: 0.95 },
-    shape: { radius: 12, spacing: "compact", cardStyle: "outlined", shadow: "none", pillButtons: false },
-    icons: { style: "filled" },
-    header: "none",
-    nav: { type: "rail-left", labels: false, activeStyle: "filled", order: ["home", "explore", "club", "favorites", "downloads", "messages", "settings"], tabs: [] },
-    search: { style: "full-width-top" },
-    home: { sections: ["search", "deviceDetector", "brandChips", "topDownloads", "featured", "newReleases"], sectionLayout: "list", sectionSubtitles: false, heroStyle: "none" },
-    themeGrid: { layout: "list", cardInfo: "wide-banner" },
-    details: { layout: "tabs", badges: true, stats: "inline", actionBar: "classic-bottom", descriptionStyle: "plain" },
-    club: { feedStyle: "timeline" },
-    profile: { layout: "banner-top" },
-    settings: { layout: "sidebar-tabs" },
-    phoneFrame: { defaultFrame: "titanium" },
-    glass: buildDefaultGlassConfig("#1E293B", "#38BDF8", {
-      nav: { opacity: 90, blur: 14, saturation: 125, borderColor: "#38BDF8", borderOpacity: 20, shadow: "none" }
-    }),
-    texts: {
-      ar: { appName: "Slate Pro", tagline: "كثافة عالية وملاحة مكتبية سريعة", bannerTitle: "مكتبة المحترفين", bannerSubtitle: "عرض سريع ومنظم لجميع الثيمات", ctaDownload: "تنزيل", ctaApply: "تطبيق" },
-      en: { appName: "Slate Pro", tagline: "High-Density Productivity Shell", bannerTitle: "Pro Catalog", bannerSubtitle: "Dense list layout with side rail navigation", ctaDownload: "Download", ctaApply: "Apply" }
-    },
-    transition: "slide",
-    animation: "snappy",
     mode: "dark"
   }
 ];
@@ -23505,9 +23422,13 @@ function switchDesignerSubtab(tabKey) {
   if (clean !== "presets") {
     destroyDesignerMiniPreviews();
   }
+  let activeDesignerTab = null;
   document.querySelectorAll("#designer-subtabs-bar .designer-subtab-pill").forEach(btn => {
-    btn.classList.toggle("active", btn.getAttribute("data-dsg-tab") === clean);
+    const isMatch = btn.getAttribute("data-dsg-tab") === clean;
+    btn.classList.toggle("active", isMatch);
+    if (isMatch) activeDesignerTab = btn;
   });
+  if (activeDesignerTab) centerTabInScrollRow(activeDesignerTab, true);
   ["presets", "glass", "layout", "frames"].forEach(k => {
     const pane = document.getElementById(`designer-pane-${k}`);
     if (pane) pane.classList.toggle("active", k === clean);
@@ -24876,9 +24797,13 @@ window.onClubConfigLoaded = function(payload) {
 };
 
 function syncClubSubtabsUi() {
+  let activePill = null;
   document.querySelectorAll("#club-subtabs-bar .club-subtab-pill").forEach(btn => {
-    btn.classList.toggle("active", btn.getAttribute("data-club-tab") === clubState.tab);
+    const isMatch = btn.getAttribute("data-club-tab") === clubState.tab;
+    btn.classList.toggle("active", isMatch);
+    if (isMatch) activePill = btn;
   });
+  if (activePill) centerTabInScrollRow(activePill, true);
 }
 
 function renderClubCategoryChips() {
@@ -26498,6 +26423,315 @@ window.onAdminClubReportsLoaded = function(payload) {
 
   listEl.innerHTML = blocks.length ? blocks.join("") : `<div style="font-size:12px; color:var(--muted); padding:8px 0;">لا توجد بلاغات أو منشورات مخفية في النادي حالياً.</div>`;
 };
+
+// ==================== PART 1: COMPATIBILITY REPORTS ====================
+let currentCompatStatus = "ok";
+let selectedCompatReason = "";
+
+function getDeviceCompatInfo() {
+  let model = "Android Device";
+  let osVersion = "Android";
+  let brand = "Honor";
+  try {
+    if (window.AndroidBridge && typeof AndroidBridge.getDeviceInfo === "function") {
+      const info = JSON.parse(AndroidBridge.getDeviceInfo());
+      model = info.model || model;
+      brand = info.brand || info.manufacturer || brand;
+      osVersion = info.osVersion || osVersion;
+    } else {
+      const ua = navigator.userAgent;
+      if (ua.includes("Samsung")) brand = "Samsung";
+      else if (ua.includes("Huawei")) brand = "Huawei";
+      else if (ua.includes("Xiaomi")) brand = "Xiaomi";
+      else if (ua.includes("Oppo")) brand = "Oppo";
+      else if (ua.includes("Vivo")) brand = "Vivo";
+      model = "متصفح الويب";
+      osVersion = "Web / Mobile";
+    }
+  } catch (_) {}
+  return { model, brand, osVersion };
+}
+
+async function loadThemeCompatData(themeId) {
+  const summaryEl = document.getElementById("compat-summary-display");
+  const progWrap = document.getElementById("compat-progress-wrap");
+  const progFill = document.getElementById("compat-progress-fill");
+  const userStatus = document.getElementById("compat-user-status");
+  if (!summaryEl) return;
+
+  try {
+    const themeDoc = await db.collection("themes").doc(themeId).get();
+    const data = themeDoc.exists ? themeDoc.data() : {};
+    let ok = data.compatOk || 0;
+    let fail = data.compatFail || 0;
+    let brandsMap = data.compatBrands || {};
+
+    const brandFilter = document.getElementById("compat-brand-filter");
+    const selectedBrand = brandFilter ? brandFilter.value : "all";
+
+    if (selectedBrand !== "all" && brandsMap[selectedBrand]) {
+      ok = brandsMap[selectedBrand].ok || 0;
+      fail = brandsMap[selectedBrand].fail || 0;
+    }
+
+    const total = ok + fail;
+    if (total < 5) {
+      summaryEl.textContent = total === 0 ? "لا توجد تقارير توافق بعد" : `تقارير قليلة (${ok} اشتغل، ${fail} لم يشتغل)`;
+      if (progWrap) progWrap.style.display = "none";
+    } else {
+      const pct = Math.round((ok / total) * 100);
+      summaryEl.textContent = `اشتغل عند ${pct}% (${ok} من ${total} أجهزة)`;
+      if (progWrap) {
+        progWrap.style.display = "block";
+        if (progFill) progFill.style.width = pct + "%";
+      }
+    }
+
+    if (firebaseAuth && firebaseAuth.currentUser) {
+      const uid = firebaseAuth.currentUser.uid;
+      const myReportDoc = await db.collection("themes").doc(themeId).collection("compat").doc(uid).get();
+      if (myReportDoc.exists) {
+        const rep = myReportDoc.data();
+        const stText = rep.status === 'ok' ? '✅ تقريرك: اشتغل' : '❌ تقريرك: لم يشتغل';
+        userStatus.textContent = `${stText} (${rep.brand} - ${rep.model})`;
+      } else {
+        userStatus.textContent = "لم تقم بتقييم توافق هذا الثيم بعد.";
+      }
+    } else {
+      userStatus.textContent = "سجّل الدخول لتقييم توافق الثيم على جهازك.";
+    }
+  } catch (e) {
+    console.error("Error loading compat data:", e);
+    summaryEl.textContent = "تعذر تحميل تقارير التوافق";
+  }
+}
+
+function openCompatModal(status) {
+  if (!currentDetailTheme) return;
+  if (!firebaseAuth || !firebaseAuth.currentUser) {
+    showToast("يجب تسجيل الدخول لإرسال تقرير التوافق");
+    triggerUserGoogleSignIn();
+    return;
+  }
+  currentCompatStatus = status;
+  selectedCompatReason = "";
+
+  const titleEl = document.getElementById("compat-modal-title");
+  const failWrap = document.getElementById("compat-fail-reasons-wrap");
+  const brandInput = document.getElementById("compat-input-brand");
+  const modelInput = document.getElementById("compat-input-model");
+  const osInput = document.getElementById("compat-input-os");
+  const noteInput = document.getElementById("compat-input-note");
+
+  if (titleEl) titleEl.textContent = status === 'ok' ? "✅ تقرير: الثيم اشتغل تماماً" : "❌ تقرير: الثيم لم يشتغل";
+  if (failWrap) failWrap.style.display = status === 'fail' ? "block" : "none";
+
+  const devInfo = getDeviceCompatInfo();
+  if (brandInput) brandInput.value = devInfo.brand;
+  if (modelInput) modelInput.value = devInfo.model;
+  if (osInput) osInput.value = devInfo.osVersion;
+  if (noteInput) noteInput.value = "";
+
+  document.querySelectorAll(".compat-reason-pill").forEach(p => p.classList.remove("active"));
+
+  document.getElementById("compat-modal-dim").style.display = "block";
+  document.getElementById("compat-report-modal").style.display = "block";
+}
+
+function closeCompatModal() {
+  document.getElementById("compat-modal-dim").style.display = "none";
+  document.getElementById("compat-report-modal").style.display = "none";
+}
+
+function selectCompatReason(reason) {
+  selectedCompatReason = reason;
+  document.querySelectorAll(".compat-reason-pill").forEach(p => {
+    const isAct = p.getAttribute("data-reason") === reason;
+    p.classList.toggle("active", isAct);
+    p.style.background = isAct ? "rgba(124,92,255,0.25)" : "var(--surface2)";
+    p.style.color = isAct ? "#C4B5FD" : "var(--muted)";
+  });
+}
+
+async function submitCompatReportAction() {
+  if (!currentDetailTheme || !firebaseAuth || !firebaseAuth.currentUser) return;
+  const uid = firebaseAuth.currentUser.uid;
+  const themeId = currentDetailTheme.id;
+
+  const brand = (document.getElementById("compat-input-brand").value || "Honor").trim();
+  const model = (document.getElementById("compat-input-model").value || "Device").trim();
+  const osVersion = (document.getElementById("compat-input-os").value || "Android").trim();
+  const note = (document.getElementById("compat-input-note").value || "").trim().slice(0, 200);
+
+  if (currentCompatStatus === 'fail' && !selectedCompatReason) {
+    showToast("يرجى اختيار سبب عدم الاشتغال");
+    return;
+  }
+
+  closeCompatModal();
+  showToast("جاري حفظ تقرير التوافق...");
+
+  const compatRef = db.collection("themes").doc(themeId).collection("compat").doc(uid);
+  const themeRef = db.collection("themes").doc(themeId);
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const themeDoc = await transaction.get(themeRef);
+      const compatDoc = await transaction.get(compatRef);
+
+      const oldData = compatDoc.exists ? compatDoc.data() : null;
+      const oldStatus = oldData ? oldData.status : null;
+      const oldBrand = oldData ? oldData.brand : null;
+
+      let compatOk = themeDoc.exists ? (themeDoc.data().compatOk || 0) : 0;
+      let compatFail = themeDoc.exists ? (themeDoc.data().compatFail || 0) : 0;
+      let compatBrands = themeDoc.exists ? (themeDoc.data().compatBrands || {}) : {};
+
+      if (oldStatus) {
+        if (oldStatus === 'ok') compatOk = Math.max(0, compatOk - 1);
+        if (oldStatus === 'fail') compatFail = Math.max(0, compatFail - 1);
+        if (oldBrand && compatBrands[oldBrand]) {
+          if (oldStatus === 'ok') compatBrands[oldBrand].ok = Math.max(0, (compatBrands[oldBrand].ok || 0) - 1);
+          if (oldStatus === 'fail') compatBrands[oldBrand].fail = Math.max(0, (compatBrands[oldBrand].fail || 0) - 1);
+        }
+      }
+
+      if (currentCompatStatus === 'ok') compatOk += 1;
+      if (currentCompatStatus === 'fail') compatFail += 1;
+
+      if (!compatBrands[brand]) {
+        compatBrands[brand] = { ok: 0, fail: 0 };
+      }
+      if (currentCompatStatus === 'ok') compatBrands[brand].ok = (compatBrands[brand].ok || 0) + 1;
+      if (currentCompatStatus === 'fail') compatBrands[brand].fail = (compatBrands[brand].fail || 0) + 1;
+
+      const now = Date.now();
+      const newReport = {
+        status: currentCompatStatus,
+        model: sanitizeHtml(model),
+        osVersion: sanitizeHtml(osVersion),
+        brand: sanitizeHtml(brand),
+        reason: currentCompatStatus === 'fail' ? selectedCompatReason : '',
+        note: sanitizeHtml(note),
+        updatedAt: now
+      };
+
+      transaction.set(compatRef, newReport, { merge: true });
+
+      const themeUpdate = {
+        compatOk,
+        compatFail,
+        compatBrands,
+        updatedAt: now
+      };
+
+      if (!themeDoc.exists) {
+        transaction.set(themeRef, { ratingAvg: 5.0, ratingCount: 0, ...themeUpdate }, { merge: true });
+      } else {
+        transaction.set(themeRef, themeUpdate, { merge: true });
+      }
+    });
+
+    showToast("تم حفظ تقرير التوافق بنجاح ✅");
+    loadThemeCompatData(themeId);
+  } catch (e) {
+    console.error("Error submitting compat report:", e);
+    showToast("تعذر حفظ التقرير: " + e.message);
+  }
+}
+
+async function loadAdminCompatReports() {
+  const container = document.getElementById("admin-subtab-compat");
+  if (!container) return;
+  container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted);">جاري تحميل تقارير التوافق والتعارض...</div>`;
+
+  try {
+    const snap = await db.collection("themes").orderBy("compatFail", "desc").limit(30).get();
+    if (snap.empty) {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--muted);">لا توجد تقارير توافق أو فشل مسجلة بعد.</div>`;
+      return;
+    }
+
+    let html = `<div style="font-size:13px; font-weight:800; color:var(--text); margin-bottom:12px;">📊 الثيمات الأكثر فشلاً أو شكاوى توافق الأجهزة</div>`;
+    html += `<div style="display:flex; flex-direction:column; gap:12px;">`;
+
+    snap.forEach(doc => {
+      const t = doc.data();
+      const id = doc.id;
+      const title = escapeHTML(t.name || id);
+      const ok = t.compatOk || 0;
+      const fail = t.compatFail || 0;
+      const total = ok + fail;
+      const pct = total > 0 ? Math.round((ok / total) * 100) : 100;
+      const publisherUid = escapeHTML(t.publisherUid || "");
+      const brands = t.compatBrands || {};
+
+      let brandDetails = Object.keys(brands).map(b => `${b}: (✅ ${brands[b].ok || 0} / ❌ ${brands[b].fail || 0})`).join(" | ");
+
+      html += `
+        <div style="background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;">
+            <div>
+              <b style="font-size:14px; color:var(--text);">${title}</b>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">المعرّف: <bdi dir="ltr">${id}</bdi> | الناشر: ${publisherUid || 'مستودع رسمي'}</div>
+            </div>
+            <div style="background:${fail > ok ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'}; color:${fail > ok ? '#F87171' : '#34D399'}; padding:4px 8px; border-radius:var(--radius-sm); font-size:11.5px; font-weight:800;">
+              نسبة النجاح: ${pct}% (${ok} نجاح / ${fail} فشل)
+            </div>
+          </div>
+          <div style="font-size:11.5px; color:var(--muted); margin-bottom:10px; background:var(--surface2); padding:8px; border-radius:var(--radius-sm);">
+            <b>حسب الأجهزة:</b> ${brandDetails || 'لا توجد تفاصيل أجهزة'}
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            ${publisherUid ? `<button type="button" class="btn" style="min-height:34px; font-size:11px;" onclick="adminWarnCompatPublisher('${id}', '${publisherUid}', '${title}')">⚠️ تنبيه الناشر</button>` : ''}
+            <button type="button" class="btn" style="min-height:34px; font-size:11px; background:rgba(239,68,68,0.15); color:#F87171;" onclick="adminHideCompatTheme('${id}')">🔒 إخفاء الثيم مؤقتاً</button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+  } catch (e) {
+    console.error("Error loading admin compat reports:", e);
+    container.innerHTML = `<div style="color:#F87171; padding:20px;">تعذر تحميل تقارير التوافق: ${escapeHTML(e.message)}</div>`;
+  }
+}
+
+async function adminWarnCompatPublisher(themeId, publisherUid, themeName) {
+  if (!confirm(`هل تريد إرسال تنبيه رسمي لناشر الثيم (${themeName}) بخصوص شكاوى توافق الأجهزة؟`)) return;
+  try {
+    await db.collection("notifications").doc(publisherUid).collection("items").add({
+      type: "admin_warning",
+      title: "تنبيه بخصوص توافق الثيم",
+      body: `تلقى الثيم الخاص بك (${themeName}) عدة تقارير فشل أو عدم توافق على بعض الأجهزة. يرجى مراجعة النسخ والتحديثات.`,
+      actorUid: firebaseAuth.currentUser.uid,
+      actorName: "الإدارة",
+      themeId: themeId,
+      read: false,
+      createdAt: Date.now()
+    });
+    showToast("تم إرسال التنبيه لناشر الثيم بنجاح 🔔");
+  } catch (e) {
+    console.error("Error sending warning:", e);
+    showToast("تعذر إرسال التنبيه: " + e.message);
+  }
+}
+
+async function adminHideCompatTheme(themeId) {
+  if (!confirm("هل تريد إخفاء هذا الثيم مؤقتاً بسبب مشاكل التوافق؟")) return;
+  try {
+    await db.collection("themes").doc(themeId).set({
+      hidden: true,
+      updatedAt: Date.now()
+    }, { merge: true });
+    showToast("تم إخفاء الثيم مؤقتاً 🔒");
+    loadAdminCompatReports();
+  } catch (e) {
+    console.error("Error hiding theme:", e);
+    showToast("تعذر إخفاء الثيم: " + e.message);
+  }
+}
 </script>
 
 <script>
