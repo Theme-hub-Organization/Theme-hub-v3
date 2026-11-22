@@ -6257,6 +6257,739 @@ html body .nav-label {
   text-overflow: clip !important;
   overflow: hidden !important;
 }
+
+/* ==========================================================================
+   GLASSY NAVIGATION TABS V5 (4 Animated Glass Styles + Classic Fallback)
+   ========================================================================== */
+@property --gnav-cradle-x {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 180px;
+}
+
+/* Common translucent pill container when any of the 4 glassy styles is active */
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav {
+  position: fixed !important;
+  bottom: calc(var(--safe-bottom) + 10px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 16px) !important;
+  max-width: 560px !important;
+  height: 58px !important;
+  border-radius: 29px !important;
+  background: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  padding: 0 4px !important;
+  gap: 0 !important;
+  z-index: 30 !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+html body.th-scope[data-glass-nav-glassy="true"][data-glass-nav-labels-active="true"] #bottom-nav {
+  height: 68px !important;
+}
+
+/* Clipped glass backdrop shell inside #bottom-nav */
+#bottom-nav .gnav-glass-bg {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background: rgba(var(--surface-rgb), 0.35);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 14px 32px rgba(0, 0, 0, 0.36);
+  transition: background-color 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
+}
+html body.th-scope[data-theme="light"] #bottom-nav .gnav-glass-bg {
+  background: rgba(var(--surface-rgb), 0.48);
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .gnav-glass-bg {
+  display: block;
+}
+
+/* Overlay container in physical LTR coordinates for RTL-agnostic translate3d */
+#bottom-nav .gnav-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+  direction: ltr;
+}
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .gnav-overlay {
+  display: block;
+}
+
+/* Keep .nav-item, icons, labels & notification dots crisp and above glass layers */
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .nav-item {
+  position: relative !important;
+  z-index: 3 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 2px 0 !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  transition: color 320ms cubic-bezier(.34,1.56,.64,1);
+  user-select: none;
+  -webkit-user-select: none;
+}
+html body.th-scope[data-glass-nav-glassy="true"][data-glass-nav-labels-active="true"] #bottom-nav .nav-item {
+  height: 54px !important;
+}
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .nav-item svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 440ms cubic-bezier(.34,1.56,.64,1), stroke 260ms ease, opacity 260ms ease;
+  will-change: transform;
+}
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .nav-item .nav-label {
+  display: none !important;
+  font-size: clamp(7px, 2vw, 9px) !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.25px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  transition: color 260ms ease, opacity 260ms ease, transform 420ms cubic-bezier(.34,1.56,.64,1);
+}
+html body.th-scope[data-glass-nav-glassy="true"][data-glass-nav-labels-active="true"] #bottom-nav .nav-item .nav-label {
+  display: block !important;
+}
+/* Also allow classic explicit label toggle when user overrides auto */
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="show"] #bottom-nav {
+  height: 68px !important;
+}
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="show"] #bottom-nav .nav-item {
+  height: 54px !important;
+}
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="show"] #bottom-nav .nav-label {
+  display: block !important;
+}
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="hide"] #bottom-nav {
+  height: 62px !important;
+}
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="hide"] #bottom-nav .nav-item {
+  height: 48px !important;
+}
+html body.th-scope[data-glass-nav-effective="classic"][data-glass-nav-labels="hide"] #bottom-nav .nav-label {
+  display: none !important;
+}
+html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .nav-item .badge-dot {
+  z-index: 6 !important;
+  transition: transform 440ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+
+/* Fallback if backdrop-filter unsupported, Reduce Transparency toggle, or detail overlay */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+  html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .gnav-glass-bg {
+    background: rgba(var(--surface-rgb), 0.94) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+html body.th-scope[data-reduce-transparency="true"][data-glass-nav-glassy="true"] #bottom-nav .gnav-glass-bg {
+  background: rgba(var(--surface-rgb), 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html body.th-scope.th-detail-open #bottom-nav .gnav-glass-bg,
+html body.th-scope.th-studio-open #bottom-nav .gnav-glass-bg {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ==========================================================================
+   STYLE 1: NOTCH GLOW (حدّ منحنٍ)
+   ========================================================================== */
+#bottom-nav .gnav-notch-track {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  direction: ltr;
+}
+html body.th-scope[data-glass-nav-effective="notch-glow"] #bottom-nav .gnav-notch-track {
+  display: block;
+}
+#bottom-nav .gnav-notch-svg-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  overflow: visible;
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 460ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+#bottom-nav .gnav-notch-svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 -2px 7px var(--a1)) drop-shadow(0 0 3px var(--a2));
+}
+#bottom-nav .gnav-notch-glow-halo {
+  position: absolute;
+  bottom: -14px;
+  left: -34px;
+  width: 68px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--a1) 52%, transparent) 0%, transparent 72%);
+  pointer-events: none;
+}
+.gnav-stop-1 { stop-color: var(--a1); }
+.gnav-stop-2 { stop-color: var(--a2); }
+html body.th-scope[data-glass-nav-effective="notch-glow"] #bottom-nav .nav-item.on {
+  color: var(--a1) !important;
+}
+html body.th-scope[data-glass-nav-effective="notch-glow"] #bottom-nav .nav-item.on svg {
+  stroke: var(--a1) !important;
+  transform: translate3d(0, -2px, 0);
+}
+html body.th-scope[data-glass-nav-effective="notch-glow"] #bottom-nav .nav-item.on .nav-label {
+  color: var(--a1) !important;
+}
+
+/* ==========================================================================
+   STYLE 2: SPOTLIGHT (حزمة ضوء)
+   ========================================================================== */
+#bottom-nav .gnav-spotlight-cone-track,
+#bottom-nav .gnav-spotlight-cap-track {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  direction: ltr;
+}
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .gnav-spotlight-cone-track,
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .gnav-spotlight-cap-track {
+  display: block;
+}
+#bottom-nav .gnav-spotlight-cone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 68px;
+  margin-left: -34px;
+  clip-path: polygon(31% 0%, 69% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--a1) 46%, transparent) 0%,
+    color-mix(in srgb, var(--a2) 18%, transparent) 58%,
+    transparent 100%
+  );
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 450ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+#bottom-nav .gnav-spotlight-cap {
+  position: absolute;
+  top: -1.5px;
+  left: 0;
+  width: 28px;
+  height: 4px;
+  margin-left: -14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--a1), var(--a2));
+  box-shadow: 0 0 12px var(--a1), 0 2px 10px var(--a2);
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 450ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .nav-item::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.75px solid transparent;
+  transform: translate(-50%, -50%) scale(0.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 420ms cubic-bezier(.34,1.56,.64,1), opacity 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
+}
+html body.th-scope[data-glass-nav-effective="spotlight"][data-glass-nav-labels-active="true"] #bottom-nav .nav-item::before {
+  top: calc(50% - 7px);
+}
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .nav-item.on::before {
+  border-color: var(--a1);
+  background: color-mix(in srgb, var(--a1) 14%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--a1) 42%, transparent);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .nav-item.on {
+  color: #fff !important;
+}
+html body.th-scope[data-glass-nav-effective="spotlight"] #bottom-nav .nav-item.on svg {
+  stroke: #fff !important;
+}
+html body.th-scope[data-theme="light"][data-glass-nav-effective="spotlight"] #bottom-nav .nav-item.on,
+html body.th-scope[data-theme="light"][data-glass-nav-effective="spotlight"] #bottom-nav .nav-item.on svg {
+  color: var(--a1) !important;
+  stroke: var(--a1) !important;
+}
+
+/* ==========================================================================
+   STYLE 3: LIQUID BUBBLE (فقاعة سائلة)
+   ========================================================================== */
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .gnav-glass-bg {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 90' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0,0 L956,0 C970,0 974,25 1000,25 C1026,25 1030,0 1044,0 L2000,0 L2000,90 L0,90 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 90' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0,0 L956,0 C970,0 974,25 1000,25 C1026,25 1030,0 1044,0 L2000,0 L2000,90 L0,90 Z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 2000px 100%;
+  mask-size: 2000px 100%;
+  -webkit-mask-position: calc(var(--gnav-cradle-x, 180px) - 1000px) 0px;
+  mask-position: calc(var(--gnav-cradle-x, 180px) - 1000px) 0px;
+  transition: --gnav-cradle-x 460ms cubic-bezier(.34,1.56,.64,1), background-color 280ms ease;
+}
+#bottom-nav .gnav-bubble-orb {
+  display: none;
+  position: absolute;
+  top: -19px;
+  left: 0;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  border-radius: 50%;
+  background: var(--grad);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--a1) 48%, transparent), inset 0 1px 1px rgba(255, 255, 255, 0.48);
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 460ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+#bottom-nav .gnav-bubble-line {
+  display: none;
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 24px;
+  height: 3px;
+  margin-left: -12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--a1), var(--a2));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--a1) 60%, transparent);
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 460ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .gnav-bubble-orb,
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .gnav-bubble-line {
+  display: block;
+}
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .nav-item.on svg {
+  stroke: #fff !important;
+  transform: translate3d(0, -24px, 0) scale(1.08);
+}
+html body.th-scope[data-glass-nav-effective="liquid-bubble"][data-glass-nav-labels-active="true"] #bottom-nav .nav-item.on svg {
+  transform: translate3d(0, -22px, 0) scale(1.06);
+}
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .nav-item.on .badge-dot {
+  transform: translate3d(0, -20px, 0);
+}
+html body.th-scope[data-glass-nav-effective="liquid-bubble"] #bottom-nav .nav-item.on .nav-label {
+  color: var(--a1) !important;
+  transform: translate3d(0, -2px, 0);
+}
+@media (max-width: 370px) {
+  #bottom-nav .gnav-bubble-orb {
+    width: 42px;
+    height: 42px;
+    margin-left: -21px;
+    top: -17px;
+  }
+}
+
+/* ==========================================================================
+   STYLE 4: FROSTED POP (زجاج دافئ منبثق)
+   ========================================================================== */
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .gnav-glass-bg {
+  background: linear-gradient(135deg, rgba(255, 214, 178, 0.14), rgba(var(--surface-rgb), 0.36) 55%, rgba(255, 184, 152, 0.08));
+  border-color: rgba(255, 238, 224, 0.22);
+}
+html body.th-scope[data-theme="light"][data-glass-nav-effective="frosted-pop"] #bottom-nav .gnav-glass-bg {
+  background: linear-gradient(135deg, rgba(255, 245, 232, 0.72), rgba(var(--surface-rgb), 0.56));
+  border-color: rgba(255, 248, 240, 0.88);
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav.gnav-is-pressing .gnav-glass-bg {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--a1) 20%, rgba(255, 210, 170, 0.26)),
+    rgba(var(--surface-rgb), 0.44)
+  );
+  border-color: color-mix(in srgb, var(--a1) 36%, rgba(255, 240, 226, 0.34));
+}
+#bottom-nav .gnav-warm-dot {
+  display: none;
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--a1);
+  box-shadow: 0 0 8px var(--a1);
+  transform: translate3d(var(--gnav-x, 180px), 0, 0);
+  transition: transform 450ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .gnav-warm-dot {
+  display: block;
+}
+#bottom-nav .gnav-metaball-stage {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: -54px;
+  pointer-events: none;
+  filter: url(#gnav-metaball-filter);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  will-change: opacity;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .gnav-metaball-stage {
+  display: block;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav.gnav-is-pressing .gnav-metaball-stage {
+  opacity: 1;
+}
+#bottom-nav .gnav-metaball-base {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  height: 40px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--a1) 88%, var(--a2));
+}
+#bottom-nav .gnav-pop-blob {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  border-radius: 50%;
+  background: var(--grad);
+  transform: translate3d(var(--gnav-press-x, 180px), 0, 0) scale(0.55);
+  transition: transform 430ms cubic-bezier(.34,1.56,.64,1);
+  will-change: transform;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav.gnav-is-pressing .gnav-pop-blob {
+  transform: translate3d(var(--gnav-press-x, 180px), -50px, 0) scale(1.12);
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .nav-item.on {
+  color: var(--a1) !important;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .nav-item.on svg {
+  stroke: var(--a1) !important;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .nav-item.on .nav-label {
+  color: var(--a1) !important;
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .nav-item.gnav-pressing svg {
+  stroke: #fff !important;
+  transform: translate3d(0, -34px, 0) scale(1.22);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.28));
+}
+html body.th-scope[data-glass-nav-effective="frosted-pop"] #bottom-nav .nav-item.gnav-pressing .badge-dot {
+  transform: translate3d(0, -30px, 0);
+}
+
+/* Reduced Motion & Performance-Saving Mode */
+@media (prefers-reduced-motion: reduce) {
+  html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav *,
+  html body.th-scope[data-glass-nav-glassy="true"] #bottom-nav .gnav-glass-bg {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+html body.th-scope[data-perf-save="true"] #bottom-nav,
+html body.th-scope[data-perf-save="true"] #bottom-nav .gnav-glass-bg,
+html body.th-scope[data-perf-save="true"] #bottom-nav * {
+  transition: none !important;
+  animation: none !important;
+  filter: none !important;
+}
+
+/* ==========================================================================
+   SETTINGS PICKER SHEET & LIVE MINI PREVIEWS
+   ========================================================================== */
+.gnav-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+.gnav-picker-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--ui-card-radius, 18px);
+  background: var(--surface2);
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+.gnav-picker-card:active {
+  transform: scale(0.99);
+}
+.gnav-picker-card.on {
+  border-color: var(--a1);
+  background: color-mix(in srgb, var(--a1) 11%, var(--surface2));
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--a1) 20%, transparent);
+}
+.gnav-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.gnav-picker-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.gnav-picker-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gnav-picker-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.gnav-picker-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.gnav-picker-card.on .gnav-picker-check {
+  background: var(--grad);
+  border-color: transparent;
+}
+.gnav-picker-check svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.8;
+  opacity: 0;
+}
+.gnav-picker-card.on .gnav-picker-check svg {
+  opacity: 1;
+}
+.gnav-mini-stage {
+  position: relative;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a1) 16%, var(--bg)), color-mix(in srgb, var(--a2) 12%, var(--surface)));
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 6px 10px;
+  overflow: visible;
+  direction: ltr;
+}
+.gnav-mini-bar {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  border-radius: 16px;
+  background: rgba(var(--surface-rgb), 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 12px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+}
+[data-theme="light"] .gnav-mini-bar {
+  border-color: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 10px rgba(15, 23, 42, 0.1);
+}
+.gnav-mini-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--muted);
+  opacity: 0.45;
+}
+.gnav-mini-dot.active {
+  background: var(--a1);
+  opacity: 1;
+}
+/* Mini Style: Classic */
+.gnav-mini-classic .gnav-mini-dot.active {
+  width: 24px;
+  height: 20px;
+  border-radius: 8px;
+  background: var(--a1);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--a1) 45%, transparent);
+}
+/* Mini Style: Notch Glow */
+.gnav-mini-notch .gnav-mini-bar {
+  overflow: hidden;
+}
+.gnav-mini-notch-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  width: 100%;
+  filter: drop-shadow(0 -1px 4px var(--a1));
+}
+/* Mini Style: Spotlight */
+.gnav-mini-spotlight .gnav-mini-cap {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 18px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--a1);
+  box-shadow: 0 0 8px var(--a1);
+}
+.gnav-mini-spotlight .gnav-mini-cone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 36px;
+  transform: translateX(-50%);
+  clip-path: polygon(28% 0%, 72% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--a1) 45%, transparent), transparent);
+}
+.gnav-mini-spotlight .gnav-mini-dot.active {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--a1);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--a1) 45%, transparent);
+}
+/* Mini Style: Liquid Bubble */
+.gnav-mini-bubble .gnav-mini-bar {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0,0 L80,0 C87,0 89,12 100,12 C111,12 113,0 120,0 L200,0 L200,34 L0,34 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0,0 L80,0 C87,0 89,12 100,12 C111,12 113,0 120,0 L200,0 L200,34 L0,34 Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+.gnav-mini-bubble-orb {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--grad);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--a1) 50%, transparent);
+}
+.gnav-mini-bubble-line {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 16px;
+  height: 2.5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--a1);
+}
+/* Mini Style: Frosted Pop */
+.gnav-mini-frosted .gnav-mini-bar {
+  background: linear-gradient(135deg, rgba(255, 214, 178, 0.2), rgba(var(--surface-rgb), 0.42));
+}
+.gnav-mini-frosted-drop {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--grad);
+  box-shadow: 0 6px 12px color-mix(in srgb, var(--a1) 45%, transparent);
+}
+.gnav-mini-frosted-neck {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 14px;
+  height: 9px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--a1), color-mix(in srgb, var(--a1) 35%, transparent));
+  border-radius: 0 0 8px 8px;
+}
+.gnav-mini-frosted-dot {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--a1);
+}
+.gnav-perf-banner {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--warning) 14%, var(--surface2));
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.gnav-perf-banner.show {
+  display: flex;
+}
 </style>
 </head>
 <body class="th-scope" data-theme="dark" data-accent="purple">
@@ -6330,6 +7063,21 @@ html body .nav-label {
       if (prefs && prefs.reduceTransparency === true) {
         b.setAttribute("data-reduce-transparency", "true");
       }
+      if (prefs) {
+        var perfOn = prefs.perfSaveMode === true;
+        b.setAttribute("data-perf-save", perfOn ? "true" : "false");
+        var gStyle = prefs.glassNavStyle || "classic";
+        var effStyle = perfOn ? "classic" : gStyle;
+        b.setAttribute("data-glass-nav-style", gStyle);
+        b.setAttribute("data-glass-nav-effective", effStyle);
+        b.setAttribute("data-glass-nav-glassy", effStyle === "classic" ? "false" : "true");
+        var lblMode = prefs.glassNavLabels || "auto";
+        b.setAttribute("data-glass-nav-labels", lblMode);
+        if (effStyle !== "classic") {
+          var showLbl = lblMode === "show" || (lblMode === "auto" && (effStyle === "notch-glow" || effStyle === "frosted-pop"));
+          b.setAttribute("data-glass-nav-labels-active", showLbl ? "true" : "false");
+        }
+      }
     }
     try {
       var low = (navigator.deviceMemory && navigator.deviceMemory <= 3) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
@@ -6342,6 +7090,17 @@ html body .nav-label {
   } catch (_) {}
 })();
 </script>
+
+<!-- SHARED SVG METABALL FILTER FOR FROSTED POP NAV -->
+<svg id="gnav-svg-defs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
+  <defs>
+    <filter id="gnav-metaball-filter" x="-10%" y="-120%" width="120%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
+      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+    </filter>
+  </defs>
+</svg>
 
 <!-- SPLASH SCREEN -->
 <div id="splash">
@@ -6956,6 +7715,21 @@ html body .nav-label {
               <div class="ico" style="background:#0EA5E9"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 12h8"></path></svg></div>
               <div class="item-body"><span class="item-title">تقليل الشفافية (بدون زجاج)</span><span class="item-desc">تحسين الأداء والوضوح بإيقاف الضبابية الخلفية</span></div>
               <div class="toggle" id="toggle-reduce-transparency"></div>
+            </div>
+            <div class="item" id="settings-nav-style-item" data-search="نمط شريط التنقل الزجاجي كلاسيكي حد منحني حزمة ضوء فقاعة سائلة زجاج دافئ nav style glass" onclick="openGlassNavSheet()">
+              <div class="ico" style="background:linear-gradient(135deg, #6366F1, #06B6D4)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="18" height="7" rx="3.5"></rect><circle cx="8" cy="16.5" r="1"></circle><circle cx="12" cy="16.5" r="1"></circle><circle cx="16" cy="16.5" r="1"></circle><path d="M9 9a3 3 0 0 1 6 0"></path></svg></div>
+              <div class="item-body"><span class="item-title">نمط شريط التنقل</span><span class="item-desc">كلاسيكي أو 4 أنماط زجاجية متحركة باللون النشط</span></div>
+              <em><span id="current-glass-nav-label">كلاسيكي</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></em>
+            </div>
+            <div class="item" id="settings-nav-labels-item" data-search="إظهار أسماء التبويبات labels navigation bar شريط التنقل" onclick="toggleGlassNavLabels()">
+              <div class="ico" style="background:#8B5CF6"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"></path><path d="M9 20h6"></path><path d="M12 4v16"></path></svg></div>
+              <div class="item-body"><span class="item-title">إظهار أسماء التبويبات</span><span class="item-desc" id="glass-nav-labels-desc">التبديل بين عرض أو إخفاء التسميات أسفل الأيقونات</span></div>
+              <div class="toggle" id="toggle-glass-nav-labels"></div>
+            </div>
+            <div class="item" id="settings-perf-save-item" data-search="وضع توفير الأداء performance battery animation توفير" onclick="togglePerfSaveMode()">
+              <div class="ico" style="background:#F59E0B"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+              <div class="item-body"><span class="item-title">وضع توفير الأداء</span><span class="item-desc">يفرض الشريط الكلاسيكي ويعطّل الفلاتر والأنيميشن الثقيلة</span></div>
+              <div class="toggle" id="toggle-perf-save-mode"></div>
             </div>
             <div class="item" data-search="لون التمييز الاكسنت accent color الالوان" onclick="openAccentSheet()">
               <div class="ico" style="background:var(--grad)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m4.93 4.93 4.24 4.24"></path></svg></div>
@@ -7689,6 +8463,135 @@ html body .nav-label {
     <div class="item" onclick="setAccent('cyan', 'أزرق سماوي')">
       <div class="ico" style="background:linear-gradient(135deg, #06B6D4, #3B82F6)"></div>
       <span>أزرق سماوي (Cyan Blue)</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3A-2. GLASSY NAVIGATION STYLE SHEET -->
+<div class="dim" id="glass-nav-dim" onclick="closeGlassNavSheet()"></div>
+<div class="sheet" id="glass-nav-sheet">
+  <div class="grab" onclick="closeGlassNavSheet()"></div>
+  <h4>
+    <span>نمط شريط التنقل</span>
+    <div class="sheet-close" onclick="closeGlassNavSheet()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </div>
+  </h4>
+
+  <div class="gnav-perf-banner" id="glass-nav-perf-banner">
+    <span>⚡ وضع توفير الأداء مفعّل: يُعرض الشريط الكلاسيكي حالياً.</span>
+    <button type="button" onclick="togglePerfSaveMode(false)" style="border:none;border-radius:8px;padding:5px 10px;background:var(--a1);color:#fff;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">إيقاف التوفير</button>
+  </div>
+
+  <div class="gnav-picker-list" id="glass-nav-picker-list">
+    <!-- Classic -->
+    <div class="gnav-picker-card" data-gnav-option="classic" onclick="selectGlassNavStyle('classic')">
+      <div class="gnav-picker-head">
+        <div class="gnav-picker-title-wrap">
+          <div class="gnav-picker-title">كلاسيكي (Classic)</div>
+          <div class="gnav-picker-desc">الشريط الأصلي الثابت لـ Theme Hub بأقصى استقرار وسرعة.</div>
+        </div>
+        <div class="gnav-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="gnav-mini-stage gnav-mini-classic">
+        <div class="gnav-mini-bar">
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot active"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notch Glow -->
+    <div class="gnav-picker-card" data-gnav-option="notch-glow" onclick="selectGlassNavStyle('notch-glow')">
+      <div class="gnav-picker-head">
+        <div class="gnav-picker-title-wrap">
+          <div class="gnav-picker-title">حدّ منحنٍ (Notch Glow)</div>
+          <div class="gnav-picker-desc">خط متوهج على الحافة السفلية يرتفع بمنحنى ناعم أسفل العنصر النشط مع الأسماء.</div>
+        </div>
+        <div class="gnav-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="gnav-mini-stage gnav-mini-notch">
+        <div class="gnav-mini-bar">
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot active"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <svg class="gnav-mini-notch-line" viewBox="0 0 200 12" preserveAspectRatio="none">
+            <path d="M0,10.5 L72,10.5 C83,10.5 87,3 100,3 C113,3 117,10.5 128,10.5 L200,10.5" fill="none" stroke="var(--a1)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spotlight -->
+    <div class="gnav-picker-card" data-gnav-option="spotlight" onclick="selectGlassNavStyle('spotlight')">
+      <div class="gnav-picker-head">
+        <div class="gnav-picker-title-wrap">
+          <div class="gnav-picker-title">حزمة ضوء (Spotlight)</div>
+          <div class="gnav-picker-desc">أيقونات زجاجية مع قبعة مضيئة ومخروط ضوئي متدرج وحلقة حول النشط.</div>
+        </div>
+        <div class="gnav-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="gnav-mini-stage gnav-mini-spotlight">
+        <div class="gnav-mini-bar">
+          <div class="gnav-mini-cone"></div>
+          <div class="gnav-mini-cap"></div>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot active"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liquid Bubble -->
+    <div class="gnav-picker-card" data-gnav-option="liquid-bubble" onclick="selectGlassNavStyle('liquid-bubble')">
+      <div class="gnav-picker-head">
+        <div class="gnav-picker-title-wrap">
+          <div class="gnav-picker-title">فقاعة سائلة (Liquid Bubble)</div>
+          <div class="gnav-picker-desc">دائرة ملوّنة بارزة وفراغ منحنٍ بالحافة العلوية مع خط مؤشر سفلي.</div>
+        </div>
+        <div class="gnav-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="gnav-mini-stage gnav-mini-bubble">
+        <div class="gnav-mini-bubble-orb"></div>
+        <div class="gnav-mini-bar">
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot" style="opacity:0;"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+        </div>
+        <div class="gnav-mini-bubble-line"></div>
+      </div>
+    </div>
+
+    <!-- Frosted Pop -->
+    <div class="gnav-picker-card" data-gnav-option="frosted-pop" onclick="selectGlassNavStyle('frosted-pop')">
+      <div class="gnav-picker-head">
+        <div class="gnav-picker-title-wrap">
+          <div class="gnav-picker-title">زجاج دافئ منبثق (Frosted Pop)</div>
+          <div class="gnav-picker-desc">زجاج دافئ بنقطة نشطة تنبثق منه فقاعة بعنق سائل عند الضغط المطوّل.</div>
+        </div>
+        <div class="gnav-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="gnav-mini-stage gnav-mini-frosted">
+        <div class="gnav-mini-frosted-neck"></div>
+        <div class="gnav-mini-frosted-drop"></div>
+        <div class="gnav-mini-bar">
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot" style="opacity:0;"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-dot"></span>
+          <span class="gnav-mini-frosted-dot"></span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -10166,6 +11069,9 @@ let prefInAppAlerts = true;
 let prefHideActivityStatus = false;
 let prefMuteSounds = false;
 let userTemplateOverrideId = "";
+let glassNavStyle = "classic";
+let glassNavLabels = "auto";
+let perfSaveMode = false;
 
 function saveUserPreferences() {
   const prefs = {
@@ -10176,6 +11082,9 @@ function saveUserPreferences() {
     hideActivityStatus: Boolean(prefHideActivityStatus),
     muteSounds: Boolean(prefMuteSounds),
     userTemplateOverrideId: String(userTemplateOverrideId || ""),
+    glassNavStyle: String(glassNavStyle || "classic"),
+    glassNavLabels: String(glassNavLabels || "auto"),
+    perfSaveMode: Boolean(perfSaveMode),
     accent: currentAccent,
     accentExplicit,
     lang: currentLang,
@@ -10216,6 +11125,13 @@ function applySavedPreferences(prefsObj = null) {
   prefHideActivityStatus = prefs && typeof prefs.hideActivityStatus === "boolean" ? prefs.hideActivityStatus : false;
   prefMuteSounds = prefs && typeof prefs.muteSounds === "boolean" ? prefs.muteSounds : false;
   userTemplateOverrideId = (prefs && typeof prefs.userTemplateOverrideId === "string") ? prefs.userTemplateOverrideId : "";
+  glassNavStyle = (prefs && ["classic", "notch-glow", "spotlight", "liquid-bubble", "frosted-pop"].includes(prefs.glassNavStyle))
+    ? prefs.glassNavStyle
+    : "classic";
+  glassNavLabels = (prefs && ["auto", "show", "hide"].includes(prefs.glassNavLabels))
+    ? prefs.glassNavLabels
+    : "auto";
+  perfSaveMode = Boolean(prefs && prefs.perfSaveMode === true);
 
   const tAlerts = document.getElementById("toggle-pref-inapp-alerts");
   if (tAlerts) tAlerts.classList.toggle("on", prefInAppAlerts);
@@ -10262,6 +11178,9 @@ function applySavedPreferences(prefsObj = null) {
   }
   if (typeof applyEffectiveThemeNow === "function") {
     applyEffectiveThemeNow();
+  }
+  if (typeof syncGlassNavSystem === "function") {
+    syncGlassNavSystem();
   }
 }
 
@@ -10639,6 +11558,11 @@ window.handleAndroidBack = function() {
     const userTplSheet = document.getElementById("user-templates-sheet");
     if (userTplSheet && userTplSheet.classList.contains("open")) {
       if (typeof closeUserTemplatesSheet === "function") closeUserTemplatesSheet();
+      return "handled";
+    }
+    const glassNavSheet = document.getElementById("glass-nav-sheet");
+    if (glassNavSheet && glassNavSheet.classList.contains("open")) {
+      if (typeof closeGlassNavSheet === "function") closeGlassNavSheet();
       return "handled";
     }
     const clubRulesSheet = document.getElementById("club-rules-sheet");
@@ -26750,6 +27674,371 @@ async function adminHideCompatTheme(themeId) {
       };
     }
   } catch (e) { /* layout helper only */ }
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   GLASSY NAVIGATION TABS V5 CONTROLLER
+   ========================================================================== */
+(function () {
+  const VALID_STYLES = ["classic", "notch-glow", "spotlight", "liquid-bubble", "frosted-pop"];
+  const STYLE_LABELS = {
+    "classic": "كلاسيكي",
+    "notch-glow": "حدّ منحنٍ",
+    "spotlight": "حزمة ضوء",
+    "liquid-bubble": "فقاعة سائلة",
+    "frosted-pop": "زجاج دافئ منبثق"
+  };
+
+  let pressTimer = null;
+  let pressStartedAt = 0;
+  let pressBound = false;
+  let resizeBound = false;
+  let notchCacheKey = "";
+
+  function isReducedMotion() {
+    try {
+      return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function triggerSoftHaptic() {
+    if (perfSaveMode || isReducedMotion()) return;
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        navigator.vibrate(8);
+      }
+    } catch (_) {}
+  }
+
+  function resolveLabelsShown(effStyle) {
+    if (glassNavLabels === "show") return true;
+    if (glassNavLabels === "hide") return false;
+    if (effStyle === "notch-glow" || effStyle === "frosted-pop") return true;
+    if (effStyle === "spotlight" || effStyle === "liquid-bubble") return false;
+    return document.body?.getAttribute("data-nav-labels") === "true";
+  }
+
+  function ensureInjected(navEl) {
+    if (!navEl) return false;
+    if (!navEl.querySelector(".gnav-glass-bg")) {
+      const bg = document.createElement("div");
+      bg.className = "gnav-glass-bg";
+      bg.setAttribute("aria-hidden", "true");
+      bg.innerHTML =
+        '<div class="gnav-notch-track">' +
+          '<div class="gnav-notch-svg-wrap">' +
+            '<div class="gnav-notch-glow-halo"></div>' +
+            '<svg class="gnav-notch-svg" width="1800" height="68" viewBox="-900 0 1800 68" style="position:absolute;left:-900px;bottom:0;">' +
+              '<defs>' +
+                '<linearGradient id="gnav-notch-grad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+                  '<stop offset="0%" class="gnav-stop-1" stop-opacity="0.35"></stop>' +
+                  '<stop offset="45%" class="gnav-stop-1" stop-opacity="1"></stop>' +
+                  '<stop offset="50%" class="gnav-stop-2" stop-opacity="1"></stop>' +
+                  '<stop offset="55%" class="gnav-stop-1" stop-opacity="1"></stop>' +
+                  '<stop offset="100%" class="gnav-stop-2" stop-opacity="0.35"></stop>' +
+                '</linearGradient>' +
+              '</defs>' +
+              '<path class="gnav-notch-path" fill="none" stroke="url(#gnav-notch-grad)" stroke-width="2.5" stroke-linecap="round" d="M-900,66 L900,66"></path>' +
+            '</svg>' +
+          '</div>' +
+        '</div>' +
+        '<div class="gnav-spotlight-cone-track"><div class="gnav-spotlight-cone"></div></div>';
+      navEl.insertBefore(bg, navEl.firstChild);
+    }
+
+    if (!navEl.querySelector(".gnav-overlay")) {
+      const ov = document.createElement("div");
+      ov.className = "gnav-overlay";
+      ov.setAttribute("aria-hidden", "true");
+      ov.innerHTML =
+        '<div class="gnav-spotlight-cap-track"><div class="gnav-spotlight-cap"></div></div>' +
+        '<div class="gnav-bubble-orb"></div>' +
+        '<div class="gnav-bubble-line"></div>' +
+        '<div class="gnav-metaball-stage">' +
+          '<div class="gnav-metaball-base"></div>' +
+          '<div class="gnav-pop-blob"></div>' +
+        '</div>' +
+        '<div class="gnav-warm-dot"></div>';
+      const bgNode = navEl.querySelector(".gnav-glass-bg");
+      if (bgNode && bgNode.nextSibling) {
+        navEl.insertBefore(ov, bgNode.nextSibling);
+      } else {
+        navEl.appendChild(ov);
+      }
+    }
+    return true;
+  }
+
+  function updateNotchGeometry(navEl, itemW, navH) {
+    const svg = navEl.querySelector(".gnav-notch-svg");
+    const path = navEl.querySelector(".gnav-notch-path");
+    if (!svg || !path || !navH) return;
+    const hw = Math.max(24, Math.min(36, itemW * 0.56));
+    const key = Math.round(hw * 10) + "_" + Math.round(navH);
+    if (key === notchCacheKey) return;
+    notchCacheKey = key;
+
+    const h = Math.round(navH);
+    const yBase = (h - 2).toFixed(1);
+    const yPeak = Math.max(6, h - 16).toFixed(1);
+    const c1 = (hw * 0.48).toFixed(1);
+    const c2 = (hw * 0.44).toFixed(1);
+    const hwStr = hw.toFixed(1);
+
+    svg.setAttribute("height", String(h));
+    svg.setAttribute("viewBox", "-900 0 1800 " + h);
+    path.setAttribute(
+      "d",
+      `M -900,${yBase} L -${hwStr},${yBase} C -${c1},${yBase} -${c2},${yPeak} 0,${yPeak} C ${c2},${yPeak} ${c1},${yBase} ${hwStr},${yBase} L 900,${yBase}`
+    );
+  }
+
+  function clearPressState(immediate) {
+    const navEl = document.getElementById("bottom-nav");
+    if (!navEl) return;
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+    const runRelease = () => {
+      navEl.classList.remove("gnav-is-pressing");
+      navEl.querySelectorAll(".nav-item.gnav-pressing").forEach(el => el.classList.remove("gnav-pressing"));
+    };
+    const elapsed = Date.now() - pressStartedAt;
+    if (immediate || elapsed >= 140) {
+      runRelease();
+    } else {
+      pressTimer = setTimeout(runRelease, 140 - elapsed);
+    }
+  }
+
+  function bindEvents(navEl) {
+    if (navEl && !pressBound) {
+      pressBound = true;
+      navEl.addEventListener("pointerdown", function (e) {
+        const item = e.target && e.target.closest ? e.target.closest(".nav-item") : null;
+        if (!item) return;
+        triggerSoftHaptic();
+
+        const eff = document.body?.getAttribute("data-glass-nav-effective") || "classic";
+        if (eff !== "frosted-pop" || perfSaveMode) return;
+
+        const navRect = navEl.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+        if (navRect.width > 0 && itemRect.width > 0) {
+          const cx = (itemRect.left - navRect.left) + (itemRect.width / 2);
+          navEl.style.setProperty("--gnav-press-x", cx.toFixed(2) + "px");
+        }
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        pressStartedAt = Date.now();
+        navEl.querySelectorAll(".nav-item.gnav-pressing").forEach(el => {
+          if (el !== item) el.classList.remove("gnav-pressing");
+        });
+        item.classList.add("gnav-pressing");
+        navEl.classList.add("gnav-is-pressing");
+      }, { passive: true });
+
+      navEl.addEventListener("pointerup", () => clearPressState(false), { passive: true });
+      navEl.addEventListener("pointercancel", () => clearPressState(true), { passive: true });
+      navEl.addEventListener("pointerleave", () => clearPressState(false), { passive: true });
+    }
+
+    if (!resizeBound) {
+      resizeBound = true;
+      const scheduleUpdate = () => requestAnimationFrame(updatePosition);
+      window.addEventListener("resize", scheduleUpdate, { passive: true });
+      window.addEventListener("orientationchange", () => {
+        setTimeout(scheduleUpdate, 60);
+        setTimeout(scheduleUpdate, 240);
+      }, { passive: true });
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(scheduleUpdate).catch(() => {});
+      }
+      if (typeof ResizeObserver === "function" && navEl) {
+        try {
+          new ResizeObserver(scheduleUpdate).observe(navEl);
+        } catch (_) {}
+      }
+    }
+  }
+
+  function updatePosition() {
+    const navEl = document.getElementById("bottom-nav");
+    if (!navEl) return;
+    const eff = document.body?.getAttribute("data-glass-nav-effective") || "classic";
+    if (eff === "classic") return;
+
+    ensureInjected(navEl);
+    bindEvents(navEl);
+
+    const activeItem = navEl.querySelector(".nav-item.on") || navEl.querySelector(".nav-item");
+    if (!activeItem) return;
+
+    const navRect = navEl.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+    if (!navRect.width || !itemRect.width) return;
+
+    const centerX = (itemRect.left - navRect.left) + (itemRect.width / 2);
+    const xPx = centerX.toFixed(2) + "px";
+    navEl.style.setProperty("--gnav-x", xPx);
+    navEl.style.setProperty("--gnav-cradle-x", xPx);
+
+    if (eff === "notch-glow") {
+      updateNotchGeometry(navEl, itemRect.width, navRect.height);
+    }
+  }
+
+  function updateSettingsUi(effStyle, labelsShown) {
+    const labelEl = document.getElementById("current-glass-nav-label");
+    if (labelEl) {
+      const baseName = STYLE_LABELS[glassNavStyle] || STYLE_LABELS.classic;
+      labelEl.textContent = perfSaveMode && glassNavStyle !== "classic"
+        ? `${baseName} (توفير الأداء: كلاسيكي)`
+        : baseName;
+    }
+
+    const lblToggle = document.getElementById("toggle-glass-nav-labels");
+    if (lblToggle) lblToggle.classList.toggle("on", labelsShown);
+
+    const lblDesc = document.getElementById("glass-nav-labels-desc");
+    if (lblDesc) {
+      const stateText = labelsShown ? "ظاهرة" : "مخفية";
+      lblDesc.textContent = glassNavLabels === "auto"
+        ? `الحالة الحالية: ${stateText} (تلقائي حسب النمط)`
+        : `الحالة الحالية: ${stateText} (مخصّص)`;
+    }
+
+    const perfToggle = document.getElementById("toggle-perf-save-mode");
+    if (perfToggle) perfToggle.classList.toggle("on", Boolean(perfSaveMode));
+
+    const banner = document.getElementById("glass-nav-perf-banner");
+    if (banner) banner.classList.toggle("show", Boolean(perfSaveMode));
+
+    document.querySelectorAll("#glass-nav-picker-list .gnav-picker-card").forEach(card => {
+      const opt = card.getAttribute("data-gnav-option");
+      card.classList.toggle("on", opt === glassNavStyle);
+    });
+  }
+
+  window.syncGlassNavSystem = function () {
+    if (!VALID_STYLES.includes(glassNavStyle)) glassNavStyle = "classic";
+    const effStyle = perfSaveMode ? "classic" : glassNavStyle;
+    const labelsShown = resolveLabelsShown(effStyle);
+
+    if (document.body) {
+      document.body.setAttribute("data-perf-save", perfSaveMode ? "true" : "false");
+      document.body.setAttribute("data-glass-nav-style", glassNavStyle);
+      document.body.setAttribute("data-glass-nav-effective", effStyle);
+      document.body.setAttribute("data-glass-nav-glassy", effStyle === "classic" ? "false" : "true");
+      document.body.setAttribute("data-glass-nav-labels", glassNavLabels);
+      document.body.setAttribute("data-glass-nav-labels-active", labelsShown ? "true" : "false");
+    }
+
+    if (effStyle === "classic") {
+      clearPressState(true);
+    }
+
+    const navEl = document.getElementById("bottom-nav");
+    if (navEl) {
+      ensureInjected(navEl);
+      bindEvents(navEl);
+    }
+
+    updateSettingsUi(effStyle, labelsShown);
+    requestAnimationFrame(updatePosition);
+  };
+
+  window.openGlassNavSheet = function () {
+    syncGlassNavSystem();
+    document.getElementById("glass-nav-dim")?.classList.add("open");
+    document.getElementById("glass-nav-sheet")?.classList.add("open");
+  };
+
+  window.closeGlassNavSheet = function () {
+    document.getElementById("glass-nav-dim")?.classList.remove("open");
+    document.getElementById("glass-nav-sheet")?.classList.remove("open");
+  };
+
+  window.selectGlassNavStyle = function (styleKey) {
+    if (!VALID_STYLES.includes(styleKey)) return;
+    glassNavStyle = styleKey;
+    // Reset to style signature labels so each selected mode looks as designed immediately
+    glassNavLabels = "auto";
+    triggerSoftHaptic();
+    syncGlassNavSystem();
+    if (typeof saveUserPreferences === "function") saveUserPreferences();
+    closeGlassNavSheet();
+    const label = STYLE_LABELS[styleKey] || styleKey;
+    if (typeof showToast === "function") {
+      showToast(perfSaveMode && styleKey !== "classic"
+        ? `تم حفظ "${label}" — أوقف توفير الأداء لتفعيل التأثير`
+        : `تم تفعيل شريط التنقل: ${label}`);
+    }
+  };
+
+  window.toggleGlassNavLabels = function () {
+    const effStyle = perfSaveMode ? "classic" : glassNavStyle;
+    const currentlyShown = resolveLabelsShown(effStyle);
+    glassNavLabels = currentlyShown ? "hide" : "show";
+    triggerSoftHaptic();
+    syncGlassNavSystem();
+    if (typeof saveUserPreferences === "function") saveUserPreferences();
+    if (typeof showToast === "function") {
+      showToast(glassNavLabels === "show" ? "تم إظهار أسماء التبويبات" : "تم إخفاء أسماء التبويبات");
+    }
+  };
+
+  window.togglePerfSaveMode = function (forceVal) {
+    perfSaveMode = typeof forceVal === "boolean" ? forceVal : !perfSaveMode;
+    syncGlassNavSystem();
+    if (typeof saveUserPreferences === "function") saveUserPreferences();
+    if (typeof showToast === "function") {
+      showToast(perfSaveMode ? "تم تفعيل وضع توفير الأداء (كلاسيكي)" : "تم إيقاف وضع توفير الأداء");
+    }
+  };
+
+  // Hook switchView & applyAppTemplate cleanly without modifying their implementations
+  try {
+    const origSwitch = window.switchView;
+    if (typeof origSwitch === "function") {
+      window.switchView = function () {
+        const res = origSwitch.apply(this, arguments);
+        requestAnimationFrame(updatePosition);
+        return res;
+      };
+    }
+    const origApplyTpl = window.applyAppTemplate;
+    if (typeof origApplyTpl === "function") {
+      window.applyAppTemplate = function () {
+        const res = origApplyTpl.apply(this, arguments);
+        setTimeout(() => {
+          if (typeof syncGlassNavSystem === "function") syncGlassNavSystem();
+        }, 100);
+        return res;
+      };
+    }
+    const origApplyLang = window.applyLanguageCode;
+    if (typeof origApplyLang === "function") {
+      window.applyLanguageCode = function () {
+        const res = origApplyLang.apply(this, arguments);
+        requestAnimationFrame(updatePosition);
+        return res;
+      };
+    }
+  } catch (_) {}
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => syncGlassNavSystem(), { once: true });
+  } else {
+    syncGlassNavSystem();
+  }
 })();
 </script>
 </body>
